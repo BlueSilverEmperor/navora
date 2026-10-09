@@ -104,11 +104,51 @@ st.markdown("""
         color: #FF5733 !important;
     }
 
-    /* DataFrame Table Styling */
-    div[data-testid="stDataFrame"], [data-testid="stTable"] {
-        background-color: #141010 !important;
-        border: 1px solid #2E2222 !important;
-        border-radius: 8px !important;
+    /* Pixel-Perfect Dark Cyber Table System */
+    .cyber-table-container {
+        width: 100%;
+        overflow-x: auto;
+        background-color: #161111;
+        border: 1px solid #2E2222;
+        border-radius: 10px;
+        margin: 12px 0 20px 0;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    }
+    table.cyber-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.86rem;
+        text-align: left;
+        color: #F3F4F6;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    table.cyber-table thead tr {
+        background-color: #1E1717;
+        border-bottom: 2px solid #3E2929;
+    }
+    table.cyber-table th {
+        padding: 12px 16px;
+        color: #FF8566;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.76rem;
+        letter-spacing: 0.04em;
+        white-space: nowrap;
+    }
+    table.cyber-table tbody tr {
+        border-bottom: 1px solid #241A1A;
+        transition: background-color 0.15s ease;
+    }
+    table.cyber-table tbody tr:hover {
+        background-color: #241818;
+    }
+    table.cyber-table tbody tr:last-child {
+        border-bottom: none;
+    }
+    table.cyber-table td {
+        padding: 12px 16px;
+        color: #E5E7EB;
+        vertical-align: middle;
     }
 
     /* Tab Uniformity */
@@ -639,6 +679,49 @@ def format_cyber_plotly_figure(fig: go.Figure) -> go.Figure:
     return fig
 
 
+def render_cyber_table(df: pd.DataFrame):
+    """Renders a pixel-perfect dark obsidian and cyber-amber HTML table, eliminating Glide Data Grid canvas white-flash glitches."""
+    if df.empty:
+        st.info("No records to display.")
+        return
+    headers = "".join(f"<th>{col}</th>" for col in df.columns)
+    
+    rows_html = []
+    for _, row in df.iterrows():
+        cells = []
+        for col in df.columns:
+            val = str(row[col])
+            if "HIGH (Locked Capital)" in val or val == "CRITICAL" or "REJECTED" in val:
+                cells.append(f'<td><span class="badge-critical" style="padding: 3px 8px;">{val}</span></td>')
+            elif "MEDIUM" in val or val == "HIGH":
+                cells.append(f'<td><span class="badge-high" style="padding: 3px 8px;">{val}</span></td>')
+            elif "LOW" in val or "FEASIBLE" in val or "APPROVED" in val:
+                cells.append(f'<td><span style="background-color: #0F2417; color: #10B981; border: 1px solid #059669; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700;">{val}</span></td>')
+            elif "Primary" in val:
+                cells.append(f'<td><span style="background-color: #1B202A; color: #93C5FD; border: 1px solid #1E3A8A; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 600;">{val}</span></td>')
+            elif col in ["Current Stock", "MOQ (Units)", "qty", "Lead Time (Days)", "Delivery Time"]:
+                cells.append(f'<td style="font-family: \'JetBrains Mono\', monospace; font-weight: 600; color: #FFFFFF;">{val}</td>')
+            elif col in ["Contract Price", "Total Cash Outlay", "cost_inr"]:
+                cells.append(f'<td style="font-family: \'JetBrains Mono\', monospace; font-weight: 600; color: #10B981;">{val}</td>')
+            else:
+                cells.append(f"<td>{val}</td>")
+        rows_html.append(f"<tr>{''.join(cells)}</tr>")
+    
+    table_html = f"""
+    <div class="cyber-table-container">
+        <table class="cyber-table">
+            <thead>
+                <tr>{headers}</tr>
+            </thead>
+            <tbody>
+                {''.join(rows_html)}
+            </tbody>
+        </table>
+    </div>
+    """
+    st.markdown(table_html, unsafe_allow_html=True)
+
+
 # ==============================================================================
 # RESOLUTION COCKPIT RENDERER (RIGHT COLUMN 62% IN PIC 1 WITH PIC 2 PALETTE)
 # ==============================================================================
@@ -824,7 +907,7 @@ def render_cyber_detail_cockpit(p, approved_problem_ids, raw_inventory, raw_sale
             "Summary": opt.get("trade_off_summary", opt.get("pros_cons", ""))
         })
     st.markdown(r"##### ⚖️ Feasible Mitigation Pathways ($N \ge 2$)")
-    st.dataframe(pd.DataFrame(opt_data), use_container_width=True, hide_index=True)
+    render_cyber_table(pd.DataFrame(opt_data))
     st.markdown(f"**🎯 AI Agent Recommendation Rationale:** {p['decision_rationale']}")
 
     # 7. Action Draft Execution Box
@@ -1065,7 +1148,7 @@ with tab_inv:
     if sku_filter != "All":
         df_inv = df_inv[df_inv["SKU"] == sku_filter]
         
-    st.dataframe(df_inv, use_container_width=True, hide_index=True)
+    render_cyber_table(df_inv)
 
 
 # ==============================================================================
@@ -1093,7 +1176,7 @@ with tab_sup:
             "MOQ (Units)": s["moq"],
             "MOQ Friction Risk": "HIGH (Locked Capital)" if s["moq"] >= 50 else ("MEDIUM" if s["moq"] >= 20 else "LOW")
         })
-    st.dataframe(pd.DataFrame(aud_rows), use_container_width=True, hide_index=True)
+    render_cyber_table(pd.DataFrame(aud_rows))
 
 
 # ==============================================================================
@@ -1105,6 +1188,6 @@ with tab_audit:
     
     if audit_log:
         df_audit = pd.DataFrame(audit_log)
-        st.dataframe(df_audit, use_container_width=True, hide_index=True)
+        render_cyber_table(df_audit)
     else:
         st.info("No approval actions executed yet today. Review the Morning Feed to approve proposed actions.")
