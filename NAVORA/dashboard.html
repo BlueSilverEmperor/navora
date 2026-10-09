@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NAVORA Operations Engine — Autonomous Procurement & Multi-Echelon Rebalancing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* =========================================================================
+       PIXEL-PERFECT TERRACOTTA & WARM CREAM DARK/LIGHT DESIGN SYSTEM
+       ========================================================================= */
+    :root, [data-theme="dark"] {
+      --bg: #181412;
+      --surface: #241E1B;
+      --surface-muted: #322B27;
+      --surface-card: rgba(36, 30, 27, 0.94);
+      --border: #3B312C;
+      --border-subtle: #3B312C;
+      --border-focus: rgba(224, 122, 95, 0.5);
+      
+      --text-main: #FAF6F0;
+      --text-sub: #B0A298;
+      --text-dim: #7E7067;
+      
+      --primary: #E07A5F;
+      --primary-hover: #EA8E75;
+      --primary-glow: rgba(224, 122, 95, 0.25);
+      
+      /* Status Colors */
+      --danger: #FF1744;
+      --danger-bg: rgba(255, 23, 68, 0.14);
+      --danger-border: rgba(255, 23, 68, 0.55);
+      --danger-glow: 0 0 20px rgba(255, 23, 68, 0.45);
+      
+      --warning: #F59E0B;
+      --warning-bg: rgba(245, 158, 11, 0.12);
+      --warning-border: rgba(245, 158, 11, 0.3);
+      
+      --success: #34D399;
+      --success-bg: rgba(52, 211, 153, 0.12);
+      --success-border: rgba(52, 211, 153, 0.35);
+      
+      --shadow-outer: 0 16px 40px rgba(0, 0, 0, 0.65);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
+      --code-bg: #14100E;
+      --code-text: #E07A5F;
+      --overlay-bg: rgba(0, 0, 0, 0.78);
+    }
+
+    [data-theme="light"] {
+      --bg: #FAF6F0;
+      --surface: #FFFFFF;
+      --surface-muted: #F0EAE1;
+      --surface-card: rgba(255, 255, 255, 0.96);
+      --border: #E2D7CB;
+      --border-subtle: #E2D7CB;
+      --border-focus: rgba(200, 90, 50, 0.45);
+      
+      --text-main: #2C221E;
+      --text-sub: #6B5E57;
+      --text-dim: #94867F;
+      
+      --primary: #C85A32;
+      --primary-hover: #B04B26;
+      --primary-glow: rgba(200, 90, 50, 0.18);
+      
+      --danger: #FF0033;
+      --danger-bg: rgba(255, 0, 51, 0.08);
+      --danger-border: rgba(255, 0, 51, 0.4);
+      --danger-glow: 0 0 16px rgba(255, 0, 51, 0.3);
+      
+      --warning: #C27803;
+      --warning-bg: rgba(194, 120, 3, 0.09);
+      --warning-border: rgba(194, 120, 3, 0.3);
+      
+      --success: #257D51;
+      --success-bg: rgba(37, 125, 81, 0.09);
+      --success-border: rgba(37, 125, 81, 0.28);
+      
+      --shadow-outer: 0 16px 40px rgba(44, 34, 30, 0.08);
+      --shadow-sm: 0 2px 8px rgba(44, 34, 30, 0.04);
+      --code-bg: #ECE4DA;
+      --code-text: #2C221E;
+      --overlay-bg: rgba(44, 34, 30, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      line-height: 1.5;
+      padding: 24px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      background-image: 
+        radial-gradient(circle at 18% 12%, rgba(224, 122, 95, 0.05) 0%, transparent 45%),
+        radial-gradient(circle at 82% 88%, rgba(224, 122, 95, 0.03) 0%, transparent 45%);
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    /* Top Navigation Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(14px);
+      transition: all 0.3s ease;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, var(--primary) 0%, #A2482F 100%);
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      color: #FFFFFF;
+      font-size: 20px;
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      color: var(--text-main);
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .theme-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface-muted);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      padding: 7px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .theme-toggle-btn:hover {
+      background: var(--surface);
+      border-color: var(--primary);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid var(--success-border);
+      box-shadow: 0 0 12px rgba(52, 211, 153, 0.18);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: currentColor;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* Sub-Header Simulation Tabs Row */
+    .controls-panel {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .btn-tab {
+      background: var(--surface-muted);
+      color: var(--text-sub);
+      border: 1px solid var(--border);
+      padding: 12px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-tab:hover {
+      background: var(--surface);
+      color: var(--text-main);
+      border-color: var(--border-focus);
+    }
+
+    .btn-tab.active {
+      background: var(--primary);
+      color: #FFFFFF;
+      border-color: var(--primary);
+      box-shadow: 0 4px 16px var(--primary-glow);
+    }
+
+    /* Main Dashboard Elevated Glassmorphic Card */
+    .feed-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: var(--shadow-outer);
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(16px);
+      transition: all 0.3s ease;
+    }
+
+    /* Summary Headline Section */
+    .summary-header {
+      margin-bottom: 26px;
+    }
+
+    .summary-title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.015em;
+      color: var(--text-main);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .summary-sub {
+      font-size: 13px;
+      color: var(--text-sub);
+      font-weight: 500;
+    }
+
+    /* 4 Key Metric Cards Row */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 26px;
+    }
+
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s ease;
+      min-height: 145px;
+    }
+
+    .metric-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px var(--primary-glow);
+    }
+
+    .metric-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-sub);
+    }
+
+    .check-icon-circle {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      color: var(--text-sub);
+      font-size: 10px;
+    }
+
+    .metric-card:hover .check-icon-circle {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .metric-value {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text-main);
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: -0.03em;
+      margin-bottom: 4px;
+    }
+
+    .metric-sub {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+
+    .metric-svg-wrap {
+      width: 100%;
+      height: 38px;
+      margin-top: auto;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .metric-svg-wrap svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Mitigation Strategies & Flowchart Section */
+    .section-divider-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-sub);
+      margin-bottom: 12px;
+    }
+
+    .mitigation-flow-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 16px;
+      margin-bottom: 26px;
+    }
+
+    /* Left Side: Strategy Cards */
+    .strategy-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .strategy-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .strategy-item:hover {
+      background: var(--surface-muted);
+      border-color: var(--primary);
+    }
+
+    .strategy-item.active-item {
+      border-color: var(--primary);
+      background: rgba(224, 122, 95, 0.08);
+      box-shadow: 0 0 16px var(--primary-glow);
+    }
+
+    .strategy-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .strategy-meta {
+      font-size: 11px;
+      color: var(--text-sub);
+      margin-top: 2px;
+    }
+
+    .badge-status {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 9px;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+
+    .badge-primary-opt {
+      background: rgba(224, 122, 95, 0.15);
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+
+    .badge-spot-opt {
+      background: var(--surface-muted);
+      color: var(--text-sub);
+      border: 1px solid var(--border);
+    }
+
+    /* Right Side: Flowchart */
+    .flowchart-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .flow-nodes-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      position: relative;
+    }
+
+    .flow-node-box {
+      background: var(--surface-muted);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+      text-align: center;
+      min-width: 105px;
+      z-index: 2;
+      transition: all 0.25s ease;
+    }
+
+    .flow-node-box.active-node {
+      background: rgba(224, 122, 95, 0.12);
+      border-color: var(--primary);
+      color: var(--primary);
+      box-shadow: 0 0 16px var(--primary-glow);
+    }
+
+    .flow-connector-svg {
+      flex: 1;
+      height: 30px;
+      margin: 0 4px;
+    }
+
+    /* Draft Action Box */
+    .draft-container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .draft-badge {
+      position: absolute;
+      top: -10px;
+      left: 18px;
+      background: var(--primary);
+      color: #FFFFFF;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 3px 12px;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px var(--primary-glow);
+    }
+
+    .draft-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 6px;
+    }
+
+    .draft-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .draft-label {
+      font-size: 11px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 600;
+    }
+
+    .draft-value {
+      font-size: 14px;
+      color: var(--text-main);
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .delta-highlight {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+      padding: 2px 8px;
+      border-radius: 4px;
+      color: var(--warning);
+      font-weight: 700;
+    }
+
+    .delta-old {
+      text-decoration: line-through;
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+
+    /* Action Controls */
+    .action-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 8px;
+      gap: 16px;
+    }
+
+    .action-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, #A2482F 100%);
+      color: #FFFFFF;
+      box-shadow: 0 4px 16px var(--primary-glow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 22px var(--primary-glow);
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--surface-muted);
+      border-color: var(--primary);
+    }
+
+    .btn-danger {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1.5px solid var(--danger);
+      font-weight: 700;
+      box-shadow: 0 0 10px rgba(255, 23, 68, 0.2);
+    }
+
+    .btn-danger:hover {
+      background: var(--danger);
+      color: #FFFFFF;
+      box-shadow: 0 0 24px var(--danger);
+      transform: translateY(-1px);
+    }
+
+    /* Conversational Override Drawer */
+    .override-drawer {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--warning-border);
+      border-radius: 12px;
+      padding: 18px;
+      margin-top: 20px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .override-drawer.visible {
+      display: block;
+    }
+
+    .override-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--warning);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .override-input-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .override-input {
+      flex: 1;
+      background: var(--surface-muted);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text-main);
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .override-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    /* Execution Receipt View */
+    .receipt-container {
+      display: none;
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 20px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .receipt-container.visible {
+      display: block;
+    }
+
+    .receipt-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--success-border);
+      padding-bottom: 12px;
+    }
+
+    .receipt-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--success);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ledger-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .ledger-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      border-left: 3px solid var(--success);
+    }
+
+    .ledger-title {
+      font-size: 11px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .ledger-delta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .audit-meta {
+      font-size: 11px;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-bg);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      place-items: center;
+    }
+
+    .modal-overlay.active {
+      display: grid;
+    }
+
+    .modal-content {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 90%;
+      max-width: 720px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--shadow-outer);
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--code-text);
+      background: var(--code-bg);
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Top Navigation Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">N</div>
+      <div>
+        <div class="brand-title">NAVORA Operations Engine</div>
+        <div class="brand-sub">Autonomous Procurement & Multi-Echelon Rebalancing</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Theme">
+        <span id="themeIcon">☀️</span>
+        <span id="themeLabel">Light Mode</span>
+      </button>
+      <button class="theme-toggle-btn" onclick="openJsonModal()">Inspect Telemetry JSON →</button>
+      <div class="status-badge">
+        <span class="status-dot"></span>
+        <span>Telemetry Stream Active</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Sub-Header Simulation Tabs Row -->
+  <div class="controls-panel">
+    <button class="btn-tab active" id="tabInitial" onclick="simulateState('INITIAL_LOAD')">
+      [1. Initial Briefing]
+    </button>
+    <button class="btn-tab" id="tabApprove" onclick="simulateState('APPROVE_CLICK')">
+      [2. Approve & Execute]
+    </button>
+    <button class="btn-tab" id="tabModify" onclick="simulateState('MODIFICATION_SUBMIT')">
+      [3. Human Override]
+    </button>
+    <button class="btn-tab" id="tabReject" onclick="simulateState('REJECT_CLICK')">
+      [4. Reject / Discard]
+    </button>
+  </div>
+
+  <!-- Main Dashboard Elevated Card -->
+  <div class="feed-card" id="briefingFeedCard">
+    <!-- Summary Headline Header -->
+    <div class="summary-header">
+      <h1 class="summary-title" id="summaryHeadline">SUMMARY OVERVIEW: STOCKOUT RISK MINIMIZED.</h1>
+      <p class="summary-sub" id="summarySub">CURRENT STATE: All critical facilities are stabilized. Mitigations are successful.</p>
+    </div>
+
+    <!-- 4 Key Metric Cards Row with Sleek SVG Graphics -->
+    <div class="metric-grid">
+      <!-- Card 1: Stabilized Stock -->
+      <div class="metric-card">
+        <div class="metric-top">
+          <span class="metric-label">Stabilized Stock</span>
+          <div class="check-icon-circle">✓</div>
+        </div>
+        <div class="metric-value" id="valStockBurn">6 / 3.0 Days</div>
+        <div class="metric-sub">Units on hand vs. Daily rate</div>
+        <div class="metric-svg-wrap">
+          <svg viewBox="0 0 160 40">
+            <defs>
+              <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#E07A5F" stop-opacity="0.45"/>
+                <stop offset="100%" stop-color="#E07A5F" stop-opacity="0.0"/>
+              </linearGradient>
+            </defs>
+            <path d="M 0,34 Q 30,36 55,26 T 105,18 T 160,8 L 160,40 L 0,40 Z" fill="url(#chartGrad)"/>
+            <path d="M 0,34 Q 30,36 55,26 T 105,18 T 160,8" fill="none" stroke="#E07A5F" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="105" cy="18" r="3.5" fill="#FAF6F0" stroke="#E07A5F" stroke-width="2"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Card 2: Coverage Gap Closed -->
+      <div class="metric-card">
+        <div class="metric-top">
+          <span class="metric-label">Coverage Gap Closed</span>
+          <div class="check-icon-circle">✓</div>
+        </div>
+        <div class="metric-value" id="valCoverageGap">3.0 Days</div>
+        <div class="metric-sub">Stockout projected in 48 hrs</div>
+        <div class="metric-svg-wrap" style="justify-content: center;">
+          <svg viewBox="0 0 100 45" style="width: 85px; height: 38px;">
+            <path d="M 15,40 A 35,35 0 0,1 85,40" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="8" stroke-linecap="round"/>
+            <path d="M 15,40 A 35,35 0 0,1 55,10" fill="none" stroke="#E07A5F" stroke-width="8" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Card 3: Lead Time Optimized -->
+      <div class="metric-card">
+        <div class="metric-top">
+          <span class="metric-label">Lead Time Optimized</span>
+          <div class="check-icon-circle">✓</div>
+        </div>
+        <div class="metric-value" id="valLeadTime">3.0 Days</div>
+        <div class="metric-sub">Standard vendor load: 6.0 days</div>
+        <div class="metric-svg-wrap">
+          <svg viewBox="0 0 160 40">
+            <defs>
+              <linearGradient id="waveGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#B0A298" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#B0A298" stop-opacity="0.0"/>
+              </linearGradient>
+            </defs>
+            <path d="M 0,35 Q 40,38 75,25 T 120,12 T 160,26 L 160,40 L 0,40 Z" fill="url(#waveGrad)"/>
+            <path d="M 0,35 Q 40,38 75,25 T 120,12 T 160,26" fill="none" stroke="#B0A298" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Card 4: Exposure Resolved -->
+      <div class="metric-card">
+        <div class="metric-top">
+          <span class="metric-label">Exposure Resolved</span>
+          <div class="check-icon-circle">✓</div>
+        </div>
+        <div class="metric-value" id="valExposure">0</div>
+        <div class="metric-sub">Net stockout deficit window</div>
+        <div class="metric-svg-wrap" style="align-items: center;">
+          <svg viewBox="0 0 160 14" style="height: 14px;">
+            <line x1="0" y1="7" x2="160" y2="7" stroke="rgba(176, 162, 152, 0.45)" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mitigation Strategies & Lifecycle Flowchart Section -->
+    <div class="section-divider-title">Mitigation Pathways & Automated Resolution Lifecycle</div>
+    <div class="mitigation-flow-grid">
+      <!-- Left: Mitigation Options List -->
+      <div class="strategy-list">
+        <div class="strategy-item active-item" id="optCard1" onclick="selectOption('OPT-1')">
+          <div>
+            <div class="strategy-name">1. Belgaum Hub Inter-Warehouse Transfer (24 Hr)</div>
+            <div class="strategy-meta">Fast dispatch • +$45.00 freight • Sourced from Belgaum Hub (48 on-hand)</div>
+          </div>
+          <span class="badge-status badge-primary-opt">Recommended</span>
+        </div>
+
+        <div class="strategy-item" id="optCard2" onclick="selectOption('OPT-3')">
+          <div>
+            <div class="strategy-name">2. Local Spot Buy (Supplier B, resolved deficit)</div>
+            <div class="strategy-meta">2 Days lead • +$260.00 local unit premium • Emergency secondary backup</div>
+          </div>
+          <span class="badge-status badge-spot-opt">Backup Sourcing</span>
+        </div>
+      </div>
+
+      <!-- Right: Linear Horizontal Flowchart -->
+      <div class="flowchart-panel">
+        <div class="flow-nodes-wrapper">
+          <div class="flow-node-box">
+            <span>Deficit Event</span>
+          </div>
+
+          <svg class="flow-connector-svg" viewBox="0 0 80 24">
+            <defs>
+              <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 8 5 L 0 9 z" fill="#E07A5F"/>
+              </marker>
+            </defs>
+            <path d="M 0,12 L 72,12" fill="none" stroke="#E07A5F" stroke-width="2.5" marker-end="url(#arrow)"/>
+          </svg>
+
+          <div class="flow-node-box active-node">
+            <span>Stabilized</span>
+          </div>
+
+          <svg class="flow-connector-svg" viewBox="0 0 80 24">
+            <path d="M 0,12 L 72,12" fill="none" stroke="#E07A5F" stroke-width="2.5" marker-end="url(#arrow)"/>
+          </svg>
+
+          <div class="flow-node-box">
+            <span>Monitored</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Component 5: Action Draft Execution Box -->
+    <div class="draft-container" id="draftContainer">
+      <div class="draft-badge" id="draftTypeBadge">ACTION DRAFT: INTER-WAREHOUSE TRANSFER</div>
+      <div class="draft-grid" id="draftGrid">
+        <div class="draft-field">
+          <div class="draft-label">Transfer Request ID</div>
+          <div class="draft-value" id="draftId">TR-8821</div>
+        </div>
+        <div class="draft-field">
+          <div class="draft-label">Source Facility (Surplus Hub)</div>
+          <div class="draft-value" id="draftSource">Belgaum DC (Stock: 48)</div>
+        </div>
+        <div class="draft-field">
+          <div class="draft-label">Destination Facility</div>
+          <div class="draft-value" id="draftDest">Gokak Regional Facility</div>
+        </div>
+        <div class="draft-field">
+          <div class="draft-label">SKU / Item Name</div>
+          <div class="draft-value" id="draftSku">OF-4420 (Heavy-Duty Oil Filter)</div>
+        </div>
+        <div class="draft-field">
+          <div class="draft-label">Allocated Quantity</div>
+          <div class="draft-value" id="draftQty">12 Units</div>
+        </div>
+        <div class="draft-field">
+          <div class="draft-label">Resulting Days of Cover</div>
+          <div class="draft-value" id="draftResultCover">6.0 Days (Safe)</div>
+        </div>
+        <div class="draft-field">
+          <div class="draft-label">Freight / Landed Cost</div>
+          <div class="draft-value" id="draftCost">$45.00</div>
+        </div>
+        <div class="draft-field">
+          <div class="draft-label">Estimated Transit Time</div>
+          <div class="draft-value" id="draftEta">24 Hours</div>
+        </div>
+        <div class="draft-field">
+          <div class="draft-label">Source Hub Post-Balance</div>
+          <div class="draft-value" id="draftSourceRemaining">36 Units (Healthy > 20)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conversational Override Drawer -->
+    <div class="override-drawer" id="overrideDrawer">
+      <div class="override-title">
+        <span>✏️ Manager Override & Natural Language Modification</span>
+      </div>
+      <div style="font-size:12px;color:var(--text-sub);margin-bottom:8px">
+        Enter parameter adjustment (e.g., <em>"Make it 20 units instead"</em> or <em>"Switch to Supplier B"</em>). The math recalculation engine will re-verify days of cover and cost impact immediately.
+      </div>
+      <div class="override-input-group">
+        <input type="text" class="override-input" id="overrideInput" value="Make it 20 units instead">
+        <button class="btn btn-secondary" onclick="applyCustomOverride()">Recalculate & Apply</button>
+      </div>
+    </div>
+
+    <!-- Governance Action Buttons Row -->
+    <div class="action-row" id="actionButtonsRow">
+      <div class="action-group">
+        <button class="btn btn-primary" id="btnApprove" onclick="handleApprove()">
+          <span>✓</span>
+          <span id="approveBtnText">Approve & Execute</span>
+        </button>
+        <button class="btn btn-secondary" id="btnModifyToggle" onclick="toggleOverrideDrawer()">
+          <span>✏️</span>
+          <span>Reject / Modify</span>
+        </button>
+      </div>
+      <div>
+        <button class="btn btn-danger" onclick="handleReject()">
+          <span>✕</span>
+          <span>Reject & Archive</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Component 7: Execution Receipt View -->
+    <div class="receipt-container" id="receiptView">
+      <div class="receipt-header">
+        <div class="receipt-title">
+          <span>✓</span>
+          <span id="receiptHeading">Simulated Transfer Request TR-8821 dispatched to Belgaum warehouse.</span>
+        </div>
+        <div class="badge-status badge-primary-opt" style="font-size:12px">DISPATCHED</div>
+      </div>
+      <div style="font-size:13px;color:var(--text-main);margin-bottom:14px" id="receiptSummary">
+        Inventory state updated: Gokak pending in-transit (+12 units), Belgaum allocated (-12 units).
+      </div>
+      <div class="ledger-grid">
+        <div class="ledger-card">
+          <div class="ledger-title">DESTINATION: Gokak Regional Facility (FAC-GOKAK-01)</div>
+          <div class="ledger-delta" id="ledgerDestDelta">+12 Units (Pending In-Transit)</div>
+          <div style="font-size:11px;color:var(--text-sub);margin-top:4px">New Effective Stock: 18 Units (6.0 Days Cover)</div>
+        </div>
+        <div class="ledger-card">
+          <div class="ledger-title">ORIGIN: Belgaum Hub (FAC-BELGAUM-HUB)</div>
+          <div class="ledger-delta" id="ledgerOriginDelta">-12 Units (Allocated for Dispatch)</div>
+          <div style="font-size:11px;color:var(--text-sub);margin-top:4px">Remaining Hub Buffer: 36 Units (Safe > 20 threshold)</div>
+        </div>
+      </div>
+      <div class="audit-meta" id="receiptAuditMeta">
+        [AUDIT LEDGER] TxID: 0x8821-E92A | Timestamp: 2026-10-09T17:34:22Z | Signer: Purchasing Manager | Overrides: None | Target: Belgaum Hub WMS API
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Raw Telemetry JSON Inspector -->
+<div class="modal-overlay" id="jsonModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 style="font-size:16px;font-weight:700;color:var(--text-main)">NAVORA Ingested Backend Telemetry (Section 3.1 Contract)</h3>
+      <button class="theme-toggle-btn" onclick="closeJsonModal()">Close</button>
+    </div>
+    <div class="modal-body">
+      <pre id="jsonPayloadPre"></pre>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Theme Management (Defaults to Dark Mode per presentation specification)
+  function initTheme() {
+    const saved = localStorage.getItem('navora-theme') || 'dark';
+    setTheme(saved);
+  }
+
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+    const next = current === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+  }
+
+  function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('navora-theme', theme);
+    const icon = document.getElementById('themeIcon');
+    const label = document.getElementById('themeLabel');
+    if (theme === 'dark') {
+      if (icon) icon.textContent = '☀️';
+      if (label) label.textContent = 'Light Mode';
+    } else {
+      if (icon) icon.textContent = '🌙';
+      if (label) label.textContent = 'Dark Mode';
+    }
+  }
+
+  // Structured Backend Telemetry JSON conforming to Section 3.1
+  const rawTelemetry = {
+    "incident_id": "INC-2026-8821",
+    "facility_id": "FAC-GOKAK-01",
+    "facility_name": "Gokak Regional Facility",
+    "sku": "OF-4420",
+    "sku_name": "Heavy-Duty Oil Filter",
+    "current_stock": 6,
+    "daily_burn_rate": 3.0,
+    "days_of_cover": 2.0,
+    "standard_lead_time_days": 6,
+    "stockout_gap_days": 4,
+    "root_cause": "40% maintenance demand spike combined with a 4-day primary supplier replenishment delay.",
+    "mitigation_options": [
+      {
+        "option_id": "OPT-1",
+        "pathway_name": "Inter-Warehouse Rebalancing",
+        "type": "INTER_WAREHOUSE_TRANSFER",
+        "source_facility": "Belgaum Distribution Center",
+        "source_facility_id": "FAC-BELGAUM-HUB",
+        "source_stock": 48,
+        "speed_hours": 24,
+        "cost_impact_usd": 45.0,
+        "recommended": true,
+        "quantity": 12
+      },
+      {
+        "option_id": "OPT-2",
+        "pathway_name": "Expedited Supplier PO",
+        "type": "EXPEDITED_PO",
+        "supplier_id": "SUP-ALPHA",
+        "source_facility": "Alpha Auto Supply Co.",
+        "speed_hours": 72,
+        "cost_impact_usd": 180.0,
+        "recommended": false,
+        "quantity": 25
+      },
+      {
+        "option_id": "OPT-3",
+        "pathway_name": "Spot Market Local Sourcing",
+        "type": "SPOT_PURCHASE",
+        "supplier_id": "SUP-BETA-LOCAL",
+        "source_facility": "Karnataka Local Parts Exchange",
+        "speed_hours": 48,
+        "cost_impact_usd": 260.0,
+        "recommended": false,
+        "quantity": 20
+      }
+    ]
+  };
+
+  let activeOptionId = "OPT-1";
+  let currentState = "INITIAL_LOAD";
+  let currentQuantity = 12;
+  let overridesApplied = null;
+
+  document.getElementById('jsonPayloadPre').textContent = JSON.stringify(rawTelemetry, null, 2);
+
+  function resetState() {
+    currentQuantity = 12;
+    overridesApplied = null;
+    document.getElementById('overrideDrawer').classList.remove('visible');
+    document.getElementById('receiptView').classList.remove('visible');
+    document.getElementById('actionButtonsRow').style.display = 'flex';
+    document.getElementById('briefingFeedCard').style.opacity = '1';
+    document.getElementById('approveBtnText').textContent = 'Approve & Execute';
+    renderDraft();
+  }
+
+  function simulateState(state) {
+    currentState = state;
+    document.querySelectorAll('.controls-panel .btn-tab').forEach(btn => btn.classList.remove('active'));
+    
+    if (state === 'INITIAL_LOAD') {
+      document.getElementById('tabInitial').classList.add('active');
+      resetState();
+    } else if (state === 'APPROVE_CLICK') {
+      document.getElementById('tabApprove').classList.add('active');
+      handleApprove();
+    } else if (state === 'MODIFICATION_SUBMIT') {
+      document.getElementById('tabModify').classList.add('active');
+      applyCustomOverride("Change quantity to 20 units");
+    } else if (state === 'REJECT_CLICK') {
+      document.getElementById('tabReject').classList.add('active');
+      handleReject();
+    }
+  }
+
+  function selectOption(optId) {
+    activeOptionId = optId;
+    document.querySelectorAll('.strategy-item').forEach(item => item.classList.remove('active-item'));
+    if (optId === 'OPT-1') {
+      document.getElementById('optCard1').classList.add('active-item');
+    } else {
+      document.getElementById('optCard2').classList.add('active-item');
+    }
+
+    const opt = rawTelemetry.mitigation_options.find(o => o.option_id === optId);
+    if (opt) {
+      currentQuantity = opt.quantity;
+      renderDraft();
+    }
+  }
+
+  function renderDraft() {
+    const opt = rawTelemetry.mitigation_options.find(o => o.option_id === activeOptionId) || rawTelemetry.mitigation_options[0];
+    const grid = document.getElementById('draftGrid');
+    const badge = document.getElementById('draftTypeBadge');
+
+    if (opt.type === 'INTER_WAREHOUSE_TRANSFER') {
+      badge.textContent = 'ACTION DRAFT: INTER-WAREHOUSE TRANSFER';
+      const hubRemaining = 48 - currentQuantity;
+      const resultingDoc = ((rawTelemetry.current_stock + currentQuantity) / rawTelemetry.daily_burn_rate).toFixed(1);
+      const freightCost = (35 + (currentQuantity * 1.50)).toFixed(2);
+
+      let qtyDisplay = `${currentQuantity} Units`;
+      let docDisplay = `${resultingDoc} Days (Safe)`;
+      let costDisplay = `$${freightCost}`;
+
+      if (overridesApplied) {
+        qtyDisplay = `<span class="delta-highlight"><span class="delta-old">12</span> ${currentQuantity} Units</span>`;
+        docDisplay = `<span class="delta-highlight"><span class="delta-old">6.0</span> ${resultingDoc} Days</span>`;
+        costDisplay = `<span class="delta-highlight"><span class="delta-old">$45.00</span> $${freightCost}</span>`;
+      }
+
+      grid.innerHTML = `
+        <div class="draft-field">
+          <div class="draft-label">Transfer Request ID</div>
+          <div class="draft-value">TR-8821</div>
+        </div>
+        <div class="draft-field">
+          <div class="draft-label">Source Facility (Surplus Hub)</div>
+          <div class="draft-value">${opt.source_facility}</div>
+        </div>
+        <div class="draft-field">
+          <div class="draft-label">Destination Facility</div>
+          <div class="draft-value">Gokak Regional Facility</div>
+        </div>
+        <div class="draft-field">
+          <div class="draft-label">SKU / Item Name</div>
+          <div class="draft-value">OF-4420 (Heavy-Duty Oil Filter)</div>
+        </div>
+        <div class="draft-field">
+          <div class="draft-label">Allocated Quantity</div>
+          <div class="draft-value">${qtyDisplay}</div>
+        </div>
+        <div class="draft-field">
+          <div class="draft-label">Resulting Days of Cover</div>
+          <div class="draft-value">${docDisplay}</div>
+        </div>
+        <div class="draft-field">
+          <div class="draft-label">Freight / Landed Cost</div>
+          <div class="draft-value">${costDisplay}</div>
+        </div>
+        <div class="draft-field">
+          <div class="draft-label">Estimated Transit Time</div>
+          <div class="draft-value">${opt.speed_hours} Hours</div>
+        </div>
+        <div class="draft-field">
+          <div class="draft-label">Source Hub Post-Balance</div>
+          <div class="draft-value">${hubRemaining} Units (${hubRemaining >= 20 ? 'Safe > 20 threshold' : 'Low Buffer'})</div>
+        </div>
+      `;
+    } else {
+      badge.textContent = `ACTION DRAFT: ${opt.type}`;
+      grid.innerHTML = `
+        <div class="draft-field">
+          <div class="draft-label">Purchase Order ID</div>
+          <div class="draft-value">PO-2026-9042</div>
+        </div>
+        <div class="draft-field">
+          <div class="draft-label">Supplier / Vendor</div>
+          <div class="draft-value">${opt.supplier_id} (${opt.source_facility})</div>
+        </div>
+        <div class="draft-field">
+          <div class="draft-label">Destination Facility</div>
+          <div class="draft-value">Gokak Regional Facility</div>
+        </div>
+        <div class="draft-field">
+          <div class="draft-label">SKU / Item Name</div>
+          <div class="draft-value">OF-4420</div>
+        </div>
+        <div class="draft-field">
+          <div class="draft-label">Order Quantity</div>
+          <div class="draft-value">${currentQuantity} Units</div>
+        </div>
+        <div class="draft-field">
+          <div class="draft-label">Expedited Surcharge</div>
+          <div class="draft-value">$${opt.cost_impact_usd.toFixed(2)}</div>
+        </div>
+      `;
+    }
+  }
+
+  async function syncFromBackend() {
+    try {
+      const res = await fetch('/api/telemetry');
+      if (res.ok) {
+        const data = await res.json();
+        Object.assign(rawTelemetry, data);
+        document.getElementById('jsonPayloadPre').textContent = JSON.stringify(rawTelemetry, null, 2);
+        renderDraft();
+      }
+    } catch (e) {
+      console.log('Running in local offline mode or backend not yet connected.');
+    }
+  }
+
+  function toggleOverrideDrawer() {
+    const drawer = document.getElementById('overrideDrawer');
+    drawer.classList.toggle('visible');
+  }
+
+  async function applyCustomOverride(explicitText) {
+    const input = explicitText || document.getElementById('overrideInput').value;
+    document.getElementById('overrideInput').value = input;
+    document.getElementById('overrideDrawer').classList.add('visible');
+
+    const match = input.match(/(\d+)\s*units?/i);
+    const targetQty = match ? parseInt(match[1], 10) : 20;
+
+    try {
+      const res = await fetch('/api/recalculate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          option_id: activeOptionId,
+          quantity: targetQty,
+          user_override_text: input
+        })
+      });
+      if (res.ok) {
+        const recalcData = await res.json();
+        currentQuantity = recalcData.new_quantity;
+      } else {
+        currentQuantity = targetQty;
+      }
+    } catch (e) {
+      currentQuantity = targetQty;
+    }
+
+    overridesApplied = {
+      parameter: "quantity",
+      old_value: 12,
+      new_value: currentQuantity,
+      raw_text: input
+    };
+
+    renderDraft();
+    document.getElementById('approveBtnText').textContent = `Confirm Revised Execution (${currentQuantity} Units)`;
+  }
+
+  async function handleApprove() {
+    document.getElementById('overrideDrawer').classList.remove('visible');
+    const receipt = document.getElementById('receiptView');
+    receipt.classList.add('visible');
+
+    const opt = rawTelemetry.mitigation_options.find(o => o.option_id === activeOptionId) || rawTelemetry.mitigation_options[0];
+    const qty = currentQuantity;
+
+    let payload = {
+      action_type: opt.type,
+      request_id: overridesApplied ? "TR-8821-REV1" : "TR-8821",
+      source_warehouse: opt.source_facility_id || "FAC-BELGAUM-HUB",
+      destination_warehouse: rawTelemetry.facility_id || "FAC-GOKAK-01",
+      sku: rawTelemetry.sku,
+      quantity: qty,
+      freight_cost_usd: parseFloat((35 + (qty * 1.50)).toFixed(2)),
+      eta_hours: opt.speed_hours,
+      manager_override: overridesApplied
+    };
+
+    try {
+      const res = await fetch('/api/actions/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        document.getElementById('receiptHeading').textContent = data.dispatch_message;
+        document.getElementById('receiptSummary').textContent = data.inventory_summary;
+        document.getElementById('ledgerDestDelta').textContent = `+${qty} Units (Pending In-Transit)`;
+        document.getElementById('ledgerOriginDelta').textContent = `-${qty} Units (Allocated for Dispatch)`;
+        document.getElementById('receiptAuditMeta').textContent = 
+          `[AUDIT LEDGER] TxID: ${data.transaction_id} | Timestamp: ${data.audit_meta.timestamp} | Signer: ${data.audit_meta.signer} | Overrides: ${overridesApplied ? overridesApplied.raw_text : 'None'} | Target: Belgaum Hub WMS API`;
+        document.getElementById('actionButtonsRow').style.display = 'none';
+        return;
+      }
+    } catch (e) {
+      console.log('Using local client-side confirmation.');
+    }
+
+    // Client-side fallback
+    document.getElementById('receiptHeading').textContent = `Simulated Transfer Request TR-8821 dispatched to Belgaum warehouse.`;
+    document.getElementById('receiptSummary').textContent = `Inventory state updated: Gokak pending in-transit (+${qty} units), Belgaum allocated (-${qty} units).`;
+    document.getElementById('ledgerDestDelta').textContent = `+${qty} Units (Pending In-Transit)`;
+    document.getElementById('ledgerOriginDelta').textContent = `-${qty} Units (Allocated for Dispatch)`;
+    document.getElementById('receiptAuditMeta').textContent = 
+      `[AUDIT LEDGER] TxID: 0x8821-E92A | Timestamp: ${new Date().toISOString()} | Signer: Purchasing Manager | Overrides: ${overridesApplied ? overridesApplied.raw_text : 'None'} | Target: Belgaum Hub WMS API`;
+    document.getElementById('actionButtonsRow').style.display = 'none';
+  }
+
+  async function handleReject() {
+    if (confirm("Are you sure you want to reject this mitigation recommendation? Reason will be archived.")) {
+      try {
+        await fetch('/api/actions/reject', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            incident_id: rawTelemetry.incident_id,
+            reason_code: "SUPERSEDED_BY_MANAGER",
+            notes: "Manual manager rejection."
+          })
+        });
+      } catch (e) {}
+      document.getElementById('briefingFeedCard').style.opacity = '0.35';
+      alert("Incident INC-2026-8821 dismissed. Logged to Audit Ledger: Reason code 'SUPERSEDED_BY_MANAGER'.");
+    }
+  }
+
+  function openJsonModal() {
+    document.getElementById('jsonModal').classList.add('active');
+  }
+
+  function closeJsonModal() {
+    document.getElementById('jsonModal').classList.remove('active');
+  }
+
+  // Initialize theme & data
+  initTheme();
+  syncFromBackend();
+  renderDraft();
+</script>
+
+</body>
+</html>
