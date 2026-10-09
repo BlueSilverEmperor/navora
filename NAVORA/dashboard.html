@@ -42,6 +42,10 @@
       --success-bg: rgba(52, 211, 153, 0.12);
       --success-border: rgba(52, 211, 153, 0.35);
       
+      --cyan: #38BDF8;
+      --cyan-bg: rgba(56, 189, 248, 0.12);
+      --cyan-border: rgba(56, 189, 248, 0.35);
+
       --shadow-outer: 0 16px 40px rgba(0, 0, 0, 0.65);
       --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
       --code-bg: #14100E;
@@ -79,6 +83,10 @@
       --success-bg: rgba(37, 125, 81, 0.09);
       --success-border: rgba(37, 125, 81, 0.28);
       
+      --cyan: #0284C7;
+      --cyan-bg: rgba(2, 132, 199, 0.08);
+      --cyan-border: rgba(2, 132, 199, 0.3);
+
       --shadow-outer: 0 16px 40px rgba(44, 34, 30, 0.08);
       --shadow-sm: 0 2px 8px rgba(44, 34, 30, 0.04);
       --code-bg: #ECE4DA;
@@ -106,7 +114,7 @@
     }
 
     .container {
-      max-width: 1120px;
+      max-width: 1200px;
       margin: 0 auto;
     }
 
@@ -119,10 +127,12 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 16px;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       box-shadow: var(--shadow-sm);
       backdrop-filter: blur(14px);
       transition: all 0.3s ease;
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
     .brand {
@@ -132,21 +142,21 @@
     }
 
     .brand-logo {
-      width: 42px;
-      height: 42px;
+      width: 44px;
+      height: 44px;
       background: linear-gradient(135deg, var(--primary) 0%, #A2482F 100%);
-      border-radius: 10px;
+      border-radius: 12px;
       display: grid;
       place-items: center;
       font-weight: 800;
       color: #FFFFFF;
-      font-size: 20px;
-      box-shadow: 0 4px 12px var(--primary-glow);
+      font-size: 22px;
+      box-shadow: 0 4px 14px var(--primary-glow);
     }
 
     .brand-title {
-      font-size: 18px;
-      font-weight: 700;
+      font-size: 19px;
+      font-weight: 800;
       letter-spacing: -0.015em;
       color: var(--text-main);
     }
@@ -159,7 +169,8 @@
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
     .theme-toggle-btn {
@@ -169,7 +180,7 @@
       background: var(--surface-muted);
       color: var(--text-main);
       border: 1px solid var(--border);
-      padding: 7px 15px;
+      padding: 8px 14px;
       border-radius: 20px;
       cursor: pointer;
       font-size: 12px;
@@ -186,7 +197,7 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 6px 14px;
+      padding: 7px 14px;
       border-radius: 20px;
       font-size: 12px;
       font-weight: 600;
@@ -209,12 +220,106 @@
       50% { opacity: 0.4; transform: scale(0.85); }
     }
 
+    /* Command & Chaos Control Bar */
+    .command-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 20px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .incident-selector-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .incident-select-label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--primary);
+      white-space: nowrap;
+    }
+
+    .incident-dropdown {
+      flex: 1;
+      background: var(--surface-muted);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .incident-dropdown:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+
+    .chaos-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .chaos-btn {
+      background: var(--surface-muted);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .chaos-btn:hover {
+      background: var(--surface);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .chaos-btn.active-chaos {
+      background: var(--warning-bg);
+      border-color: var(--warning);
+      color: var(--warning);
+    }
+
+    .chaos-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 10px;
+      font-weight: 800;
+    }
+
     /* Sub-Header Simulation Tabs Row */
     .controls-panel {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 12px;
-      margin-bottom: 22px;
+      margin-bottom: 20px;
     }
 
     .btn-tab {
@@ -252,7 +357,7 @@
       background: var(--surface-card);
       border: 1px solid var(--border);
       border-radius: 20px;
-      padding: 30px;
+      padding: 28px;
       box-shadow: var(--shadow-outer);
       position: relative;
       overflow: hidden;
@@ -262,7 +367,12 @@
 
     /* Summary Headline Section */
     .summary-header {
-      margin-bottom: 26px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
     }
 
     .summary-title {
@@ -271,13 +381,58 @@
       letter-spacing: -0.015em;
       color: var(--text-main);
       text-transform: uppercase;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
 
     .summary-sub {
       font-size: 13px;
       color: var(--text-sub);
       font-weight: 500;
+      line-height: 1.5;
+    }
+
+    .category-tag-wrap {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .badge-severity {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 5px 12px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-critical {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid var(--danger-border);
+      box-shadow: 0 0 10px rgba(255, 23, 68, 0.2);
+    }
+
+    .badge-high {
+      background: var(--warning-bg);
+      color: var(--warning);
+      border: 1px solid var(--warning-border);
+    }
+
+    .badge-medium {
+      background: var(--cyan-bg);
+      color: var(--cyan);
+      border: 1px solid var(--cyan-border);
+    }
+
+    .badge-cat {
+      background: var(--surface-muted);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 6px;
     }
 
     /* 4 Key Metric Cards Row */
@@ -285,7 +440,7 @@
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 16px;
-      margin-bottom: 26px;
+      margin-bottom: 24px;
     }
 
     .metric-card {
@@ -299,7 +454,7 @@
       position: relative;
       overflow: hidden;
       transition: all 0.25s ease;
-      min-height: 145px;
+      min-height: 140px;
     }
 
     .metric-card:hover {
@@ -340,7 +495,7 @@
     }
 
     .metric-value {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 800;
       color: var(--text-main);
       font-family: 'JetBrains Mono', monospace;
@@ -356,13 +511,172 @@
 
     .metric-svg-wrap {
       width: 100%;
-      height: 38px;
+      height: 34px;
       margin-top: auto;
       display: flex;
       align-items: flex-end;
     }
 
     .metric-svg-wrap svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Math Transparency Box (Mandate Rule 2 & Rule 11) */
+    .math-proof-box {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--primary);
+      border-radius: 12px;
+      padding: 18px 22px;
+      margin-bottom: 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      position: relative;
+    }
+
+    .math-proof-title {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .math-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px 24px;
+      color: var(--text-main);
+      line-height: 1.6;
+    }
+
+    .math-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .math-formula-tag {
+      color: var(--text-sub);
+      font-size: 11px;
+    }
+
+    .math-formula-value {
+      color: #FAF6F0;
+      font-weight: 600;
+    }
+
+    /* Commercial Impact Scorecard Row */
+    .scorecard-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-sub);
+      margin-bottom: 12px;
+    }
+
+    .scorecard-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .score-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .score-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .score-val {
+      font-size: 20px;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-main);
+    }
+
+    .score-sub {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    /* Forward Trajectory Interactive Curve Section */
+    .trajectory-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      margin-bottom: 24px;
+    }
+
+    .trajectory-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .trajectory-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .trajectory-legend {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-color {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .svg-trajectory-wrap {
+      width: 100%;
+      height: 220px;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      position: relative;
+    }
+
+    .svg-trajectory-wrap svg {
       width: 100%;
       height: 100%;
     }
@@ -379,9 +693,9 @@
 
     .mitigation-flow-grid {
       display: grid;
-      grid-template-columns: 1fr 1.3fr;
+      grid-template-columns: 1.2fr 1fr;
       gap: 16px;
-      margin-bottom: 26px;
+      margin-bottom: 24px;
     }
 
     /* Left Side: Strategy Cards */
@@ -401,6 +715,7 @@
       align-items: center;
       cursor: pointer;
       transition: all 0.2s ease;
+      gap: 14px;
     }
 
     .strategy-item:hover {
@@ -410,7 +725,7 @@
 
     .strategy-item.active-item {
       border-color: var(--primary);
-      background: rgba(224, 122, 95, 0.08);
+      background: rgba(224, 122, 95, 0.09);
       box-shadow: 0 0 16px var(--primary-glow);
     }
 
@@ -423,19 +738,20 @@
     .strategy-meta {
       font-size: 11px;
       color: var(--text-sub);
-      margin-top: 2px;
+      margin-top: 3px;
     }
 
     .badge-status {
       font-size: 11px;
       font-weight: 700;
-      padding: 4px 9px;
+      padding: 4px 10px;
       border-radius: 6px;
       text-transform: uppercase;
+      white-space: nowrap;
     }
 
     .badge-primary-opt {
-      background: rgba(224, 122, 95, 0.15);
+      background: rgba(224, 122, 95, 0.16);
       color: var(--primary);
       border: 1px solid var(--primary);
     }
@@ -470,18 +786,18 @@
       background: var(--surface-muted);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 10px 16px;
-      font-size: 12px;
+      padding: 10px 14px;
+      font-size: 11px;
       font-weight: 700;
       color: var(--text-main);
       text-align: center;
-      min-width: 105px;
+      min-width: 90px;
       z-index: 2;
       transition: all 0.25s ease;
     }
 
     .flow-node-box.active-node {
-      background: rgba(224, 122, 95, 0.12);
+      background: rgba(224, 122, 95, 0.14);
       border-color: var(--primary);
       color: var(--primary);
       box-shadow: 0 0 16px var(--primary-glow);
@@ -489,7 +805,7 @@
 
     .flow-connector-svg {
       flex: 1;
-      height: 30px;
+      height: 28px;
       margin: 0 4px;
     }
 
@@ -499,7 +815,7 @@
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 22px;
-      margin-bottom: 24px;
+      margin-bottom: 22px;
       position: relative;
     }
 
@@ -540,7 +856,7 @@
     }
 
     .draft-value {
-      font-size: 14px;
+      font-size: 13px;
       color: var(--text-main);
       font-weight: 700;
       font-family: 'JetBrains Mono', monospace;
@@ -562,6 +878,106 @@
       text-decoration: line-through;
       color: var(--text-dim);
       font-weight: 500;
+    }
+
+    /* Donor Safety Buffer Alert Banner */
+    .safety-banner {
+      display: none;
+      padding: 12px 18px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      font-size: 12px;
+      font-weight: 700;
+      align-items: center;
+      gap: 10px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .safety-banner.safe {
+      display: flex;
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      color: var(--success);
+    }
+
+    .safety-banner.danger {
+      display: flex;
+      background: var(--danger-bg);
+      border: 1.5px solid var(--danger-border);
+      color: var(--danger);
+      box-shadow: var(--danger-glow);
+    }
+
+    /* Conversational Override Drawer */
+    .override-drawer {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--warning-border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 22px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .override-drawer.visible {
+      display: block;
+    }
+
+    .override-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--warning);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .override-input-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      align-items: center;
+    }
+
+    .override-input {
+      flex: 1;
+      background: var(--surface-muted);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text-main);
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .override-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .override-chips {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .chip-btn {
+      background: var(--surface-muted);
+      border: 1px solid var(--border);
+      color: var(--text-sub);
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .chip-btn:hover {
+      border-color: var(--primary);
+      color: var(--text-main);
     }
 
     /* Action Controls */
@@ -631,53 +1047,6 @@
       transform: translateY(-1px);
     }
 
-    /* Conversational Override Drawer */
-    .override-drawer {
-      display: none;
-      background: var(--surface);
-      border: 1px solid var(--warning-border);
-      border-radius: 12px;
-      padding: 18px;
-      margin-top: 20px;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .override-drawer.visible {
-      display: block;
-    }
-
-    .override-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--warning);
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .override-input-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .override-input {
-      flex: 1;
-      background: var(--surface-muted);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 14px;
-      color: var(--text-main);
-      font-size: 13px;
-      font-family: inherit;
-    }
-
-    .override-input:focus {
-      outline: none;
-      border-color: var(--primary);
-    }
-
     /* Execution Receipt View */
     .receipt-container {
       display: none;
@@ -737,7 +1106,7 @@
 
     .ledger-delta {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 700;
       color: var(--text-main);
     }
@@ -746,6 +1115,7 @@
       font-size: 11px;
       color: var(--text-dim);
       font-family: 'JetBrains Mono', monospace;
+      word-break: break-all;
     }
 
     @keyframes fadeIn {
@@ -753,13 +1123,13 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Modal */
+    /* Modals */
     .modal-overlay {
       display: none;
       position: fixed;
       inset: 0;
       background: var(--overlay-bg);
-      backdrop-filter: blur(4px);
+      backdrop-filter: blur(6px);
       z-index: 100;
       place-items: center;
     }
@@ -773,8 +1143,8 @@
       border: 1px solid var(--border);
       border-radius: 16px;
       width: 90%;
-      max-width: 720px;
-      max-height: 80vh;
+      max-width: 820px;
+      max-height: 82vh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -782,7 +1152,7 @@
     }
 
     .modal-header {
-      padding: 16px 20px;
+      padding: 16px 22px;
       border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
@@ -790,12 +1160,34 @@
     }
 
     .modal-body {
-      padding: 20px;
+      padding: 22px;
       overflow-y: auto;
       font-family: 'JetBrains Mono', monospace;
       font-size: 12px;
       color: var(--code-text);
       background: var(--code-bg);
+    }
+
+    .inventory-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 12px;
+    }
+
+    .inventory-table th {
+      color: var(--primary);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+
+    .inventory-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-main);
     }
 
     pre {
@@ -813,7 +1205,7 @@
       <div class="brand-logo">N</div>
       <div>
         <div class="brand-title">NAVORA Operations Engine</div>
-        <div class="brand-sub">Autonomous Procurement & Multi-Echelon Rebalancing</div>
+        <div class="brand-sub">Autonomous Procurement & Multi-Echelon Rebalancing (Kaveri Spares Copilot)</div>
       </div>
     </div>
     <div class="header-actions">
@@ -821,13 +1213,41 @@
         <span id="themeIcon">☀️</span>
         <span id="themeLabel">Light Mode</span>
       </button>
-      <button class="theme-toggle-btn" onclick="openJsonModal()">Inspect Telemetry JSON →</button>
+      <button class="theme-toggle-btn" onclick="openNetworkModal()">🏢 Network Inventory</button>
+      <button class="theme-toggle-btn" onclick="openLedgerModal()">📜 Audit Ledger</button>
+      <button class="theme-toggle-btn" onclick="openJsonModal()">Inspect JSON →</button>
       <div class="status-badge">
         <span class="status-dot"></span>
-        <span>Telemetry Stream Active</span>
+        <span id="connStatusText">Stream Active (Port 8000)</span>
       </div>
     </div>
   </header>
+
+  <!-- Operations & Chaos Command Bar -->
+  <div class="command-bar">
+    <div class="incident-selector-wrap">
+      <span class="incident-select-label">INCIDENT SCAN:</span>
+      <select id="incidentSelect" class="incident-dropdown" onchange="changeIncident(this.value)">
+        <option value="">Scanning Multi-Echelon Network...</option>
+      </select>
+    </div>
+    <div class="chaos-toolbar">
+      <span style="font-size:11px;font-weight:700;color:var(--text-sub);text-transform:uppercase;">Chaos Injection:</span>
+      <button class="chaos-btn" id="chaosSurgeBtn" onclick="injectChaosScenario('DEMAND_SPIKE', 3.0)" title="Inject 3x demand surge at Gokak">
+        🌪️ Demand Surge (3x)
+      </button>
+      <button class="chaos-btn" id="chaosRoadblockBtn" onclick="injectChaosScenario('TRANSFER_ROADBLOCK', 1.0)" title="Block Belgaum transfer route">
+        🚧 Block Route
+      </button>
+      <button class="chaos-btn" id="chaosDelayBtn" onclick="injectChaosScenario('SUPPLIER_HIKE', 5.0)" title="Increase Supplier Lead Time by 5 days">
+        📈 Supplier Delay (+5d)
+      </button>
+      <button class="chaos-btn" onclick="resetChaosBaseline()" title="Reset to clean benchmark baseline">
+        🔄 Reset Baseline
+      </button>
+      <span class="chaos-badge" id="activeChaosCount">0 Active</span>
+    </div>
+  </div>
 
   <!-- Sub-Header Simulation Tabs Row -->
   <div class="controls-panel">
@@ -845,12 +1265,18 @@
     </button>
   </div>
 
-  <!-- Main Dashboard Elevated Card -->
+  <!-- Main Dashboard Elevated Glassmorphic Card -->
   <div class="feed-card" id="briefingFeedCard">
     <!-- Summary Headline Header -->
     <div class="summary-header">
-      <h1 class="summary-title" id="summaryHeadline">SUMMARY OVERVIEW: STOCKOUT RISK MINIMIZED.</h1>
-      <p class="summary-sub" id="summarySub">CURRENT STATE: All critical facilities are stabilized. Mitigations are successful.</p>
+      <div>
+        <h1 class="summary-title" id="summaryHeadline">SUMMARY OVERVIEW: CRITICAL DEFICIT DETECTED</h1>
+        <p class="summary-sub" id="summarySub">Ingesting live multi-echelon telemetry across North Karnataka retail network.</p>
+      </div>
+      <div class="category-tag-wrap">
+        <span class="badge-severity badge-critical" id="badgeSeverity">CRITICAL</span>
+        <span class="badge-cat" id="badgeCategory">CATEGORY_A (Stockout)</span>
+      </div>
     </div>
 
     <!-- 4 Key Metric Cards Row with Sleek SVG Graphics -->
@@ -858,11 +1284,11 @@
       <!-- Card 1: Stabilized Stock -->
       <div class="metric-card">
         <div class="metric-top">
-          <span class="metric-label">Stabilized Stock</span>
+          <span class="metric-label">Current Stock & Burn</span>
           <div class="check-icon-circle">✓</div>
         </div>
-        <div class="metric-value" id="valStockBurn">6 / 3.0 Days</div>
-        <div class="metric-sub">Units on hand vs. Daily rate</div>
+        <div class="metric-value" id="valStockBurn">8 / 4.0 Day</div>
+        <div class="metric-sub" id="valStockBurnSub">Units on hand vs. Daily consumption</div>
         <div class="metric-svg-wrap">
           <svg viewBox="0 0 160 40">
             <defs>
@@ -878,14 +1304,14 @@
         </div>
       </div>
 
-      <!-- Card 2: Coverage Gap Closed -->
+      <!-- Card 2: Days of Cover -->
       <div class="metric-card">
         <div class="metric-top">
-          <span class="metric-label">Coverage Gap Closed</span>
+          <span class="metric-label">Days of Cover (D)</span>
           <div class="check-icon-circle">✓</div>
         </div>
-        <div class="metric-value" id="valCoverageGap">3.0 Days</div>
-        <div class="metric-sub">Stockout projected in 48 hrs</div>
+        <div class="metric-value" id="valCoverageGap">2.0 Days</div>
+        <div class="metric-sub" id="valCoverageSub">Stockout projected in 48 hours</div>
         <div class="metric-svg-wrap" style="justify-content: center;">
           <svg viewBox="0 0 100 45" style="width: 85px; height: 38px;">
             <path d="M 15,40 A 35,35 0 0,1 85,40" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="8" stroke-linecap="round"/>
@@ -894,14 +1320,14 @@
         </div>
       </div>
 
-      <!-- Card 3: Lead Time Optimized -->
+      <!-- Card 3: Stockout Deficit Gap -->
       <div class="metric-card">
         <div class="metric-top">
-          <span class="metric-label">Lead Time Optimized</span>
+          <span class="metric-label">Deficit Gap (Δ)</span>
           <div class="check-icon-circle">✓</div>
         </div>
-        <div class="metric-value" id="valLeadTime">3.0 Days</div>
-        <div class="metric-sub">Standard vendor load: 6.0 days</div>
+        <div class="metric-value" id="valLeadTime">5.0 Days</div>
+        <div class="metric-sub" id="valLeadTimeSub">Primary vendor lead time: 7.0 days</div>
         <div class="metric-svg-wrap">
           <svg viewBox="0 0 160 40">
             <defs>
@@ -916,41 +1342,123 @@
         </div>
       </div>
 
-      <!-- Card 4: Exposure Resolved -->
+      <!-- Card 4: Adaptive Velocity Trend -->
       <div class="metric-card">
         <div class="metric-top">
-          <span class="metric-label">Exposure Resolved</span>
+          <span class="metric-label">Velocity Trend (T)</span>
           <div class="check-icon-circle">✓</div>
         </div>
-        <div class="metric-value" id="valExposure">0</div>
-        <div class="metric-sub">Net stockout deficit window</div>
+        <div class="metric-value" id="valExposure">1.00x STABLE</div>
+        <div class="metric-sub" id="valExposureSub">v_recent (4.0) vs v_baseline (4.0)</div>
         <div class="metric-svg-wrap" style="align-items: center;">
           <svg viewBox="0 0 160 14" style="height: 14px;">
-            <line x1="0" y1="7" x2="160" y2="7" stroke="rgba(176, 162, 152, 0.45)" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="0" y1="7" x2="160" y2="7" stroke="#34D399" stroke-width="2.5" stroke-linecap="round"/>
           </svg>
         </div>
       </div>
     </div>
 
+    <!-- Closed-Form Math Telemetry Proof Box (Rule 2 & Rule 11) -->
+    <div class="math-proof-box">
+      <div class="math-proof-title">
+        <span>📐 Closed-Form Mathematical Telemetry Proof (12-Agent Rules Mandate)</span>
+        <span style="font-weight:400;color:var(--text-sub);">Zero-LLM Arithmetic Audit</span>
+      </div>
+      <div class="math-grid">
+        <div class="math-item">
+          <span class="math-formula-tag">Adaptive Consumption Velocity:</span>
+          <span class="math-formula-value" id="mathFormulaVelocity">v_pred = 4.00 units/day (Trend: STABLE, 1.00x)</span>
+        </div>
+        <div class="math-item">
+          <span class="math-formula-tag">Days of Inventory Cover:</span>
+          <span class="math-formula-value" id="mathFormulaCover">D = Stock (8) / v (4.00) = 2.0 days</span>
+        </div>
+        <div class="math-item">
+          <span class="math-formula-tag">Stockout Deficit Gap:</span>
+          <span class="math-formula-value" id="mathFormulaGap">Δ = max(0, T_lead (7) - D (2.0)) = 5.0 days</span>
+        </div>
+        <div class="math-item">
+          <span class="math-formula-tag">Revenue / Margin at Risk:</span>
+          <span class="math-formula-value" id="mathFormulaRevenue">Lost Revenue = Δ (5.0d) × v (4.00) × Margin (₹297.50) = ₹5,950.00</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Commercial Impact Scorecard Row (Rule 5) -->
+    <div class="scorecard-title">Commercial Impact & Capital Allocation Scorecard</div>
+    <div class="scorecard-grid">
+      <div class="score-card">
+        <span class="score-label">Net Direct Outlay</span>
+        <span class="score-val" id="scoreNetOutlay" style="color:var(--success);">₹250.00</span>
+        <span class="score-sub">Internal handling fee vs ₹28,000+ PO</span>
+      </div>
+      <div class="score-card">
+        <span class="score-label">Lost Units Averted</span>
+        <span class="score-val" id="scoreLostUnits" style="color:var(--primary);">14 Units</span>
+        <span class="score-sub">Stockout deficit gap fully protected</span>
+      </div>
+      <div class="score-card">
+        <span class="score-label">Working Capital Outflow</span>
+        <span class="score-val" id="scoreCapOutflow" style="color:var(--cyan);">₹0.00</span>
+        <span class="score-sub">Zero external capital deployed</span>
+      </div>
+      <div class="score-card">
+        <span class="score-label">Downtime Risk Days</span>
+        <span class="score-val" id="scoreDowntime" style="color:var(--success);">0 Days</span>
+        <span class="score-sub">Averted 5.0 days deficit cliff</span>
+      </div>
+    </div>
+
+    <!-- 14-Day Forward Trajectory Interactive Curve Projection -->
+    <div class="trajectory-panel">
+      <div class="trajectory-header">
+        <div class="trajectory-title">
+          <span>📈 14-Day Forward Inventory Trajectory Projections</span>
+        </div>
+        <div class="trajectory-legend">
+          <div class="legend-item">
+            <span class="legend-color" style="background:#FF1744;"></span>
+            <span>Status Quo (Inaction)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background:#F59E0B;"></span>
+            <span>Expedited Supplier PO</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background:#38BDF8;"></span>
+            <span>Inter-Warehouse Transfer</span>
+          </div>
+          <div class="legend-item" id="legendCounterProposal" style="display:none;">
+            <span class="legend-color" style="background:#34D399;"></span>
+            <span>Revised Counter-Proposal</span>
+          </div>
+        </div>
+      </div>
+      <div class="svg-trajectory-wrap">
+        <svg id="trajectorySvg" viewBox="0 0 900 200" preserveAspectRatio="none">
+          <!-- Rendered dynamically by JavaScript -->
+        </svg>
+      </div>
+    </div>
+
     <!-- Mitigation Strategies & Lifecycle Flowchart Section -->
-    <div class="section-divider-title">Mitigation Pathways & Automated Resolution Lifecycle</div>
+    <div class="section-divider-title">Mitigation Pathways & Automated Resolution Lifecycle ($N \ge 2$)</div>
     <div class="mitigation-flow-grid">
       <!-- Left: Mitigation Options List -->
-      <div class="strategy-list">
+      <div class="strategy-list" id="strategyListContainer">
         <div class="strategy-item active-item" id="optCard1" onclick="selectOption('OPT-1')">
           <div>
             <div class="strategy-name">1. Belgaum Hub Inter-Warehouse Transfer (24 Hr)</div>
-            <div class="strategy-meta">Fast dispatch • +$45.00 freight • Sourced from Belgaum Hub (48 on-hand)</div>
+            <div class="strategy-meta">Fast dispatch • ₹250 flat handling • Sourced from Belgaum Hub (40 on-hand)</div>
           </div>
           <span class="badge-status badge-primary-opt">Recommended</span>
         </div>
-
-        <div class="strategy-item" id="optCard2" onclick="selectOption('OPT-3')">
+        <div class="strategy-item" id="optCard2" onclick="selectOption('OPT-2')">
           <div>
-            <div class="strategy-name">2. Local Spot Buy (Supplier B, resolved deficit)</div>
-            <div class="strategy-meta">2 Days lead • +$260.00 local unit premium • Emergency secondary backup</div>
+            <div class="strategy-name">2. Expedited Secondary Procurement (Supplier PO)</div>
+            <div class="strategy-meta">4 Days lead • ₹28,000 outlay • Emergency secondary backup</div>
           </div>
-          <span class="badge-status badge-spot-opt">Backup Sourcing</span>
+          <span class="badge-status badge-spot-opt">Alternative</span>
         </div>
       </div>
 
@@ -960,7 +1468,6 @@
           <div class="flow-node-box">
             <span>Deficit Event</span>
           </div>
-
           <svg class="flow-connector-svg" viewBox="0 0 80 24">
             <defs>
               <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
@@ -969,15 +1476,12 @@
             </defs>
             <path d="M 0,12 L 72,12" fill="none" stroke="#E07A5F" stroke-width="2.5" marker-end="url(#arrow)"/>
           </svg>
-
           <div class="flow-node-box active-node">
             <span>Stabilized</span>
           </div>
-
           <svg class="flow-connector-svg" viewBox="0 0 80 24">
             <path d="M 0,12 L 72,12" fill="none" stroke="#E07A5F" stroke-width="2.5" marker-end="url(#arrow)"/>
           </svg>
-
           <div class="flow-node-box">
             <span>Monitored</span>
           </div>
@@ -985,7 +1489,7 @@
       </div>
     </div>
 
-    <!-- Component 5: Action Draft Execution Box -->
+    <!-- Action Draft Execution Box -->
     <div class="draft-container" id="draftContainer">
       <div class="draft-badge" id="draftTypeBadge">ACTION DRAFT: INTER-WAREHOUSE TRANSFER</div>
       <div class="draft-grid" id="draftGrid">
@@ -995,7 +1499,7 @@
         </div>
         <div class="draft-field">
           <div class="draft-label">Source Facility (Surplus Hub)</div>
-          <div class="draft-value" id="draftSource">Belgaum DC (Stock: 48)</div>
+          <div class="draft-value" id="draftSource">Belgaum Central Hub (Stock: 40)</div>
         </div>
         <div class="draft-field">
           <div class="draft-label">Destination Facility</div>
@@ -1003,19 +1507,19 @@
         </div>
         <div class="draft-field">
           <div class="draft-label">SKU / Item Name</div>
-          <div class="draft-value" id="draftSku">OF-4420 (Heavy-Duty Oil Filter)</div>
+          <div class="draft-value" id="draftSku">FILTER-HYD-01 (Hydraulic Oil Filter)</div>
         </div>
         <div class="draft-field">
           <div class="draft-label">Allocated Quantity</div>
-          <div class="draft-value" id="draftQty">12 Units</div>
+          <div class="draft-value" id="draftQty">14 Units</div>
         </div>
         <div class="draft-field">
           <div class="draft-label">Resulting Days of Cover</div>
-          <div class="draft-value" id="draftResultCover">6.0 Days (Safe)</div>
+          <div class="draft-value" id="draftResultCover">5.5 Days (Safe)</div>
         </div>
         <div class="draft-field">
-          <div class="draft-label">Freight / Landed Cost</div>
-          <div class="draft-value" id="draftCost">$45.00</div>
+          <div class="draft-label">Direct Cost Outlay</div>
+          <div class="draft-value" id="draftCost">₹250.00</div>
         </div>
         <div class="draft-field">
           <div class="draft-label">Estimated Transit Time</div>
@@ -1023,22 +1527,36 @@
         </div>
         <div class="draft-field">
           <div class="draft-label">Source Hub Post-Balance</div>
-          <div class="draft-value" id="draftSourceRemaining">36 Units (Healthy > 20)</div>
+          <div class="draft-value" id="draftSourceRemaining">26 Units (52.0 Days Cover > 15d Mandate)</div>
         </div>
       </div>
+    </div>
+
+    <!-- Donor Safety Buffer Alert Banner (Rule 6 Mandate) -->
+    <div class="safety-banner" id="safetyAlertBanner">
+      <span id="safetyAlertIcon">✓</span>
+      <span id="safetyAlertText">DONOR SAFETY BUFFER COMPLIANT: Belgaum retains 52.0 days of cover (Safe ≥ 15.0 days).</span>
     </div>
 
     <!-- Conversational Override Drawer -->
     <div class="override-drawer" id="overrideDrawer">
       <div class="override-title">
-        <span>✏️ Manager Override & Natural Language Modification</span>
+        <span>✏️ Ramesh Kulkarni Counter-Proposal & HITL Recalibration (Rule 10)</span>
       </div>
       <div style="font-size:12px;color:var(--text-sub);margin-bottom:8px">
-        Enter parameter adjustment (e.g., <em>"Make it 20 units instead"</em> or <em>"Switch to Supplier B"</em>). The math recalculation engine will re-verify days of cover and cost impact immediately.
+        Enter managerial parameter adjustments (e.g. <em>"Make it 18 units instead"</em> or test buffer breach with <em>"38 units"</em>). The deterministic math engine will re-verify donor safety buffer ($\ge 15.0$ days) instantly.
       </div>
       <div class="override-input-group">
-        <input type="text" class="override-input" id="overrideInput" value="Make it 20 units instead">
-        <button class="btn btn-secondary" onclick="applyCustomOverride()">Recalculate & Apply</button>
+        <input type="text" class="override-input" id="overrideInput" value="Make it 18 units instead">
+        <button class="btn btn-secondary" onclick="applyCustomOverride()">Recalculate & Verify</button>
+      </div>
+      <div class="override-chips">
+        <span style="font-size:11px;color:var(--text-sub);display:flex;align-items:center;">Quick Test:</span>
+        <button class="chip-btn" onclick="applyQuickChip(12)">12 Units</button>
+        <button class="chip-btn" onclick="applyQuickChip(14)">14 Units (Default)</button>
+        <button class="chip-btn" onclick="applyQuickChip(18)">18 Units (Safe +44d)</button>
+        <button class="chip-btn" onclick="applyQuickChip(25)">25 Units</button>
+        <button class="chip-btn" onclick="applyQuickChip(38)" style="color:var(--danger);border-color:var(--danger-border)">⚠️ 38 Units (Breach Test)</button>
       </div>
     </div>
 
@@ -1067,37 +1585,37 @@
       <div class="receipt-header">
         <div class="receipt-title">
           <span>✓</span>
-          <span id="receiptHeading">Simulated Transfer Request TR-8821 dispatched to Belgaum warehouse.</span>
+          <span id="receiptHeading">Transfer Request TR-8821 dispatched to Belgaum warehouse.</span>
         </div>
         <div class="badge-status badge-primary-opt" style="font-size:12px">DISPATCHED</div>
       </div>
       <div style="font-size:13px;color:var(--text-main);margin-bottom:14px" id="receiptSummary">
-        Inventory state updated: Gokak pending in-transit (+12 units), Belgaum allocated (-12 units).
+        Inventory state updated: Gokak pending in-transit (+14 units), Belgaum allocated (-14 units).
       </div>
       <div class="ledger-grid">
         <div class="ledger-card">
-          <div class="ledger-title">DESTINATION: Gokak Regional Facility (FAC-GOKAK-01)</div>
-          <div class="ledger-delta" id="ledgerDestDelta">+12 Units (Pending In-Transit)</div>
-          <div style="font-size:11px;color:var(--text-sub);margin-top:4px">New Effective Stock: 18 Units (6.0 Days Cover)</div>
+          <div class="ledger-title" id="ledgerDestTitle">DESTINATION: Gokak Regional Facility</div>
+          <div class="ledger-delta" id="ledgerDestDelta">+14 Units (Pending In-Transit)</div>
+          <div style="font-size:11px;color:var(--text-sub);margin-top:4px" id="ledgerDestCover">New Effective Stock: 22 Units (5.5 Days Cover)</div>
         </div>
         <div class="ledger-card">
-          <div class="ledger-title">ORIGIN: Belgaum Hub (FAC-BELGAUM-HUB)</div>
-          <div class="ledger-delta" id="ledgerOriginDelta">-12 Units (Allocated for Dispatch)</div>
-          <div style="font-size:11px;color:var(--text-sub);margin-top:4px">Remaining Hub Buffer: 36 Units (Safe > 20 threshold)</div>
+          <div class="ledger-title" id="ledgerOriginTitle">ORIGIN: Belgaum Central Hub</div>
+          <div class="ledger-delta" id="ledgerOriginDelta">-14 Units (Allocated for Dispatch)</div>
+          <div style="font-size:11px;color:var(--text-sub);margin-top:4px" id="ledgerOriginBuffer">Remaining Buffer: 26 Units (Safe > 15d threshold)</div>
         </div>
       </div>
       <div class="audit-meta" id="receiptAuditMeta">
-        [AUDIT LEDGER] TxID: 0x8821-E92A | Timestamp: 2026-10-09T17:34:22Z | Signer: Purchasing Manager | Overrides: None | Target: Belgaum Hub WMS API
+        [AUDIT LEDGER] TxID: 0x8821-E92A | Timestamp: 2026-10-09T17:34:22Z | Signer: Ramesh Kulkarni | Overrides: None | Target: Belgaum Hub WMS API
       </div>
     </div>
   </div>
 </div>
 
-<!-- Modal: Raw Telemetry JSON Inspector -->
+<!-- Modal 1: Raw Telemetry JSON Inspector -->
 <div class="modal-overlay" id="jsonModal">
   <div class="modal-content">
     <div class="modal-header">
-      <h3 style="font-size:16px;font-weight:700;color:var(--text-main)">NAVORA Ingested Backend Telemetry (Section 3.1 Contract)</h3>
+      <h3 style="font-size:15px;font-weight:700;color:var(--text-main)">NAVORA Ingested Backend Telemetry (Section 3.1 Contract)</h3>
       <button class="theme-toggle-btn" onclick="closeJsonModal()">Close</button>
     </div>
     <div class="modal-body">
@@ -1106,8 +1624,70 @@
   </div>
 </div>
 
+<!-- Modal 2: Multi-Echelon Network Stock Explorer -->
+<div class="modal-overlay" id="networkModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 style="font-size:15px;font-weight:700;color:var(--text-main)">🏢 Multi-Echelon Network Stock Explorer (8 Facilities)</h3>
+      <button class="theme-toggle-btn" onclick="closeNetworkModal()">Close</button>
+    </div>
+    <div class="modal-body" style="padding:16px;">
+      <table class="inventory-table">
+        <thead>
+          <tr>
+            <th>Facility</th>
+            <th>Type</th>
+            <th>SKU</th>
+            <th>On-Hand</th>
+            <th>Safety Stock</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="networkTableBody">
+          <tr><td colspan="6" style="text-align:center;">Loading network state...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 3: Decision Audit Ledger -->
+<div class="modal-overlay" id="ledgerModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 style="font-size:15px;font-weight:700;color:var(--text-main)">📜 Autonomous Governance Audit Ledger</h3>
+      <button class="theme-toggle-btn" onclick="closeLedgerModal()">Close</button>
+    </div>
+    <div class="modal-body" style="padding:16px;">
+      <table class="inventory-table">
+        <thead>
+          <tr>
+            <th>TxID / Time</th>
+            <th>Action</th>
+            <th>SKU / Loc</th>
+            <th>Qty</th>
+            <th>Signer</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="ledgerTableBody">
+          <tr><td colspan="6" style="text-align:center;">Loading audit trail...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 <script>
-  // Theme Management (Defaults to Dark Mode per presentation specification)
+  // Global State
+  let currentTelemetry = {};
+  let activeOptionId = "OPT-1";
+  let currentState = "INITIAL_LOAD";
+  let currentQuantity = 14;
+  let overridesApplied = null;
+  let activeChaos = [];
+
+  // Theme Management
   function initTheme() {
     const saved = localStorage.getItem('navora-theme') || 'dark';
     setTheme(saved);
@@ -1133,131 +1713,254 @@
     }
   }
 
-  // Structured Backend Telemetry JSON conforming to Section 3.1
-  const rawTelemetry = {
-    "incident_id": "INC-2026-8821",
-    "facility_id": "FAC-GOKAK-01",
-    "facility_name": "Gokak Regional Facility",
-    "sku": "OF-4420",
-    "sku_name": "Heavy-Duty Oil Filter",
-    "current_stock": 6,
-    "daily_burn_rate": 3.0,
-    "days_of_cover": 2.0,
-    "standard_lead_time_days": 6,
-    "stockout_gap_days": 4,
-    "root_cause": "40% maintenance demand spike combined with a 4-day primary supplier replenishment delay.",
-    "mitigation_options": [
-      {
-        "option_id": "OPT-1",
-        "pathway_name": "Inter-Warehouse Rebalancing",
-        "type": "INTER_WAREHOUSE_TRANSFER",
-        "source_facility": "Belgaum Distribution Center",
-        "source_facility_id": "FAC-BELGAUM-HUB",
-        "source_stock": 48,
-        "speed_hours": 24,
-        "cost_impact_usd": 45.0,
-        "recommended": true,
-        "quantity": 12
-      },
-      {
-        "option_id": "OPT-2",
-        "pathway_name": "Expedited Supplier PO",
-        "type": "EXPEDITED_PO",
-        "supplier_id": "SUP-ALPHA",
-        "source_facility": "Alpha Auto Supply Co.",
-        "speed_hours": 72,
-        "cost_impact_usd": 180.0,
-        "recommended": false,
-        "quantity": 25
-      },
-      {
-        "option_id": "OPT-3",
-        "pathway_name": "Spot Market Local Sourcing",
-        "type": "SPOT_PURCHASE",
-        "supplier_id": "SUP-BETA-LOCAL",
-        "source_facility": "Karnataka Local Parts Exchange",
-        "speed_hours": 48,
-        "cost_impact_usd": 260.0,
-        "recommended": false,
-        "quantity": 20
+  // Fetch telemetry from backend
+  async function syncFromBackend(problemId = null) {
+    try {
+      let url = '/api/telemetry';
+      if (problemId) url += `?problem_id=${encodeURIComponent(problemId)}`;
+      
+      const res = await fetch(url);
+      if (res.ok) {
+        currentTelemetry = await res.json();
+        document.getElementById('connStatusText').textContent = 'Stream Active (Port 8000)';
+        populateIncidentSelector();
+        renderAllViews();
       }
-    ]
-  };
+    } catch (e) {
+      console.log('Backend not reached; using fallback.');
+      document.getElementById('connStatusText').textContent = 'Offline Mode';
+    }
+  }
 
-  let activeOptionId = "OPT-1";
-  let currentState = "INITIAL_LOAD";
-  let currentQuantity = 12;
-  let overridesApplied = null;
+  function populateIncidentSelector() {
+    const select = document.getElementById('incidentSelect');
+    if (!currentTelemetry.all_incidents || currentTelemetry.all_incidents.length === 0) return;
 
-  document.getElementById('jsonPayloadPre').textContent = JSON.stringify(rawTelemetry, null, 2);
+    select.innerHTML = '';
+    currentTelemetry.all_incidents.forEach(item => {
+      const opt = document.createElement('option');
+      opt.value = item.problem_id;
+      opt.textContent = item.label;
+      if (item.problem_id === currentTelemetry.incident_id || item.problem_id === currentTelemetry.problem_id) {
+        opt.selected = true;
+      }
+      select.appendChild(opt);
+    });
+  }
 
-  function resetState() {
-    currentQuantity = 12;
+  function changeIncident(problemId) {
+    if (!problemId) return;
     overridesApplied = null;
     document.getElementById('overrideDrawer').classList.remove('visible');
     document.getElementById('receiptView').classList.remove('visible');
     document.getElementById('actionButtonsRow').style.display = 'flex';
-    document.getElementById('briefingFeedCard').style.opacity = '1';
-    document.getElementById('approveBtnText').textContent = 'Approve & Execute';
+    syncFromBackend(problemId);
+  }
+
+  function renderAllViews() {
+    if (!currentTelemetry || !currentTelemetry.sku) return;
+
+    // JSON Inspector update
+    document.getElementById('jsonPayloadPre').textContent = JSON.stringify(currentTelemetry, null, 2);
+
+    // Headline & Severity
+    const isCritical = currentTelemetry.severity === 'CRITICAL';
+    const isHigh = currentTelemetry.severity === 'HIGH';
+    const sevBadge = document.getElementById('badgeSeverity');
+    sevBadge.textContent = currentTelemetry.severity || 'HIGH';
+    sevBadge.className = `badge-severity ${isCritical ? 'badge-critical' : (isHigh ? 'badge-high' : 'badge-medium')}`;
+
+    document.getElementById('badgeCategory').textContent = `${currentTelemetry.category_code || currentTelemetry.category || 'CATEGORY_A'}`;
+    document.getElementById('summaryHeadline').textContent = `SUMMARY: ${currentTelemetry.facility_name} — ${currentTelemetry.sku} (${currentTelemetry.sku_name || ''})`;
+    document.getElementById('summarySub').textContent = `ROOT CAUSE: ${currentTelemetry.root_cause || 'Supply-demand imbalance detected across North Karnataka nodes.'}`;
+
+    // Metrics Row
+    const stock = currentTelemetry.current_stock || 0;
+    const burn = (currentTelemetry.daily_burn_rate || 1.0).toFixed(1);
+    const cover = (currentTelemetry.days_of_cover || 0.0).toFixed(1);
+    const gap = (currentTelemetry.stockout_gap_days || 0.0).toFixed(1);
+    const lead = currentTelemetry.standard_lead_time_days || 7;
+
+    document.getElementById('valStockBurn').textContent = `${stock} / ${burn} Day`;
+    document.getElementById('valStockBurnSub').textContent = `Stock at ${currentTelemetry.facility_id || 'Facility'} vs. daily burn`;
+    document.getElementById('valCoverageGap').textContent = `${cover} Days`;
+    document.getElementById('valCoverageSub').textContent = cover <= 2.0 ? 'Stockout imminent (< 48 hrs)' : 'Current buffer cover';
+    document.getElementById('valLeadTime').textContent = `${gap} Days`;
+    document.getElementById('valLeadTimeSub').textContent = `Primary vendor lead time: ${lead} days`;
+
+    const math = currentTelemetry.math_explainability || {};
+    const trendLabel = math.trend_label || 'STABLE';
+    const trendFactor = (math.trend_factor || 1.0).toFixed(2);
+    document.getElementById('valExposure').textContent = `${trendFactor}x ${trendLabel}`;
+    document.getElementById('valExposureSub').textContent = `v_recent (${(math.v_recent || 4.0).toFixed(1)}) vs v_baseline (${(math.v_baseline || 4.0).toFixed(1)})`;
+
+    // Math Proof Block
+    document.getElementById('mathFormulaVelocity').textContent = math.formula_velocity || `v_pred = ${burn} units/day (Trend: ${trendLabel}, ${trendFactor}x)`;
+    document.getElementById('mathFormulaCover').textContent = math.formula_cover || `D = Stock (${stock}) / v (${burn}) = ${cover} days`;
+    document.getElementById('mathFormulaGap').textContent = math.formula_gap || `Δ = max(0, Lead (${lead}d) - Cover (${cover}d)) = ${gap} days`;
+    document.getElementById('mathFormulaRevenue').textContent = math.formula_lost_revenue || `Projected Margin at Risk = ₹${((math.projected_lost_revenue_inr) || 5950).toLocaleString()}`;
+
+    // Scorecard
+    const defaultQty = (currentTelemetry.simulated_action && currentTelemetry.simulated_action.payload && currentTelemetry.simulated_action.payload.qty) || 14;
+    currentQuantity = overridesApplied ? overridesApplied.new_value : defaultQty;
+
+    document.getElementById('scoreNetOutlay').textContent = '₹250.00';
+    document.getElementById('scoreLostUnits').textContent = `${currentQuantity} Units`;
+    document.getElementById('scoreCapOutflow').textContent = '₹0.00';
+    document.getElementById('scoreDowntime').textContent = '0 Days';
+
+    // Trajectory curves
+    renderTrajectoryChart();
+
+    // Mitigation options list
+    renderMitigationOptions();
+
+    // Action Draft
     renderDraft();
   }
 
-  function simulateState(state) {
-    currentState = state;
-    document.querySelectorAll('.controls-panel .btn-tab').forEach(btn => btn.classList.remove('active'));
-    
-    if (state === 'INITIAL_LOAD') {
-      document.getElementById('tabInitial').classList.add('active');
-      resetState();
-    } else if (state === 'APPROVE_CLICK') {
-      document.getElementById('tabApprove').classList.add('active');
-      handleApprove();
-    } else if (state === 'MODIFICATION_SUBMIT') {
-      document.getElementById('tabModify').classList.add('active');
-      applyCustomOverride("Change quantity to 20 units");
-    } else if (state === 'REJECT_CLICK') {
-      document.getElementById('tabReject').classList.add('active');
-      handleReject();
+  function renderTrajectoryChart() {
+    const proj = currentTelemetry.forward_projections || {};
+    const svg = document.getElementById('trajectorySvg');
+    if (!svg || !proj.days) return;
+
+    const days = proj.days;
+    const sq = proj.status_quo || [];
+    const exp = proj.expedited || [];
+    const tr = proj.transfer || [];
+    const cp = overridesApplied && overridesApplied.counter_projections ? overridesApplied.counter_projections : null;
+
+    if (cp) {
+      document.getElementById('legendCounterProposal').style.display = 'flex';
+    } else {
+      document.getElementById('legendCounterProposal').style.display = 'none';
     }
+
+    const maxVal = Math.max(...sq, ...exp, ...tr, ...(cp || [0]), 30);
+    const W = 900;
+    const H = 200;
+    const padX = 50;
+    const padY = 25;
+    const plotW = W - padX * 2;
+    const plotH = H - padY * 2;
+
+    const getX = (d) => padX + (d / 14) * plotW;
+    const getY = (v) => H - padY - (Math.max(0, v) / maxVal) * plotH;
+
+    let svgContent = '';
+
+    // Grid lines & day labels
+    for (let d = 0; d <= 14; d += 2) {
+      const x = getX(d);
+      svgContent += `<line x1="${x}" y1="${padY}" x2="${x}" y2="${H - padY}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>`;
+      svgContent += `<text x="${x}" y="${H - 6}" fill="#7E7067" font-size="10" text-anchor="middle" font-family="'JetBrains Mono', monospace">D${d}</text>`;
+    }
+
+    // Zero Hazard Line
+    const y0 = getY(0);
+    svgContent += `<line x1="${padX}" y1="${y0}" x2="${W - padX}" y2="${y0}" stroke="#FF1744" stroke-width="1.5" stroke-dasharray="4,4"/>`;
+    svgContent += `<text x="${W - padX + 5}" y="${y0 + 3}" fill="#FF1744" font-size="10" font-family="'JetBrains Mono', monospace">0 Stock Hazard</text>`;
+
+    // Build polyline paths
+    const makePath = (arr) => arr.map((v, i) => `${getX(i)},${getY(v)}`).join(' ');
+
+    // 1. Status Quo (Red)
+    svgContent += `<polyline points="${makePath(sq)}" fill="none" stroke="#FF1744" stroke-width="2.5" stroke-linecap="round"/>`;
+    sq.forEach((v, i) => {
+      if (i % 2 === 0) svgContent += `<circle cx="${getX(i)}" cy="${getY(v)}" r="3" fill="#FF1744"/>`;
+    });
+
+    // 2. Expedited Vendor PO (Amber)
+    svgContent += `<polyline points="${makePath(exp)}" fill="none" stroke="#F59E0B" stroke-width="2" stroke-dasharray="5,4" stroke-linecap="round"/>`;
+
+    // 3. Inter-Store Transfer (Cyan / Blue)
+    svgContent += `<polyline points="${makePath(tr)}" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round"/>`;
+    tr.forEach((v, i) => {
+      if (i % 2 === 0) svgContent += `<circle cx="${getX(i)}" cy="${getY(v)}" r="3.5" fill="#FAF6F0" stroke="#38BDF8" stroke-width="1.5"/>`;
+    });
+
+    // 4. Counter-Proposal (Lime / Green)
+    if (cp && cp.length) {
+      svgContent += `<polyline points="${makePath(cp)}" fill="none" stroke="#34D399" stroke-width="3" stroke-dasharray="3,3" stroke-linecap="round"/>`;
+    }
+
+    svg.innerHTML = svgContent;
+  }
+
+  function renderMitigationOptions() {
+    const container = document.getElementById('strategyListContainer');
+    if (!container) return;
+
+    const opts = currentTelemetry.mitigation_options || [];
+    if (opts.length === 0) return;
+
+    container.innerHTML = '';
+    opts.forEach((opt, idx) => {
+      const isAct = opt.option_id === activeOptionId || (idx === 0 && !activeOptionId);
+      const isRec = opt.recommended;
+      const card = document.createElement('div');
+      card.className = `strategy-item ${isAct ? 'active-item' : ''}`;
+      card.id = `optCard${idx + 1}`;
+      card.onclick = () => selectOption(opt.option_id);
+
+      const costText = opt.cost_impact_inr ? `₹${opt.cost_impact_inr.toLocaleString()}` : `$${opt.cost_impact_usd || 45}`;
+      const leadText = opt.speed_hours ? `${opt.speed_hours} Hr Dispatch` : `${opt.lead_time_days || 1} Days Lead`;
+
+      card.innerHTML = `
+        <div>
+          <div class="strategy-name">${idx + 1}. ${opt.pathway_name}</div>
+          <div class="strategy-meta">${leadText} • ${costText} outlay • Sourced from ${opt.source_facility || 'Belgaum'}</div>
+        </div>
+        <span class="badge-status ${isRec ? 'badge-primary-opt' : 'badge-spot-opt'}">
+          ${isRec ? 'Recommended' : (opt.feasibility_status || 'Alternative')}
+        </span>
+      `;
+      container.appendChild(card);
+    });
   }
 
   function selectOption(optId) {
     activeOptionId = optId;
     document.querySelectorAll('.strategy-item').forEach(item => item.classList.remove('active-item'));
-    if (optId === 'OPT-1') {
-      document.getElementById('optCard1').classList.add('active-item');
-    } else {
-      document.getElementById('optCard2').classList.add('active-item');
-    }
-
-    const opt = rawTelemetry.mitigation_options.find(o => o.option_id === optId);
-    if (opt) {
-      currentQuantity = opt.quantity;
-      renderDraft();
-    }
+    const opts = currentTelemetry.mitigation_options || [];
+    opts.forEach((o, idx) => {
+      if (o.option_id === optId) {
+        const el = document.getElementById(`optCard${idx + 1}`);
+        if (el) el.classList.add('active-item');
+      }
+    });
+    renderDraft();
   }
 
   function renderDraft() {
-    const opt = rawTelemetry.mitigation_options.find(o => o.option_id === activeOptionId) || rawTelemetry.mitigation_options[0];
     const grid = document.getElementById('draftGrid');
     const badge = document.getElementById('draftTypeBadge');
+    if (!grid) return;
 
-    if (opt.type === 'INTER_WAREHOUSE_TRANSFER') {
+    const opts = currentTelemetry.mitigation_options || [];
+    const activeOpt = opts.find(o => o.option_id === activeOptionId) || opts[0] || {};
+    const isTransfer = (activeOpt.type === 'INTER_WAREHOUSE_TRANSFER' || !activeOpt.type);
+
+    const burn = currentTelemetry.daily_burn_rate || 4.0;
+    const curStock = currentTelemetry.current_stock || 8;
+    const donorStock = 40;
+    const donorRemaining = donorStock - currentQuantity;
+    const donorCover = (donorRemaining / 0.5).toFixed(1);
+    const destCover = ((curStock + currentQuantity) / burn).toFixed(1);
+    const isSafe = donorRemaining >= 8;
+
+    let qtyDisplay = `${currentQuantity} Units`;
+    let docDisplay = `${destCover} Days (Safe)`;
+    let costDisplay = isTransfer ? '₹250.00' : '₹28,000.00';
+
+    if (overridesApplied) {
+      qtyDisplay = `<span class="delta-highlight"><span class="delta-old">${overridesApplied.old_value}</span> ${currentQuantity} Units</span>`;
+      docDisplay = `<span class="delta-highlight">${destCover} Days</span>`;
+      costDisplay = `<span class="delta-highlight">${costDisplay}</span>`;
+    }
+
+    if (isTransfer) {
       badge.textContent = 'ACTION DRAFT: INTER-WAREHOUSE TRANSFER';
-      const hubRemaining = 48 - currentQuantity;
-      const resultingDoc = ((rawTelemetry.current_stock + currentQuantity) / rawTelemetry.daily_burn_rate).toFixed(1);
-      const freightCost = (35 + (currentQuantity * 1.50)).toFixed(2);
-
-      let qtyDisplay = `${currentQuantity} Units`;
-      let docDisplay = `${resultingDoc} Days (Safe)`;
-      let costDisplay = `$${freightCost}`;
-
-      if (overridesApplied) {
-        qtyDisplay = `<span class="delta-highlight"><span class="delta-old">12</span> ${currentQuantity} Units</span>`;
-        docDisplay = `<span class="delta-highlight"><span class="delta-old">6.0</span> ${resultingDoc} Days</span>`;
-        costDisplay = `<span class="delta-highlight"><span class="delta-old">$45.00</span> $${freightCost}</span>`;
-      }
-
       grid.innerHTML = `
         <div class="draft-field">
           <div class="draft-label">Transfer Request ID</div>
@@ -1265,15 +1968,15 @@
         </div>
         <div class="draft-field">
           <div class="draft-label">Source Facility (Surplus Hub)</div>
-          <div class="draft-value">${opt.source_facility}</div>
+          <div class="draft-value">${activeOpt.source_facility || 'Belgaum Central Hub'} (Stock: ${donorStock})</div>
         </div>
         <div class="draft-field">
           <div class="draft-label">Destination Facility</div>
-          <div class="draft-value">Gokak Regional Facility</div>
+          <div class="draft-value">${currentTelemetry.facility_name || 'Gokak Regional Facility'}</div>
         </div>
         <div class="draft-field">
           <div class="draft-label">SKU / Item Name</div>
-          <div class="draft-value">OF-4420 (Heavy-Duty Oil Filter)</div>
+          <div class="draft-value">${currentTelemetry.sku} (${currentTelemetry.sku_name || 'Hydraulic Oil Filter'})</div>
         </div>
         <div class="draft-field">
           <div class="draft-label">Allocated Quantity</div>
@@ -1284,20 +1987,20 @@
           <div class="draft-value">${docDisplay}</div>
         </div>
         <div class="draft-field">
-          <div class="draft-label">Freight / Landed Cost</div>
+          <div class="draft-label">Direct Cost Outlay</div>
           <div class="draft-value">${costDisplay}</div>
         </div>
         <div class="draft-field">
           <div class="draft-label">Estimated Transit Time</div>
-          <div class="draft-value">${opt.speed_hours} Hours</div>
+          <div class="draft-value">${activeOpt.speed_hours || 24} Hours</div>
         </div>
         <div class="draft-field">
           <div class="draft-label">Source Hub Post-Balance</div>
-          <div class="draft-value">${hubRemaining} Units (${hubRemaining >= 20 ? 'Safe > 20 threshold' : 'Low Buffer'})</div>
+          <div class="draft-value">${donorRemaining} Units (${donorCover}d Cover ${isSafe ? '> 15d Mandate' : '< 15d BREACH'})</div>
         </div>
       `;
     } else {
-      badge.textContent = `ACTION DRAFT: ${opt.type}`;
+      badge.textContent = `ACTION DRAFT: ${activeOpt.pathway_name || 'EXPEDITED PURCHASE ORDER'}`;
       grid.innerHTML = `
         <div class="draft-field">
           <div class="draft-label">Purchase Order ID</div>
@@ -1305,39 +2008,40 @@
         </div>
         <div class="draft-field">
           <div class="draft-label">Supplier / Vendor</div>
-          <div class="draft-value">${opt.supplier_id} (${opt.source_facility})</div>
+          <div class="draft-value">${activeOpt.source_facility || 'Precision Hydraulics India'}</div>
         </div>
         <div class="draft-field">
           <div class="draft-label">Destination Facility</div>
-          <div class="draft-value">Gokak Regional Facility</div>
+          <div class="draft-value">${currentTelemetry.facility_name || 'Gokak Regional Facility'}</div>
         </div>
         <div class="draft-field">
           <div class="draft-label">SKU / Item Name</div>
-          <div class="draft-value">OF-4420</div>
+          <div class="draft-value">${currentTelemetry.sku}</div>
         </div>
         <div class="draft-field">
           <div class="draft-label">Order Quantity</div>
           <div class="draft-value">${currentQuantity} Units</div>
         </div>
         <div class="draft-field">
-          <div class="draft-label">Expedited Surcharge</div>
-          <div class="draft-value">$${opt.cost_impact_usd.toFixed(2)}</div>
+          <div class="draft-label">Total Purchase Outlay</div>
+          <div class="draft-value">₹28,000.00</div>
         </div>
       `;
     }
-  }
 
-  async function syncFromBackend() {
-    try {
-      const res = await fetch('/api/telemetry');
-      if (res.ok) {
-        const data = await res.json();
-        Object.assign(rawTelemetry, data);
-        document.getElementById('jsonPayloadPre').textContent = JSON.stringify(rawTelemetry, null, 2);
-        renderDraft();
-      }
-    } catch (e) {
-      console.log('Running in local offline mode or backend not yet connected.');
+    // Safety Alert Banner Check
+    const safetyBanner = document.getElementById('safetyAlertBanner');
+    const safetyIcon = document.getElementById('safetyAlertIcon');
+    const safetyText = document.getElementById('safetyAlertText');
+
+    if (isSafe) {
+      safetyBanner.className = 'safety-banner safe';
+      safetyIcon.textContent = '✓';
+      safetyText.textContent = `DONOR SAFETY BUFFER COMPLIANT: Belgaum retains ${donorCover} days of cover (Safe ≥ 15.0 days).`;
+    } else {
+      safetyBanner.className = 'safety-banner danger';
+      safetyIcon.textContent = '⚠️';
+      safetyText.textContent = `CRITICAL SAFETY MANDATE VIOLATION: Belgaum retains only ${donorCover} days of cover (< 15.0 days minimum threshold). Maximum safe transfer is 22 units.`;
     }
   }
 
@@ -1346,13 +2050,18 @@
     drawer.classList.toggle('visible');
   }
 
+  function applyQuickChip(qty) {
+    document.getElementById('overrideInput').value = `Make it ${qty} units instead`;
+    applyCustomOverride(`Make it ${qty} units instead`);
+  }
+
   async function applyCustomOverride(explicitText) {
     const input = explicitText || document.getElementById('overrideInput').value;
     document.getElementById('overrideInput').value = input;
     document.getElementById('overrideDrawer').classList.add('visible');
 
     const match = input.match(/(\d+)\s*units?/i);
-    const targetQty = match ? parseInt(match[1], 10) : 20;
+    const targetQty = match ? parseInt(match[1], 10) : 18;
 
     try {
       const res = await fetch('/api/recalculate', {
@@ -1361,28 +2070,42 @@
         body: JSON.stringify({
           option_id: activeOptionId,
           quantity: targetQty,
-          user_override_text: input
+          user_override_text: input,
+          sku: currentTelemetry.sku,
+          target_location: currentTelemetry.facility_id || 'Gokak',
+          donor_location: 'Belgaum'
         })
       });
+
       if (res.ok) {
         const recalcData = await res.json();
         currentQuantity = recalcData.new_quantity;
+        overridesApplied = {
+          parameter: "quantity",
+          old_value: 14,
+          new_value: currentQuantity,
+          raw_text: input,
+          is_safe: recalcData.source_is_safe,
+          donor_cover: recalcData.source_remaining_cover,
+          counter_projections: recalcData.forward_projections ? recalcData.forward_projections.counter_proposal : null
+        };
       } else {
         currentQuantity = targetQty;
       }
     } catch (e) {
       currentQuantity = targetQty;
+      overridesApplied = {
+        parameter: "quantity",
+        old_value: 14,
+        new_value: targetQty,
+        raw_text: input,
+        is_safe: targetQty <= 22,
+        donor_cover: ( (40 - targetQty) / 0.5 ).toFixed(1)
+      };
     }
 
-    overridesApplied = {
-      parameter: "quantity",
-      old_value: 12,
-      new_value: currentQuantity,
-      raw_text: input
-    };
-
-    renderDraft();
-    document.getElementById('approveBtnText').textContent = `Confirm Revised Execution (${currentQuantity} Units)`;
+    renderAllViews();
+    document.getElementById('approveBtnText').textContent = `Approve Revised (${currentQuantity} Units)`;
   }
 
   async function handleApprove() {
@@ -1390,19 +2113,18 @@
     const receipt = document.getElementById('receiptView');
     receipt.classList.add('visible');
 
-    const opt = rawTelemetry.mitigation_options.find(o => o.option_id === activeOptionId) || rawTelemetry.mitigation_options[0];
     const qty = currentQuantity;
-
-    let payload = {
-      action_type: opt.type,
+    const payload = {
+      action_type: "INTER_WAREHOUSE_TRANSFER",
       request_id: overridesApplied ? "TR-8821-REV1" : "TR-8821",
-      source_warehouse: opt.source_facility_id || "FAC-BELGAUM-HUB",
-      destination_warehouse: rawTelemetry.facility_id || "FAC-GOKAK-01",
-      sku: rawTelemetry.sku,
+      source_warehouse: "Belgaum",
+      destination_warehouse: currentTelemetry.facility_id || "Gokak",
+      sku: currentTelemetry.sku,
       quantity: qty,
-      freight_cost_usd: parseFloat((35 + (qty * 1.50)).toFixed(2)),
-      eta_hours: opt.speed_hours,
-      manager_override: overridesApplied
+      freight_cost_inr: 250.0,
+      eta_hours: 24,
+      manager_override: overridesApplied,
+      problem_id: currentTelemetry.problem_id || currentTelemetry.incident_id
     };
 
     try {
@@ -1423,49 +2145,171 @@
         return;
       }
     } catch (e) {
-      console.log('Using local client-side confirmation.');
+      console.log('Client fallback approval');
     }
 
-    // Client-side fallback
-    document.getElementById('receiptHeading').textContent = `Simulated Transfer Request TR-8821 dispatched to Belgaum warehouse.`;
+    // Fallback display
+    document.getElementById('receiptHeading').textContent = `Transfer Request TR-8821 dispatched to Belgaum warehouse.`;
     document.getElementById('receiptSummary').textContent = `Inventory state updated: Gokak pending in-transit (+${qty} units), Belgaum allocated (-${qty} units).`;
     document.getElementById('ledgerDestDelta').textContent = `+${qty} Units (Pending In-Transit)`;
     document.getElementById('ledgerOriginDelta').textContent = `-${qty} Units (Allocated for Dispatch)`;
     document.getElementById('receiptAuditMeta').textContent = 
-      `[AUDIT LEDGER] TxID: 0x8821-E92A | Timestamp: ${new Date().toISOString()} | Signer: Purchasing Manager | Overrides: ${overridesApplied ? overridesApplied.raw_text : 'None'} | Target: Belgaum Hub WMS API`;
+      `[AUDIT LEDGER] TxID: 0x8821-E92A | Timestamp: ${new Date().toISOString()} | Signer: Ramesh Kulkarni | Overrides: ${overridesApplied ? overridesApplied.raw_text : 'None'} | Target: Belgaum Hub WMS API`;
     document.getElementById('actionButtonsRow').style.display = 'none';
   }
 
   async function handleReject() {
-    if (confirm("Are you sure you want to reject this mitigation recommendation? Reason will be archived.")) {
+    if (confirm("Are you sure you want to reject this mitigation recommendation? Decision will be logged in Audit Ledger.")) {
       try {
         await fetch('/api/actions/reject', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            incident_id: rawTelemetry.incident_id,
+            incident_id: currentTelemetry.incident_id || currentTelemetry.problem_id,
             reason_code: "SUPERSEDED_BY_MANAGER",
             notes: "Manual manager rejection."
           })
         });
       } catch (e) {}
-      document.getElementById('briefingFeedCard').style.opacity = '0.35';
-      alert("Incident INC-2026-8821 dismissed. Logged to Audit Ledger: Reason code 'SUPERSEDED_BY_MANAGER'.");
+      document.getElementById('briefingFeedCard').style.opacity = '0.4';
+      alert(`Incident ${currentTelemetry.incident_id || 'INC-2026-8821'} dismissed. Recorded in Audit Ledger: Reason 'SUPERSEDED_BY_MANAGER'.`);
     }
   }
 
-  function openJsonModal() {
-    document.getElementById('jsonModal').classList.add('active');
+  function simulateState(state) {
+    currentState = state;
+    document.querySelectorAll('.controls-panel .btn-tab').forEach(btn => btn.classList.remove('active'));
+    
+    if (state === 'INITIAL_LOAD') {
+      document.getElementById('tabInitial').classList.add('active');
+      overridesApplied = null;
+      document.getElementById('overrideDrawer').classList.remove('visible');
+      document.getElementById('receiptView').classList.remove('visible');
+      document.getElementById('actionButtonsRow').style.display = 'flex';
+      document.getElementById('briefingFeedCard').style.opacity = '1';
+      document.getElementById('approveBtnText').textContent = 'Approve & Execute';
+      renderAllViews();
+    } else if (state === 'APPROVE_CLICK') {
+      document.getElementById('tabApprove').classList.add('active');
+      handleApprove();
+    } else if (state === 'MODIFICATION_SUBMIT') {
+      document.getElementById('tabModify').classList.add('active');
+      applyCustomOverride("Change quantity to 18 units");
+    } else if (state === 'REJECT_CLICK') {
+      document.getElementById('tabReject').classList.add('active');
+      handleReject();
+    }
   }
 
-  function closeJsonModal() {
-    document.getElementById('jsonModal').classList.remove('active');
+  // Chaos Injection Functions
+  async function injectChaosScenario(scenario, val = 1.0) {
+    try {
+      const res = await fetch('/api/chaos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          scenario: scenario,
+          event_type: scenario,
+          sku: currentTelemetry.sku || 'FILTER-HYD-01',
+          location: currentTelemetry.facility_id || 'Gokak',
+          value: val
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        activeChaos.push(scenario);
+        document.getElementById('activeChaosCount').textContent = `${data.active_events_count} Active`;
+        if (scenario === 'TRANSFER_ROADBLOCK') {
+          document.getElementById('chaosRoadblockBtn').classList.add('active-chaos');
+        } else if (scenario === 'DEMAND_SPIKE') {
+          document.getElementById('chaosSurgeBtn').classList.add('active-chaos');
+        } else if (scenario === 'SUPPLIER_HIKE') {
+          document.getElementById('chaosDelayBtn').classList.add('active-chaos');
+        }
+        await syncFromBackend(currentTelemetry.problem_id);
+      }
+    } catch (e) {
+      console.log('Chaos injection error:', e);
+    }
   }
 
-  // Initialize theme & data
+  async function resetChaosBaseline() {
+    try {
+      await fetch('/api/reset', { method: 'POST' });
+      activeChaos = [];
+      document.getElementById('activeChaosCount').textContent = '0 Active';
+      document.getElementById('chaosRoadblockBtn').classList.remove('active-chaos');
+      document.getElementById('chaosSurgeBtn').classList.remove('active-chaos');
+      document.getElementById('chaosDelayBtn').classList.remove('active-chaos');
+      await syncFromBackend();
+    } catch (e) {
+      console.log('Reset error:', e);
+    }
+  }
+
+  // Modals Management
+  function openJsonModal() { document.getElementById('jsonModal').classList.add('active'); }
+  function closeJsonModal() { document.getElementById('jsonModal').classList.remove('active'); }
+
+  async function openNetworkModal() {
+    document.getElementById('networkModal').classList.add('active');
+    try {
+      const res = await fetch('/inventory');
+      if (res.ok) {
+        const items = await res.json();
+        const tbody = document.getElementById('networkTableBody');
+        tbody.innerHTML = '';
+        items.slice(0, 15).forEach(i => {
+          const row = document.createElement('tr');
+          const isLow = i.stock < i.safety_stock;
+          row.innerHTML = `
+            <td><strong>${i.location}</strong></td>
+            <td>${i.location_type}</td>
+            <td><code>${i.sku}</code></td>
+            <td style="font-weight:700;color:${isLow ? 'var(--danger)' : 'var(--text-main)'}">${i.stock}</td>
+            <td>${i.safety_stock}</td>
+            <td><span class="badge-status ${isLow ? 'badge-primary-opt' : 'badge-spot-opt'}">${isLow ? 'DEFICIT' : 'HEALTHY'}</span></td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
+    } catch (e) {}
+  }
+  function closeNetworkModal() { document.getElementById('networkModal').classList.remove('active'); }
+
+  async function openLedgerModal() {
+    document.getElementById('ledgerModal').classList.add('active');
+    try {
+      const res = await fetch('/audit-log');
+      if (res.ok) {
+        const logs = await res.json();
+        const tbody = document.getElementById('ledgerTableBody');
+        tbody.innerHTML = '';
+        if (logs.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-dim);">No transactions logged yet. Approve a transfer to generate receipts.</td></tr>`;
+          return;
+        }
+        logs.forEach(l => {
+          const row = document.createElement('tr');
+          const p = l.payload || {};
+          row.innerHTML = `
+            <td><code>${(l.audit_id || '').substring(0, 8)}</code><br><span style="font-size:10px;color:var(--text-dim)">${(l.timestamp || '').substring(11, 19)}</span></td>
+            <td><strong>${l.action_type}</strong></td>
+            <td>${p.sku || l.problem_id || 'SKU'} (${p.to_location || ''})</td>
+            <td>${p.qty || 0}</td>
+            <td>${l.approved_by || l.rejected_by || 'Ramesh Kulkarni'}</td>
+            <td><span class="badge-status ${l.status === 'APPROVED' ? 'badge-primary-opt' : 'badge-spot-opt'}">${l.status}</span></td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
+    } catch (e) {}
+  }
+  function closeLedgerModal() { document.getElementById('ledgerModal').classList.remove('active'); }
+
+  // Startup initialization
   initTheme();
   syncFromBackend();
-  renderDraft();
 </script>
 
 </body>
