@@ -88,17 +88,27 @@ Rather than merely displaying static reports or relying on unreliable LLM arithm
 - **Deficit Stockout Gap ($\Delta$):**
   $$\Delta = \max(0.0, T_{\text{lead}} - D)$$
 
-- **Donor Safety Margin Calculation (`calculate_donor_transfer_safety`):**
-  Ensures donor locations strictly maintain $\ge 15.0$ operational cover days post-transfer:
-  $$\text{Remaining Cover} = \frac{\text{Stock}_{\text{donor}} - Q_{\text{transfer}}}{v_{\text{donor}}} \ge 15.0$$
-  $$\text{Max Safe Transfer Qty} = \max(0, \text{Stock}_{\text{donor}} - \lceil 15.0 \times v_{\text{donor}} \rceil)$$
+- **Donor Safety Margin Calculation (`calculate_donor_transfer_safety` & `find_best_donor_location_with_reservations`):**
+  Ensures donor locations strictly maintain $\ge 15.0$ operational cover days post-transfer, factoring in active reservation locks:
+  $$\text{Effective Stock} = \max(0, \text{Gross Stock}_{\text{donor}} - \text{Reserved Stock}_{\text{donor}})$$
+  $$\text{Remaining Cover} = \frac{\text{Effective Stock} - Q_{\text{transfer}}}{v_{\text{donor}}} \ge 15.0$$
+  $$\text{Max Safe Transfer Qty} = \max(0, \text{Effective Stock} - \lceil 15.0 \times v_{\text{donor}} \rceil)$$
+
+- **Simulation Date Anchored PO Evaluation (`check_is_po_overdue`):**
+  - Uncouples overdue checking from host system clock (`datetime.today()` / `datetime.now()`).
+  - Evaluates delivery dates against explicit simulation date (`"2026-10-09"` default).
+  - Terminal statuses (`DELIVERED`, `CANCELLED`) are never marked overdue.
+
+- **Physical Inventory Floor Clamping & Unfulfilled Demand Metrics (`clamp_inventory_projection`):**
+  - Physical stock is strictly clamped at $\ge 0.0$ at each step of consumption.
+  - Excess daily demand deficit is accumulated into an `unmet_demand_lost_units` path.
 
 - **14-Day Forward Trajectory Projections (`generate_14day_projections`):**
   Generates day-by-day simulated inventory arrays over $t \in [0, 14]$ days for all three paths:
   - **Status Quo**: Stock burns at $v_{\text{daily}}$; primary PO arrives on day $T_{\text{primary}}$ (+25 units).
   - **Expedited Vendor PO**: Stock burns at $v_{\text{daily}}$; expedited vendor delivery arrives on day $T_{\text{expedited}}$ (+20 units).
   - **Inter-Store Network Transfer**: Stock burns at $v_{\text{daily}}$; rapid transfer arrives on day 1 (+$Q_{\text{transfer}}$ units).
-  - Floor constraint: stock levels never dip below 0.0.
+  - Floor constraint: stock levels never dip below 0.0 with lost unit accounting.
 
 - **Supplier Friction & MOQ Scoring (`evaluate_supplier_friction`):**
   - Flags `INFEASIBLE_MOQ` if vendor MOQ causes over-purchasing exceeding $3 \times Q_{\text{needed}}$.
@@ -190,7 +200,7 @@ Built with a sleek, high-contrast industrial aesthetic engineered for intense su
 | `GET` | `/briefing` | Ingests data, triggers domain math and agent evaluation, and returns ranked problems with calculated alternatives and 14-day forward projections |
 | `POST` | `/action/recalculate-override` | Recalculates updated donor cover, recipient cover, safety margin, and 14-day trajectory projections without committing state |
 | `POST` | `/action/override-recalculate` | Legacy compatibility alias for counter-proposal recalculation |
-| `POST` | `/action/approve` | Commits inventory transfer or purchase order, mutates stock balances, and appends to `data/audit_log.json` |
+| `POST` | `/action/approve` | Idempotent transaction approval: checks SHA-256 signature / `client_request_id` (`409 Conflict` on duplicate), verifies donor physical stock and post-transfer cover $\ge 15.0$ days (`400 Bad Request` on violation), mutates multi-echelon stock balances, and appends to `data/audit_log.json` |
 | `POST` | `/action/reject` | Records user rejection with an operational rationale in audit log |
 | `POST` | `/chaos/inject` | Mutates runtime memory (`DEMAND_SPIKE`, `TRANSFER_ROADBLOCK`, `SUPPLIER_HIKE`) with custom `value` parameters |
 | `GET` | `/inventory` | Returns multi-echelon inventory joined with product metadata |
@@ -213,13 +223,13 @@ Built with a sleek, high-contrast industrial aesthetic engineered for intense su
 
 ### 5. Automated Verification Suite (`tests/test_decisions.py`)
 
-All **26 automated test assertions** pass cleanly in **1.90 seconds**:
+All **35 automated test assertions** pass cleanly:
 
 ```bash
 python -m pytest tests/test_decisions.py -v
 ```
 
-#### Core Mandate Verification Highlights:
+#### Core Mandate Verification Highlights (35/35 Passing):
 1. `test_adaptive_velocity_surge`: A 2x jump in 7-day sales triggers `ACCELERATING` and adjusts days of cover.
 2. `test_donor_safety_margin`: Transfer proposals that leave a donor store with $<15$ days of cover are rejected (`is_safe: False`).
 3. `test_benchmark_gokak_belgaum`: Gokak hydraulic filter stockout selects a Belgaum transfer of 12–16 units over expedited vendor procurement.
@@ -231,6 +241,18 @@ python -m pytest tests/test_decisions.py -v
 9. `test_supplier_moq_friction`: Verifies supplier with MOQ 100 for a 10-unit stockout is flagged `INFEASIBLE_MOQ`.
 10. `test_chaos_injection_resilience`: Injects route block and asserts autonomous agent fallback to expedited procurement.
 11. `test_briefing_and_approval_api`: Validates FastAPI approval pipeline and inventory balance mutations.
+12. `test_reject_action_api`: Verifies action rejection recording and audit trail updates.
+13. `test_chaos_inject_api`: Confirms runtime chaos injection mutates state dynamically.
+14. `test_demand_surge_detection`: Asserts surge detection on custom multi-horizon velocity thresholds.
+15. `test_zero_sales_division_guard`: Defensive zero-division guard returns safe defaults when sales data is completely zero or empty.
+16. `test_dynamic_donor_selection_non_belgaum`: Dynamically resolves alternate donors across network without hardcoded facility biases.
+17. `test_dynamic_forward_projection_lead_times`: Trajectory math accounts for dynamic supplier lead times and varying delivery days.
+18. `test_telemetry_endpoint_404_on_nonexistent`: Validates `404 Not Found` response when telemetry is requested for an unknown problem ID.
+19. `test_simulation_date_overdue_anchor`: Verifies overdue detection anchors to explicit `simulation_date` (`"2026-10-09"`) rather than system clock.
+20. `test_negative_stock_clamping_and_lost_units`: Asserts physical inventory never drops below 0.0 and accumulates deficits into `unmet_demand_lost_units`.
+21. `test_shared_donor_reservation_deduction`: Rejects candidates with gross surplus if active draft reservations leave $<15.0$ days cover.
+22. `test_approval_idempotency_duplicate_conflict`: Verifies duplicate `/action/approve` calls return `HTTP 409 Conflict`.
+23. `test_approval_safety_buffer_violation_400`: Verifies approval endpoint blocks transfers leaving donor with $<15.0$ days cover (`HTTP 400 Bad Request`).
 
 #### Live End-to-End Backend Audit Script:
 ```bash
