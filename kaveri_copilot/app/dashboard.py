@@ -46,10 +46,25 @@ st.set_page_config(
 st.markdown("""
 <style>
     /* Global Base */
-    .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
+    .stApp, [data-testid="stAppViewContainer"] {
         background-color: #110E0E !important;
         color: #F3F4F6 !important;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    /* Pull Title Banner to Top of Page (Eliminates Streamlit default 6rem top blank gap) */
+    [data-testid="stHeader"] {
+        background-color: transparent !important;
+        height: 2rem !important;
+        min-height: 2rem !important;
+        z-index: 99 !important;
+    }
+    .block-container, [data-testid="stAppViewBlockContainer"], div[data-testid="stMainBlockContainer"], .main .block-container {
+        padding-top: 0.6rem !important;
+        padding-bottom: 2rem !important;
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
+        max-width: 100% !important;
     }
     
     [data-testid="stSidebar"] {
@@ -169,7 +184,8 @@ st.markdown("""
         background: linear-gradient(135deg, #1C1515 0%, #130E0E 100%);
         border: 1px solid #302020;
         border-radius: 12px;
-        padding: 22px 28px;
+        padding: 20px 28px;
+        margin-top: 0px !important;
         margin-bottom: 20px;
         display: flex;
         justify-content: space-between;
