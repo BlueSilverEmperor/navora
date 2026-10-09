@@ -1,0 +1,242 @@
+[
+  {
+    "sku": "FILTER-HYD-01",
+    "location": "Gokak",
+    "stock": 8
+  },
+  {
+    "sku": "FILTER-HYD-01",
+    "location": "Belgaum",
+    "stock": 40
+  },
+  {
+    "sku": "FILTER-HYD-01",
+    "location": "Dharwad",
+    "stock": 14
+  },
+  {
+    "sku": "FILTER-HYD-01",
+    "location": "Hubli",
+    "stock": 18
+  },
+  {
+    "sku": "FILTER-HYD-01",
+    "location": "Bagalkot",
+    "stock": 10
+  },
+  {
+    "sku": "FILTER-HYD-01",
+    "location": "Nippani",
+    "stock": 12
+  },
+  {
+    "sku": "FILTER-HYD-01",
+    "location": "Belgaum Central Warehouse",
+    "stock": 65
+  },
+  {
+    "sku": "FILTER-HYD-01",
+    "location": "Hubli Regional Warehouse",
+    "stock": 8
+  },
+  {
+    "sku": "VALVE-CTRL-02",
+    "location": "Gokak",
+    "stock": 2
+  },
+  {
+    "sku": "VALVE-CTRL-02",
+    "location": "Belgaum",
+    "stock": 3
+  },
+  {
+    "sku": "VALVE-CTRL-02",
+    "location": "Dharwad",
+    "stock": 1
+  },
+  {
+    "sku": "VALVE-CTRL-02",
+    "location": "Hubli",
+    "stock": 4
+  },
+  {
+    "sku": "VALVE-CTRL-02",
+    "location": "Bagalkot",
+    "stock": 15
+  },
+  {
+    "sku": "VALVE-CTRL-02",
+    "location": "Nippani",
+    "stock": 1
+  },
+  {
+    "sku": "VALVE-CTRL-02",
+    "location": "Belgaum Central Warehouse",
+    "stock": 6
+  },
+  {
+    "sku": "VALVE-CTRL-02",
+    "location": "Hubli Regional Warehouse",
+    "stock": 8
+  },
+  {
+    "sku": "PUMP-GEAR-03",
+    "location": "Gokak",
+    "stock": 3
+  },
+  {
+    "sku": "PUMP-GEAR-03",
+    "location": "Belgaum",
+    "stock": 4
+  },
+  {
+    "sku": "PUMP-GEAR-03",
+    "location": "Dharwad",
+    "stock": 2
+  },
+  {
+    "sku": "PUMP-GEAR-03",
+    "location": "Hubli",
+    "stock": 2
+  },
+  {
+    "sku": "PUMP-GEAR-03",
+    "location": "Bagalkot",
+    "stock": 2
+  },
+  {
+    "sku": "PUMP-GEAR-03",
+    "location": "Nippani",
+    "stock": 1
+  },
+  {
+    "sku": "PUMP-GEAR-03",
+    "location": "Belgaum Central Warehouse",
+    "stock": 5
+  },
+  {
+    "sku": "PUMP-GEAR-03",
+    "location": "Hubli Regional Warehouse",
+    "stock": 4
+  },
+  {
+    "sku": "SEAL-KIT-04",
+    "location": "Gokak",
+    "stock": 3
+  },
+  {
+    "sku": "SEAL-KIT-04",
+    "location": "Belgaum",
+    "stock": 4
+  },
+  {
+    "sku": "SEAL-KIT-04",
+    "location": "Dharwad",
+    "stock": 2
+  },
+  {
+    "sku": "SEAL-KIT-04",
+    "location": "Hubli",
+    "stock": 3
+  },
+  {
+    "sku": "SEAL-KIT-04",
+    "location": "Bagalkot",
+    "stock": 2
+  },
+  {
+    "sku": "SEAL-KIT-04",
+    "location": "Nippani",
+    "stock": 0
+  },
+  {
+    "sku": "SEAL-KIT-04",
+    "location": "Belgaum Central Warehouse",
+    "stock": 5
+  },
+  {
+    "sku": "SEAL-KIT-04",
+    "location": "Hubli Regional Warehouse",
+    "stock": 4
+  },
+  {
+    "sku": "HOSE-ASSEM-05",
+    "location": "Gokak",
+    "stock": 25
+  },
+  {
+    "sku": "HOSE-ASSEM-05",
+    "location": "Belgaum",
+    "stock": 35
+  },
+  {
+    "sku": "HOSE-ASSEM-05",
+    "location": "Dharwad",
+    "stock": 20
+  },
+  {
+    "sku": "HOSE-ASSEM-05",
+    "location": "Hubli",
+    "stock": 40
+  },
+  {
+    "sku": "HOSE-ASSEM-05",
+    "location": "Bagalkot",
+    "stock": 18
+  },
+  {
+    "sku": "HOSE-ASSEM-05",
+    "location": "Nippani",
+    "stock": 22
+  },
+  {
+    "sku": "HOSE-ASSEM-05",
+    "location": "Belgaum Central Warehouse",
+    "stock": 110
+  },
+  {
+    "sku": "HOSE-ASSEM-05",
+    "location": "Hubli Regional Warehouse",
+    "stock": 95
+  },
+  {
+    "sku": "MOTOR-PIST-06",
+    "location": "Gokak",
+    "stock": 2
+  },
+  {
+    "sku": "MOTOR-PIST-06",
+    "location": "Belgaum",
+    "stock": 4
+  },
+  {
+    "sku": "MOTOR-PIST-06",
+    "location": "Dharwad",
+    "stock": 3
+  },
+  {
+    "sku": "MOTOR-PIST-06",
+    "location": "Hubli",
+    "stock": 5
+  },
+  {
+    "sku": "MOTOR-PIST-06",
+    "location": "Bagalkot",
+    "stock": 2
+  },
+  {
+    "sku": "MOTOR-PIST-06",
+    "location": "Nippani",
+    "stock": 1
+  },
+  {
+    "sku": "MOTOR-PIST-06",
+    "location": "Belgaum Central Warehouse",
+    "stock": 8
+  },
+  {
+    "sku": "MOTOR-PIST-06",
+    "location": "Hubli Regional Warehouse",
+    "stock": 7
+  }
+]

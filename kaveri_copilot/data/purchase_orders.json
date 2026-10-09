@@ -1,0 +1,20 @@
+[
+  {
+    "po": "PO-2026-0892",
+    "supplier": "Deccan Fluid Power Hosur",
+    "sku": "PUMP-GEAR-03",
+    "location": "Hubli",
+    "qty": 10,
+    "expected_date": "2026-10-04",
+    "status": "DELAYED"
+  },
+  {
+    "po": "PO-2026-0901",
+    "supplier": "Gates Fluid Power India",
+    "sku": "HOSE-ASSEM-05",
+    "location": "Belgaum Central Warehouse",
+    "qty": 50,
+    "expected_date": "2026-10-14",
+    "status": "IN_TRANSIT"
+  }
+]
