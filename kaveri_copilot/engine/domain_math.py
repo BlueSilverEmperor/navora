@@ -18,7 +18,7 @@ def compute_adaptive_velocity(
     current_stock: int,
     primary_lead_time: int
 ) -> dict:
-    """Calculates trailing sales velocity, detects surges/drops, and projects stockout days."""
+    """Calculates trailing sales velocity with defensive zero-division guards."""
     if isinstance(sales_df, list):
         sales_df = pd.DataFrame(sales_df)
     elif not isinstance(sales_df, pd.DataFrame):
@@ -37,35 +37,44 @@ def compute_adaptive_velocity(
             "is_drop": False,
         }
 
-    sub = sales_df[(sales_df["sku"] == sku) & (sales_df["location"] == location)].sort_values("date")
+    sub = sales_df[(sales_df["sku"] == sku) & (sales_df["location"] == location)]
+    if "date" in sub.columns:
+        sub = sub.sort_values("date")
 
-    # 30-day baseline vs 7-day recent velocity
-    v_baseline = float(sub["qty_sold"].tail(30).mean()) if len(sub) > 0 else 0.0
-    v_recent = float(sub["qty_sold"].tail(7).mean()) if len(sub) >= 7 else v_baseline
+    v_baseline = (
+        float(sub["qty_sold"].tail(30).mean()) if len(sub) > 0 else 0.0
+    )
+    v_recent = (
+        float(sub["qty_sold"].tail(7).mean())
+        if len(sub) >= 7
+        else v_baseline
+    )
 
-    trend_factor = (v_recent / v_baseline) if v_baseline > 0 else 1.0
+    # Defensive Trend Calculation: Avoid ZeroDivisionError
+    if v_baseline > 0.0:
+        trend_factor = round(v_recent / v_baseline, 2)
+    else:
+        trend_factor = 2.0 if v_recent > 0.0 else 1.0
 
-    # Adaptive velocity selection based on trend
     if trend_factor >= 1.5:
-        v_predicted = v_recent  # Surge condition
+        v_predicted = v_recent
         trend_label = "ACCELERATING"
-    elif trend_factor <= 0.4 and v_baseline > 0:
-        v_predicted = v_recent  # Sharp drop condition
+    elif trend_factor <= 0.4 and v_baseline > 0.0:
+        v_predicted = v_recent
         trend_label = "DECELERATING"
     else:
-        v_predicted = v_baseline  # Stable
+        v_predicted = v_baseline
         trend_label = "STABLE"
 
-    # Projected stock cover (days)
+    # Defensive Cover & Deficit Gap Calculations
     if current_stock <= 0:
         days_cover = 0.0
-    elif v_predicted <= 0:
-        days_cover = 999.0  # Dead stock
+    elif v_predicted <= 0.0:
+        days_cover = 999.0  # Dormant stock flag
     else:
-        days_cover = round(current_stock / v_predicted, 2)
+        days_cover = round(float(current_stock) / v_predicted, 2)
 
-    # Deficit window before primary vendor delivery
-    stockout_gap = max(0.0, round(primary_lead_time - days_cover, 2))
+    stockout_gap = max(0.0, round(float(primary_lead_time) - days_cover, 2))
 
     return {
         "v_baseline": round(v_baseline, 2),
@@ -81,16 +90,16 @@ def compute_adaptive_velocity(
 
 
 def calculate_donor_transfer_safety(donor_stock: int, donor_v: float, transfer_qty: int) -> dict:
-    """Ensures donor location retains at least 15 days operational cover."""
+    """Enforces donor maintains >= 15.0 days of operational cover post-transfer."""
     remaining_stock = donor_stock - transfer_qty
-    remaining_cover = (remaining_stock / donor_v) if donor_v > 0 else 999.0
+    remaining_cover = (remaining_stock / donor_v) if donor_v > 0.0 else 999.0
     is_safe = bool(remaining_cover >= 15.0 and remaining_stock >= 0)
     max_safe_transfer = max(0, int(donor_stock - np.ceil(15.0 * donor_v)))
 
     return {
         "is_safe": is_safe,
         "remaining_cover_days": round(remaining_cover, 1),
-        "max_safe_transfer_qty": max_safe_transfer
+        "max_safe_transfer_qty": max_safe_transfer,
     }
 
 
@@ -100,33 +109,38 @@ def generate_14day_projections(
     transfer_qty: int,
     primary_lead_time: int = 7,
     expedited_lead_time: int = 3,
-    expedited_qty: int = 20,
-    transfer_arrival_day: int = 1
+    replenishment_order_qty: int = 25,
+    transfer_arrival_day: int = 1,
+    expedited_qty: Optional[int] = None,
+    **kwargs
 ) -> dict:
-    """Generates day-by-day inventory level arrays over a 14-day projection window."""
+    """Generates day-by-day simulated inventory arrays using dynamic parameters."""
+    expedited_arrival_qty = expedited_qty if expedited_qty is not None else replenishment_order_qty
+    status_quo_arrival_qty = replenishment_order_qty
+
     days = list(range(15))
 
-    # Status Quo (Do Nothing: wait for primary vendor PO)
+    # 1. Status Quo (Primary PO arrives on primary_lead_time)
     stock_status_quo = []
-    curr = current_stock
+    curr = float(current_stock)
     for d in days:
         if d == primary_lead_time:
-            curr += 25
+            curr += status_quo_arrival_qty
         curr = max(0.0, curr - daily_burn)
         stock_status_quo.append(round(curr, 1))
 
-    # Expedited Vendor PO (Arrives on expedited_lead_time)
+    # 2. Expedited Supplier PO (Arrives on expedited_lead_time)
     stock_expedited = []
-    curr = current_stock
+    curr = float(current_stock)
     for d in days:
         if d == expedited_lead_time:
-            curr += expedited_qty
+            curr += expedited_arrival_qty
         curr = max(0.0, curr - daily_burn)
         stock_expedited.append(round(curr, 1))
 
-    # Inter-Store Transfer (Arrives on transfer_arrival_day)
+    # 3. Inter-Store Network Transfer (Arrives on transfer_arrival_day)
     stock_transfer = []
-    curr = current_stock
+    curr = float(current_stock)
     for d in days:
         if d == transfer_arrival_day:
             curr += transfer_qty
@@ -137,7 +151,7 @@ def generate_14day_projections(
         "days": days,
         "status_quo": stock_status_quo,
         "expedited": stock_expedited,
-        "transfer": stock_transfer
+        "transfer": stock_transfer,
     }
 
 

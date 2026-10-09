@@ -9,6 +9,7 @@ import os
 import sys
 from datetime import datetime, timedelta
 import pytest
+import pandas as pd
 from fastapi.testclient import TestClient
 
 # Ensure kaveri_copilot is in sys.path
@@ -29,7 +30,7 @@ from engine.domain_math import (
     calculate_donor_transfer_safety,
     generate_14day_projections
 )
-from engine.decision_agent import DecisionEngine
+from engine.decision_agent import DecisionEngine, find_best_donor_location
 from engine.mock_data_gen import seed_all_data
 from app.server import app
 
@@ -490,5 +491,63 @@ def test_forward_projection_math():
 
 def test_human_override_flow():
     TestExtendedChallengeFeatures().test_human_override_flow()
+
+
+def test_zero_sales_division_guard():
+    """Verify that zero sales history produces no division errors and flags dead stock."""
+    empty_sales = pd.DataFrame(columns=["date", "sku", "location", "qty_sold"])
+    res = compute_adaptive_velocity(empty_sales, "NEW-PART-01", "Dharwad", current_stock=10, primary_lead_time=7)
+    
+    assert res["v_baseline"] == 0.0
+    assert res["v_recent"] == 0.0
+    assert res["trend_factor"] == 1.0
+    assert res["trend_label"] == "STABLE"
+    assert res["days_of_cover"] == 999.0
+    assert res["stockout_gap_days"] == 0.0
+
+
+def test_dynamic_donor_selection_non_belgaum():
+    """Verify donor matching selects a non-Belgaum hub if it possesses the surplus."""
+    mock_inv = pd.DataFrame([
+        {"sku": "SEAL-XYZ", "location": "Nippani", "current_stock": 2},
+        {"web_id": 1, "sku": "SEAL-XYZ", "location": "Belgaum Central Warehouse", "current_stock": 5},
+        {"web_id": 2, "sku": "SEAL-XYZ", "location": "Hubli Regional Warehouse", "current_stock": 50}
+    ])
+    mock_sales = pd.DataFrame([
+        {"sku": "SEAL-XYZ", "location": "Belgaum Central Warehouse", "qty_sold": 1.0},
+        {"sku": "SEAL-XYZ", "location": "Hubli Regional Warehouse", "qty_sold": 0.5}
+    ])
+    
+    donor = find_best_donor_location(mock_inv, mock_sales, "SEAL-XYZ", "Nippani", needed_qty=10)
+    assert donor is not None
+    assert donor["donor_location"] == "Hubli Regional Warehouse"
+    assert donor["remaining_cover_days"] >= 15.0
+
+
+def test_dynamic_forward_projection_lead_times():
+    """Verify that forward projections plot delivery arrivals on dynamic lead time days."""
+    proj = generate_14day_projections(
+        current_stock=5,
+        daily_burn=2.0,
+        transfer_qty=10,
+        primary_lead_time=10,
+        expedited_lead_time=4,
+        replenishment_order_qty=30,
+        transfer_arrival_day=1
+    )
+    assert len(proj["days"]) == 15
+    # Expedited step-up must occur on Day 4
+    assert proj["expedited"][4] > proj["expedited"][3]
+    # Primary step-up must occur on Day 10
+    assert proj["status_quo"][10] > proj["status_quo"][9]
+
+
+def test_telemetry_endpoint_404_on_nonexistent():
+    """Verify that the FastAPI endpoints return HTTP 404 for non-existent entities rather than silently defaulting to the benchmark scenario."""
+    client = TestClient(app)
+    response = client.get("/api/telemetry?problem_id=PRB-NONEXISTENT-99")
+    assert response.status_code == 404
+    response2 = client.get("/api/telemetry?sku=UNKNOWN-SKU&location=UNKNOWN-LOC")
+    assert response2.status_code == 404
 
 

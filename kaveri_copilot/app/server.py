@@ -345,6 +345,32 @@ class ChaosInjectionRequest(BaseModel):
     to_location: Optional[str] = None
 
 
+def get_runtime_state(current_date: str = "2026-10-09") -> Dict[str, Any]:
+    """Fetches current memory/JSON records and runs agentic pipeline."""
+    import pandas as pd
+    engine = DecisionEngine(data_dir=DATA_DIR, current_date=current_date, chaos_events=ACTIVE_CHAOS_EVENTS)
+    brief = engine.run_agentic_pipeline()
+    inv_df = pd.DataFrame(engine.inventory)
+    sales_df = pd.DataFrame(engine.sales)
+    sup_df = pd.DataFrame(engine.suppliers)
+    prod_df = pd.DataFrame(engine.products)
+    po_df = pd.DataFrame(engine.purchase_orders)
+    if "stock" in inv_df.columns and "current_stock" not in inv_df.columns:
+        inv_df["current_stock"] = inv_df["stock"]
+    elif "current_stock" in inv_df.columns and "stock" not in inv_df.columns:
+        inv_df["stock"] = inv_df["current_stock"]
+
+    return {
+        "engine": engine,
+        "problems": brief.get("problems", []),
+        "inventory": inv_df,
+        "sales": sales_df,
+        "suppliers": sup_df,
+        "products": prod_df,
+        "purchase_orders": po_df,
+    }
+
+
 @app.post("/action/recalculate-override")
 def recalculate_override(req: RecalculateOverrideRequest):
     """
@@ -366,8 +392,11 @@ def recalculate_override(req: RecalculateOverrideRequest):
     )
 
     donor_loc = req.donor_location
-    if "Belgaum" in donor_loc and any(inv.get("sku") == req.sku and inv.get("location") == "Belgaum" for inv in inventory):
-        donor_loc = "Belgaum"
+    matched_donor = next(
+        (inv.get("location") for inv in inventory if inv.get("sku") == req.sku and (inv.get("location") == donor_loc or donor_loc in str(inv.get("location")))),
+        donor_loc
+    )
+    donor_loc = matched_donor
 
     v_donor = calculate_daily_burn_rate(sales, req.sku, donor_loc, 30)
     v_target = calculate_daily_burn_rate(sales, req.sku, req.target_location, 30)
@@ -388,13 +417,31 @@ def recalculate_override(req: RecalculateOverrideRequest):
     donor_revised_cover = calculate_days_of_cover(donor_remaining, v_donor)
     target_revised_cover = calculate_days_of_cover(target_new, v_target)
 
+    # Dynamic supplier lead time lookup
+    prim_lead = 7
+    exp_lead = 3
+    replenish_qty = 20
+    sup_file = os.path.join(DATA_DIR, "suppliers.json")
+    if os.path.exists(sup_file):
+        try:
+            with open(sup_file, "r", encoding="utf-8") as f:
+                suppliers = json.load(f)
+            sku_sups = [s for s in suppliers if s.get("sku") == req.sku]
+            if sku_sups:
+                prim_lead = int(sku_sups[0].get("lead_time_days", 7))
+                replenish_qty = int(sku_sups[0].get("moq", 20))
+                if len(sku_sups) > 1:
+                    exp_lead = int(sku_sups[1].get("lead_time_days", 3))
+        except Exception:
+            pass
+
     projections = generate_14day_projections(
         current_stock=target_stock,
         daily_burn=v_target if v_target > 0 else 1.0,
         transfer_qty=req.override_qty,
-        primary_lead_time=7,
-        expedited_lead_time=3,
-        expedited_qty=20,
+        primary_lead_time=prim_lead,
+        expedited_lead_time=exp_lead,
+        replenishment_order_qty=replenish_qty,
         transfer_arrival_day=1
     )
 
@@ -550,36 +597,7 @@ def audit_suppliers():
 # NAVORA Direct Integration Endpoints
 # -----------------------------------------------------------------------------
 
-@app.get("/api/telemetry")
-def get_navora_telemetry(problem_id: Optional[str] = None, current_date: str = "2026-10-09"):
-    """
-    Returns telemetry formatted for the NAVORA frontend.
-    Defaults to the benchmark Gokak FILTER-HYD-01 problem or requested problem_id,
-    and includes a list of all detected problems for the problem switcher.
-    """
-    engine = DecisionEngine(data_dir=DATA_DIR, current_date=current_date, chaos_events=ACTIVE_CHAOS_EVENTS)
-    brief = engine.run_agentic_pipeline()
-    problems = brief.get("problems", [])
-    
-    selected_p = None
-    if problem_id:
-        for p in problems:
-            if p.get("problem_id") == problem_id:
-                selected_p = p
-                break
-    
-    if not selected_p:
-        # Default to Gokak FILTER-HYD-01 if present, else first problem
-        for p in problems:
-            if p.get("sku") == "FILTER-HYD-01" and p.get("location") == "Gokak":
-                selected_p = p
-                break
-        if not selected_p and problems:
-            selected_p = problems[0]
-
-    if not selected_p:
-        return {"error": "No problems detected in network", "problems": []}
-
+def _format_navora_telemetry(selected_p: Dict[str, Any], problems: List[Dict[str, Any]]) -> Dict[str, Any]:
     # Transform evaluated_options to NAVORA format
     mitigation_options = []
     for idx, opt in enumerate(selected_p.get("evaluated_options", [])):
@@ -621,6 +639,7 @@ def get_navora_telemetry(problem_id: Optional[str] = None, current_date: str = "
 
     m = selected_p.get("domain_metrics", {})
     return {
+        **selected_p,
         "incident_id": selected_p.get("problem_id"),
         "problem_id": selected_p.get("problem_id"),
         "facility_id": selected_p.get("location"),
@@ -644,6 +663,61 @@ def get_navora_telemetry(problem_id: Optional[str] = None, current_date: str = "
         "simulated_action": selected_p.get("simulated_action", {}),
         "all_incidents": all_incidents
     }
+
+
+@app.get("/api/telemetry")
+def get_telemetry(
+    problem_id: Optional[str] = None,
+    sku: Optional[str] = None,
+    location: Optional[str] = None,
+    current_date: str = "2026-10-09"
+):
+    state = get_runtime_state(current_date=current_date)
+    problems = state["problems"]
+
+    # 1. Lookup by problem_id across dynamically detected incidents
+    if problem_id:
+        prob = next((p for p in problems if p.get("problem_id") == problem_id), None)
+        if prob:
+            return _format_navora_telemetry(prob, problems)
+        raise HTTPException(
+            status_code=404,
+            detail=f"Telemetry not found for query (problem_id={problem_id}, sku={sku}, location={location})"
+        )
+
+    # 2. Dynamic on-the-fly telemetry computation for unseen SKU & location
+    if sku and location:
+        inv = state["inventory"]
+        row = inv[(inv["sku"] == sku) & (inv["location"] == location)]
+        if not row.empty:
+            stock = int(row.iloc[0]["current_stock"])
+            sup = state["suppliers"][state["suppliers"]["sku"] == sku]
+            lead_time = int(sup.iloc[0]["lead_time_days"]) if not sup.empty else 7
+
+            from engine.domain_math import compute_adaptive_velocity
+            telemetry = compute_adaptive_velocity(
+                state["sales"], sku, location, stock, lead_time
+            )
+            return {
+                "sku": sku,
+                "location": location,
+                "current_stock": stock,
+                **telemetry
+            }
+        raise HTTPException(
+            status_code=404,
+            detail=f"Telemetry not found for query (problem_id={problem_id}, sku={sku}, location={location})"
+        )
+
+    # 3. Default call (e.g. initial frontend load without parameters)
+    if not problems:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Telemetry not found for query (problem_id={problem_id}, sku={sku}, location={location})"
+        )
+
+    selected_p = next((p for p in problems if p.get("sku") == "FILTER-HYD-01" and p.get("location") == "Gokak"), problems[0])
+    return _format_navora_telemetry(selected_p, problems)
 
 
 class NavoraRecalculateRequest(BaseModel):

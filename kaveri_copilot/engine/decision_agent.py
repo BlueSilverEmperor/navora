@@ -8,7 +8,8 @@ import json
 import math
 import os
 from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Union
+import pandas as pd
 
 from engine.domain_math import (
     calculate_daily_burn_rate,
@@ -23,9 +24,64 @@ from engine.domain_math import (
     evaluate_supplier_friction,
     validate_and_recalculate_transfer,
     generate_14day_projections,
+    calculate_donor_transfer_safety,
 )
 
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data"))
+
+
+def find_best_donor_location(
+    inventory_df: Union[pd.DataFrame, List[Dict[str, Any]]],
+    sales_df: Union[pd.DataFrame, List[Dict[str, Any]]],
+    sku: str,
+    target_location: str,
+    needed_qty: int,
+) -> Optional[Dict[str, Any]]:
+    """Scans all network locations to identify the optimal qualified surplus donor."""
+    if isinstance(inventory_df, list):
+        inventory_df = pd.DataFrame(inventory_df)
+    if isinstance(sales_df, list):
+        sales_df = pd.DataFrame(sales_df)
+
+    stock_col = "current_stock" if "current_stock" in inventory_df.columns else "stock"
+
+    candidates = inventory_df[
+        (inventory_df["sku"] == sku) & (inventory_df["location"] != target_location)
+    ]
+
+    feasible_donors = []
+
+    for _, row in candidates.iterrows():
+        loc = row["location"]
+        stock = int(row[stock_col])
+
+        sub_sales = sales_df[(sales_df["sku"] == sku) & (sales_df["location"] == loc)]
+        donor_v = (
+            float(sub_sales["qty_sold"].tail(30).mean())
+            if len(sub_sales) > 0
+            else 0.05
+        )
+
+        safety = calculate_donor_transfer_safety(stock, donor_v, needed_qty)
+        if safety["is_safe"]:
+            feasible_donors.append({
+                "donor_location": loc,
+                "location": loc,
+                "current_stock": stock,
+                "stock": stock,
+                "donor_velocity": donor_v,
+                "remaining_cover_days": safety["remaining_cover_days"],
+                "max_safe_transfer_qty": safety["max_safe_transfer_qty"],
+                "surplus": safety["max_safe_transfer_qty"],
+                "burn_rate": donor_v,
+                "cover_days": round(stock / donor_v, 1) if donor_v > 0 else 999.0
+            })
+
+    if not feasible_donors:
+        return None
+
+    # Rank by maximum remaining cover runway
+    return max(feasible_donors, key=lambda x: x["remaining_cover_days"])
 
 
 class DecisionEngine:
@@ -227,14 +283,19 @@ class DecisionEngine:
 
             stock = inv["stock"]
             burn = calculate_daily_burn_rate(self.sales, sku, loc, days_observed=30)
-            surplus = calculate_available_surplus(stock, burn, min_retained_cover_days=15)
+            safety = calculate_donor_transfer_safety(stock, burn, needed_qty)
 
-            if surplus > 0:
+            if safety["is_safe"] or safety["max_safe_transfer_qty"] > 0:
                 candidates.append({
+                    "donor_location": loc,
                     "location": loc,
                     "stock": stock,
+                    "current_stock": stock,
                     "burn_rate": burn,
-                    "surplus": surplus,
+                    "donor_velocity": burn,
+                    "surplus": safety["max_safe_transfer_qty"],
+                    "max_safe_transfer_qty": safety["max_safe_transfer_qty"],
+                    "remaining_cover_days": safety["remaining_cover_days"],
                     "cover_days": calculate_days_of_cover(stock, burn)
                 })
 
@@ -242,6 +303,7 @@ class DecisionEngine:
             key=lambda c: (
                 1 if (c["cover_days"] > 45 and "Warehouse" not in c["location"]) else 0,
                 1 if "Warehouse" not in c["location"] else 0,
+                c["remaining_cover_days"],
                 c["surplus"]
             ),
             reverse=True
@@ -286,8 +348,6 @@ class DecisionEngine:
 
             burn = metrics["burn_rate"]
             target_qty = math.ceil(burn * 3.5) if burn > 0 else 5
-            if sku == "FILTER-HYD-01" and loc == "Gokak":
-                target_qty = 14
 
             donors = self.find_network_donors(sku, loc, target_qty)
             secondary_sups = find_secondary_suppliers(self.suppliers, sku)
@@ -323,17 +383,19 @@ class DecisionEngine:
                 # Option 1: Internal Network Balancing
                 if donors:
                     best_donor = donors[0]
-                    actual_transfer_qty = min(best_donor["surplus"], target_qty)
-                    if sku == "FILTER-HYD-01" and loc == "Gokak" and best_donor["location"] == "Belgaum":
-                        actual_transfer_qty = 14
+                    donor_location = best_donor.get("donor_location", best_donor.get("location"))
+                    actual_transfer_qty = min(best_donor.get("surplus", best_donor.get("max_safe_transfer_qty", target_qty)), target_qty)
+                    if actual_transfer_qty <= 0:
+                        actual_transfer_qty = min(best_donor.get("stock", target_qty), target_qty)
 
+                    donor_v = best_donor.get("donor_velocity", best_donor.get("burn_rate", 1.0))
                     donor_post_cover = calculate_days_of_cover(
                         best_donor["stock"] - actual_transfer_qty,
-                        best_donor["burn_rate"]
+                        donor_v
                     )
                     options.append({
                         "option_name": "Internal Network Balancing (Store/Warehouse Transfer)",
-                        "source": best_donor["location"],
+                        "source": donor_location,
                         "delivery_time_days": 1,
                         "lead_time_days": 1,
                         "estimated_cost_inr": 250.0,
@@ -342,12 +404,13 @@ class DecisionEngine:
                         "feasibility_status": "FEASIBLE",
                         "pros_cons": (
                             f"PRO: 1-day transit resolves deficit immediately; ₹250 flat handling fee "
-                            f"with zero new inventory cash outflow. {best_donor['location']} retains {donor_post_cover:.1f} days cover."
+                            f"with zero new inventory cash outflow. {donor_location} retains {donor_post_cover:.1f} days cover."
                         ),
                         "trade_off_summary": f"1-day transit, ₹250 flat handling, donor retains {donor_post_cover:.1f} days cover (>15 days required)."
                     })
                 else:
-                    reason = "Transfer route blocked" if self.is_route_blocked("Belgaum", loc, sku) else "Network branches lack >15 days surplus cover"
+                    any_blocked = any(self.is_route_blocked(inv["location"], loc, sku) for inv in self.inventory if inv.get("sku") == sku and inv.get("location") != loc)
+                    reason = "Transfer route blocked" if any_blocked else "Network branches lack >15 days surplus cover"
                     options.append({
                         "option_name": "Internal Network Balancing (Store/Warehouse Transfer)",
                         "source": "Network Multi-Echelon Search",
