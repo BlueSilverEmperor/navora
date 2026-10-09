@@ -511,88 +511,69 @@ tab_feed, tab_inventory, tab_suppliers, tab_audit = st.tabs([
 # ------------------------------------------------------------------------------
 # TAB 1: MORNING FEED
 # ------------------------------------------------------------------------------
-with tab_feed:
-    st.subheader("Today's Prioritized Purchasing Queue")
-    st.caption("5 Problem Categories: Imminent Stockouts, Capital Traps, Overdue POs, Demand Volatility, and Supplier Infeasibility.")
+def render_active_task_workspace(p, approved_problem_ids, raw_inventory, raw_sales):
+    """Renders the detailed inspection and decision cockpit for the selected active problem."""
+    pid = p["problem_id"]
+    is_handled = pid in approved_problem_ids
+    cat_code = p.get("category_code", "CATEGORY_A")
 
-    # Filter by category/severity
-    filter_col1, filter_col2 = st.columns([1, 2])
-    with filter_col1:
-        sev_filter = st.selectbox("Filter Severity:", ["All", "CRITICAL", "HIGH", "MEDIUM"])
+    badge_class = "badge-critical" if p["severity"] == "CRITICAL" else ("badge-high" if p["severity"] == "HIGH" else "badge-medium")
+    card_border = "#f87171" if p["severity"] == "CRITICAL" else "#cbd5e1"
+    status_banner = "✅ ALREADY EXECUTED" if is_handled else "⚡ AWAITING RAMESH KULKARNI APPROVAL"
 
-    filtered_problems = briefing["problems"]
-    if sev_filter != "All":
-        filtered_problems = [p for p in filtered_problems if p["severity"] == sev_filter]
-
-    st.info("💡 **Benchmark Scenario Focus:** SKU `FILTER-HYD-01` at **Gokak Store** (2.0 days cover vs 7-day supplier lead time). Belgaum Store holds 40 units (80 days cover). Use the Counter-Proposal box below to test dynamic human override.")
-
-    for p in filtered_problems:
-        pid = p["problem_id"]
-        is_handled = pid in approved_problem_ids
-        cat_code = p.get("category_code", "CATEGORY_A")
-
-        badge_class = "badge-critical" if p["severity"] == "CRITICAL" else ("badge-high" if p["severity"] == "HIGH" else "badge-medium")
-        card_border = "#f87171" if p["severity"] == "CRITICAL" else "#cbd5e1"
-        status_banner = "✅ ALREADY EXECUTED" if is_handled else "⚡ AWAITING RAMESH KULKARNI APPROVAL"
-
-        # Check for supplier friction
-        has_friction = any("INFEASIBLE_MOQ" in o.get("feasibility_status", "") for o in p["evaluated_options"])
-
-        with st.container():
-            st.markdown(f"""
-            <div style="border: 1px solid {card_border}; border-radius: 10px; padding: 1.25rem; margin-bottom: 1.25rem; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                    <div>
-                        <span class="{badge_class}">{p['severity']}</span>
-                        <span style="background: #e0f2fe; color: #0369a1; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; margin-left: 0.3rem;">{cat_code}</span>
-                        <span style="font-weight: 700; font-size: 1.1rem; margin-left: 0.5rem;">{p['sku_name']} ({p['sku']})</span>
-                        <span style="color: #64748b; margin-left: 0.5rem;">📍 <b>{p['location']}</b></span>
-                    </div>
-                    <div>
-                        <span style="font-size: 0.8rem; font-weight: 600; color: {'#16a34a' if is_handled else '#d97706'};">
-                            {status_banner}
-                        </span>
-                    </div>
-                </div>
-                <p style="color: #334155; margin: 0.4rem 0 0.8rem 0; font-size: 0.95rem;">
-                    <b>Diagnosis:</b> {p['diagnosis']}
-                </p>
+    st.markdown(f"""
+    <div style="border: 1px solid {card_border}; border-radius: 10px; padding: 1.25rem; margin-bottom: 1.25rem; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <div>
+                <span class="{badge_class}">{p['severity']}</span>
+                <span style="background: #e0f2fe; color: #0369a1; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; margin-left: 0.3rem;">{cat_code}</span>
+                <span style="font-weight: 700; font-size: 1.15rem; margin-left: 0.5rem;">{p['sku_name']} ({p['sku']})</span>
+                <span style="color: #64748b; margin-left: 0.5rem;">📍 <b>{p['location']}</b></span>
             </div>
-            """, unsafe_allow_html=True)
+            <div>
+                <span style="font-size: 0.8rem; font-weight: 600; color: {'#16a34a' if is_handled else '#d97706'};">
+                    {status_banner}
+                </span>
+            </div>
+        </div>
+        <p style="color: #334155; margin: 0.4rem 0 0.8rem 0; font-size: 0.95rem;">
+            <b>Diagnosis:</b> {p['diagnosis']}
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
-            # Adaptive velocity metrics & domain metrics
-            m = p["domain_metrics"]
-            ad = p.get("adaptive_velocity", m.get("adaptive_velocity", {}))
-            v_base = ad.get("v_baseline", m.get("daily_burn_rate", 0.0))
-            v_rec = ad.get("v_recent", m.get("daily_burn_rate", 0.0))
-            trend_factor = ad.get("trend_factor", 1.0)
-            trend_label = ad.get("trend_label", "STABLE")
+    # Adaptive velocity metrics & domain metrics
+    m = p["domain_metrics"]
+    ad = p.get("adaptive_velocity", m.get("adaptive_velocity", {}))
+    v_base = ad.get("v_baseline", m.get("daily_burn_rate", 0.0))
+    v_rec = ad.get("v_recent", m.get("daily_burn_rate", 0.0))
+    trend_factor = ad.get("trend_factor", 1.0)
+    trend_label = ad.get("trend_label", "STABLE")
 
-            trend_badge_class = "badge-surge" if trend_label == "ACCELERATING" else ("badge-drop" if trend_label == "DECELERATING" else "badge-stable")
-            trend_display = f"{trend_label} ({trend_factor:.1f}x)"
+    trend_badge_class = "badge-surge" if trend_label == "ACCELERATING" else ("badge-drop" if trend_label == "DECELERATING" else "badge-stable")
+    trend_display = f"{trend_label} ({trend_factor:.1f}x)"
 
-            vc1, vc2, vc3, vc4, vc5, vc6 = st.columns(6)
-            with vc1:
-                st.markdown(f"""<div class="metric-card"><div class="metric-label">v_baseline (30d)</div><div class="metric-val">{v_base:.2f}/day</div></div>""", unsafe_allow_html=True)
-            with vc2:
-                st.markdown(f"""<div class="metric-card"><div class="metric-label">v_recent (7d)</div><div class="metric-val">{v_rec:.2f}/day</div></div>""", unsafe_allow_html=True)
-            with vc3:
-                st.markdown(f"""<div class="metric-card"><div class="metric-label">Trend Factor</div><div class="metric-val"><span class="{trend_badge_class}">{trend_display}</span></div></div>""", unsafe_allow_html=True)
-            with vc4:
-                st.markdown(f"""<div class="metric-card"><div class="metric-label">Current Stock</div><div class="metric-val">{m['current_stock']} units</div></div>""", unsafe_allow_html=True)
-            with vc5:
-                cover_color = "#dc2626" if m['days_of_cover'] <= 3.0 else ("#d97706" if m['days_of_cover'] <= 7.0 else "#16a34a")
-                st.markdown(f"""<div class="metric-card"><div class="metric-label">Days of Cover (D)</div><div class="metric-val" style="color: {cover_color};">{m['days_of_cover']} days</div></div>""", unsafe_allow_html=True)
-            with vc6:
-                gap_color = "#dc2626" if m['stockout_gap_days'] > 0 else "#16a34a"
-                st.markdown(f"""<div class="metric-card"><div class="metric-label">Stockout Gap (Δ)</div><div class="metric-val" style="color: {gap_color};">{m['stockout_gap_days']} days</div></div>""", unsafe_allow_html=True)
+    vc1, vc2, vc3, vc4, vc5, vc6 = st.columns(6)
+    with vc1:
+        st.markdown(f"""<div class="metric-card"><div class="metric-label">v_baseline (30d)</div><div class="metric-val">{v_base:.2f}/day</div></div>""", unsafe_allow_html=True)
+    with vc2:
+        st.markdown(f"""<div class="metric-card"><div class="metric-label">v_recent (7d)</div><div class="metric-val">{v_rec:.2f}/day</div></div>""", unsafe_allow_html=True)
+    with vc3:
+        st.markdown(f"""<div class="metric-card"><div class="metric-label">Trend Factor</div><div class="metric-val"><span class="{trend_badge_class}">{trend_display}</span></div></div>""", unsafe_allow_html=True)
+    with vc4:
+        st.markdown(f"""<div class="metric-card"><div class="metric-label">Current Stock</div><div class="metric-val">{m['current_stock']} units</div></div>""", unsafe_allow_html=True)
+    with vc5:
+        cover_color = "#dc2626" if m['days_of_cover'] <= 3.0 else ("#d97706" if m['days_of_cover'] <= 7.0 else "#16a34a")
+        st.markdown(f"""<div class="metric-card"><div class="metric-label">Days of Cover (D)</div><div class="metric-val" style="color: {cover_color};">{m['days_of_cover']} days</div></div>""", unsafe_allow_html=True)
+    with vc6:
+        gap_color = "#dc2626" if m['stockout_gap_days'] > 0 else "#16a34a"
+        st.markdown(f"""<div class="metric-card"><div class="metric-label">Stockout Gap (Δ)</div><div class="metric-val" style="color: {gap_color};">{m['stockout_gap_days']} days</div></div>""", unsafe_allow_html=True)
 
-            # Option Evaluation Table & Explainability
-            with st.expander("📊 View Side-by-Side Trade-off Table & Mathematical Explainability", expanded=(p["severity"] == "CRITICAL" and not is_handled)):
-                if "math_explainability" in p:
-                    me = p["math_explainability"]
-                    st.markdown(f"""
-<div class="telemetry-card">
+    # Option Evaluation Table & Explainability
+    if "math_explainability" in p:
+        me = p["math_explainability"]
+        st.markdown(f"""
+<div class="telemetry-card" style="margin-top: 1rem;">
     <div class="telemetry-header">📐 Deterministic Velocity Math &amp; Telemetry:</div>
     <div class="telemetry-line">• <b>Velocity:</b> <span class="telemetry-tag-cyan">{me.get('formula_velocity', '')}</span></div>
     <div class="telemetry-line">• <b>Days of Cover:</b> <span class="telemetry-tag-yellow">{me.get('formula_cover', '')}</span></div>
@@ -601,239 +582,371 @@ with tab_feed:
 </div>
 """, unsafe_allow_html=True)
 
-                # Commercial Impact Scorecard
-                m_gap = m.get("stockout_gap_days", 0.0)
-                ad_v = p.get("adaptive_velocity", {}).get("v_predicted", m.get("daily_burn_rate", 1.0))
-                lost_units = round(m_gap * ad_v, 1) if m_gap > 0 else 0.0
-                has_transfer = any("Internal" in o["option_name"] and o.get("feasibility_status") == "FEASIBLE" for o in p["evaluated_options"])
+    # Commercial Impact Scorecard
+    m_gap = m.get("stockout_gap_days", 0.0)
+    ad_v = p.get("adaptive_velocity", {}).get("v_predicted", m.get("daily_burn_rate", 1.0))
+    lost_units = round(m_gap * ad_v, 1) if m_gap > 0 else 0.0
+    has_transfer = any("Internal" in o["option_name"] and o.get("feasibility_status") == "FEASIBLE" for o in p["evaluated_options"])
 
-                st.markdown("##### 💳 Commercial Impact Scorecard (Options Trade-off Matrix)")
-                sc1, sc2, sc3, sc4 = st.columns(4)
-                with sc1:
-                    net_cost_str = "₹250.00" if has_transfer else (f"₹{p['simulated_action']['payload'].get('total_estimated_cost_inr', 0):,.2f}")
-                    st.markdown(f"""
-                    <div class="scorecard-card">
-                        <div class="scorecard-label">Net Direct Cost</div>
-                        <div class="scorecard-val" style="color: #16a34a;">{net_cost_str}</div>
-                        <div class="scorecard-sub">Flat Handling vs Vendor Premium</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                with sc2:
-                    st.markdown(f"""
-                    <div class="scorecard-card">
-                        <div class="scorecard-label">Lost Units Averted</div>
-                        <div class="scorecard-val" style="color: #2563eb;">{lost_units} units</div>
-                        <div class="scorecard-sub">Protected vs Inaction Deficit</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                with sc3:
-                    wc_outflow = "₹0.00" if has_transfer else f"₹{p['simulated_action']['payload'].get('total_estimated_cost_inr', 0):,.2f}"
-                    st.markdown(f"""
-                    <div class="scorecard-card">
-                        <div class="scorecard-label">Working Capital Outflow</div>
-                        <div class="scorecard-val" style="color: #16a34a;">{wc_outflow}</div>
-                        <div class="scorecard-sub">{"Internal Inventory Reallocation" if has_transfer else "New Vendor Capital Outlay"}</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                with sc4:
-                    dt_risk = "0 Days" if has_transfer else (f"{min(3, int(m_gap))} Days" if m_gap > 0 else "0 Days")
-                    st.markdown(f"""
-                    <div class="scorecard-card">
-                        <div class="scorecard-label">Downtime Risk</div>
-                        <div class="scorecard-val" style="color: {'#16a34a' if dt_risk == '0 Days' else '#dc2626'};">{dt_risk}</div>
-                        <div class="scorecard-sub">Eliminates {m_gap}d Stockout Gap</div>
-                    </div>
-                    """, unsafe_allow_html=True)
+    st.markdown("##### 💳 Commercial Impact Scorecard (Options Trade-off Matrix)")
+    sc1, sc2, sc3, sc4 = st.columns(4)
+    with sc1:
+        net_cost_str = "₹250.00" if has_transfer else (f"₹{p['simulated_action']['payload'].get('total_estimated_cost_inr', 0):,.2f}")
+        st.markdown(f"""
+        <div class="scorecard-card">
+            <div class="scorecard-label">Net Direct Cost</div>
+            <div class="scorecard-val" style="color: #16a34a;">{net_cost_str}</div>
+            <div class="scorecard-sub">Flat Handling vs Vendor Premium</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with sc2:
+        st.markdown(f"""
+        <div class="scorecard-card">
+            <div class="scorecard-label">Lost Units Averted</div>
+            <div class="scorecard-val" style="color: #2563eb;">{lost_units} units</div>
+            <div class="scorecard-sub">Protected vs Inaction Deficit</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with sc3:
+        wc_outflow = "₹0.00" if has_transfer else f"₹{p['simulated_action']['payload'].get('total_estimated_cost_inr', 0):,.2f}"
+        st.markdown(f"""
+        <div class="scorecard-card">
+            <div class="scorecard-label">Working Capital Outflow</div>
+            <div class="scorecard-val" style="color: #16a34a;">{wc_outflow}</div>
+            <div class="scorecard-sub">{"Internal Inventory Reallocation" if has_transfer else "New Vendor Capital Outlay"}</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with sc4:
+        dt_risk = "0 Days" if has_transfer else (f"{min(3, int(m_gap))} Days" if m_gap > 0 else "0 Days")
+        st.markdown(f"""
+        <div class="scorecard-card">
+            <div class="scorecard-label">Downtime Risk</div>
+            <div class="scorecard-val" style="color: {'#16a34a' if dt_risk == '0 Days' else '#dc2626'};">{dt_risk}</div>
+            <div class="scorecard-sub">Eliminates {m_gap}d Stockout Gap</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-                st.markdown("<div style='margin-bottom: 0.75rem;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-bottom: 0.75rem;'></div>", unsafe_allow_html=True)
 
-                # Interactive Plotly Forward Trajectory Graph
-                fp = p.get("forward_projections")
-                if fp and "days" in fp:
-                    st.markdown("##### 📈 14-Day Forward Visual Inventory Trajectories")
-                    fig = go.Figure()
-                    fig.add_trace(go.Scatter(
-                        x=fp["days"],
-                        y=fp["status_quo"],
-                        mode="lines+markers",
-                        name="Option 3: Status Quo (Wait for Primary Vendor PO)",
-                        line=dict(color="#ef4444", width=3, dash="dot"),
-                        marker=dict(size=6)
-                    ))
-                    fig.add_trace(go.Scatter(
-                        x=fp["days"],
-                        y=fp["expedited"],
-                        mode="lines+markers",
-                        name="Option 2: Expedited Vendor PO (Day 3 Arrival)",
-                        line=dict(color="#f59e0b", width=3, dash="dash"),
-                        marker=dict(size=6)
-                    ))
-                    fig.add_trace(go.Scatter(
+    # Interactive Plotly Forward Trajectory Graph
+    fp = p.get("forward_projections")
+    if fp and "days" in fp:
+        st.markdown("##### 📈 14-Day Forward Visual Inventory Trajectories")
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=fp["days"],
+            y=fp["status_quo"],
+            mode="lines+markers",
+            name="Option 3: Status Quo (Wait for Primary Vendor PO)",
+            line=dict(color="#ef4444", width=3, dash="dot"),
+            marker=dict(size=6)
+        ))
+        fig.add_trace(go.Scatter(
+            x=fp["days"],
+            y=fp["expedited"],
+            mode="lines+markers",
+            name="Option 2: Expedited Vendor PO (Day 3 Arrival)",
+            line=dict(color="#f59e0b", width=3, dash="dash"),
+            marker=dict(size=6)
+        ))
+        fig.add_trace(go.Scatter(
+            x=fp["days"],
+            y=fp["transfer"],
+            mode="lines+markers",
+            name="Option 1: Inter-Store Transfer (Day 1 Arrival)",
+            line=dict(color="#2563eb", width=3.5),
+            marker=dict(size=7)
+        ))
+        fig.add_hline(
+            y=0,
+            line_dash="dash",
+            line_color="#dc2626",
+            line_width=2,
+            annotation_text="⚠️ Stockout Hazard Line (Zero Stock)",
+            annotation_position="bottom right",
+            annotation_font_color="#dc2626"
+        )
+        fig.update_layout(
+            title=dict(
+                text=f"Projected Inventory Levels (Next 14 Days): {p['sku_name']} @ {p['location']}",
+                font=dict(size=13, color="#1e293b")
+            ),
+            xaxis=dict(title="Days Ahead", dtick=1, gridcolor="#f1f5f9"),
+            yaxis=dict(title="Projected Stock (Units)", gridcolor="#f1f5f9"),
+            hovermode="x unified",
+            height=340,
+            margin=dict(l=40, r=40, t=50, b=40),
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+            plot_bgcolor="white",
+            paper_bgcolor="white"
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    opt_data = []
+    for opt in p["evaluated_options"]:
+        opt_data.append({
+            "Option Name": f"{opt['option_name']} [{opt.get('source', '')}]",
+            "Delivery Time": f"{opt.get('lead_time_days', opt.get('delivery_time_days', 1))} days",
+            "Total Cash Outlay": f"₹{opt.get('cash_impact_inr', opt.get('estimated_cost_inr', 0.0)):,.2f}",
+            "Feasibility": opt.get("feasibility_status", opt.get("feasibility", "FEASIBLE")),
+            "Summary": opt.get("trade_off_summary", opt.get("pros_cons", ""))
+        })
+    st.markdown(r"##### ⚖️ Feasible Mitigation Pathways ($N \ge 2$)")
+    st.dataframe(pd.DataFrame(opt_data), use_container_width=True, hide_index=True)
+    st.markdown(f"**🎯 AI Agent Recommendation Rationale:** {p['decision_rationale']}")
+
+    # Simulated Action Box
+    act = p["simulated_action"]
+    pay = act["payload"]
+    
+    st.markdown(f"""
+    <div class="action-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <div>
+                <span class="badge-action">Simulated Action: {act['action_type']}</span>
+                <span style="margin-left: 0.5rem; font-weight: 600; font-size: 0.9rem; color: #14532d;">
+                    Quantity: {pay['qty']} units • Total Estimated Cost: ₹{pay['total_estimated_cost_inr']:,.2f}
+                </span>
+            </div>
+            <div style="font-size: 0.85rem; color: #166534; font-weight: 600;">
+                Expected Arrival: {pay['expected_delivery_date']}
+            </div>
+        </div>
+        <div style="font-size: 0.9rem; color: #1f2937;">
+            <b>Route:</b> {pay['from_location_or_supplier']} ➔ <b>{pay['to_location']}</b> &nbsp;|&nbsp; 
+            <b>Urgency:</b> {pay['urgency']} &nbsp;|&nbsp; 
+            <b>Human Gate:</b> Simulated Draft (Mandatory Ramesh Kulkarni Approval Required)
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Human-in-the-Loop Counter-Proposal & Approval Gate
+    if not is_handled:
+        # Dynamic Override Input for Transfers
+        if act["action_type"] == "TRANSFER_REQUEST":
+            with st.expander("✏️ Ramesh's Counter-Proposal (Override Proposed Transfer Qty)", expanded=False):
+                override_qty = st.number_input(
+                    f"Proposed Transfer Qty for {p['sku']} ({pay['from_location_or_supplier']} ➔ {pay['to_location']}):",
+                    min_value=1,
+                    max_value=100,
+                    value=pay["qty"],
+                    key=f"ov_{pid}"
+                )
+                recalc = validate_and_recalculate_transfer(
+                    from_loc=pay["from_location_or_supplier"],
+                    to_loc=pay["to_location"],
+                    sku=pay["sku"],
+                    requested_qty=override_qty,
+                    inventory=raw_inventory,
+                    sales=raw_sales
+                )
+                
+                rc1, rc2, rc3 = st.columns(3)
+                with rc1:
+                    st.metric("Recipient Cover Post-Override", f"{recalc['recipient_cover_days']} days", delta=f"{recalc['recipient_cover_days'] - m['days_of_cover']:.1f} days")
+                with rc2:
+                    donor_status = "SAFE (>=15d)" if recalc["is_valid"] else "BREACH (<15d)"
+                    st.metric("Donor Cover Post-Override", f"{recalc['donor_cover_days']} days", delta=donor_status, delta_color="normal" if recalc["is_valid"] else "inverse")
+                with rc3:
+                    st.metric("Revised Handling Outlay", "₹250.00", delta="Zero New Working Capital")
+
+                # Dynamic Forward Trajectory Recalibration
+                v_burn = ad.get("v_predicted", m.get("daily_burn_rate", 1.0))
+                ov_proj = generate_14day_projections(
+                    current_stock=m["current_stock"],
+                    daily_burn=v_burn if v_burn > 0 else 1.0,
+                    transfer_qty=override_qty,
+                    primary_lead_time=m["primary_supplier_lead_time_days"],
+                    expedited_lead_time=3,
+                    expedited_qty=20,
+                    transfer_arrival_day=1
+                )
+                fig_ov = go.Figure()
+                fig_ov.add_trace(go.Scatter(
+                    x=ov_proj["days"],
+                    y=ov_proj["transfer"],
+                    mode="lines+markers",
+                    name=f"Counter-Proposal Curve ({override_qty} units)",
+                    line=dict(color="#10b981", width=3),
+                    marker=dict(size=6)
+                ))
+                if fp and "transfer" in fp:
+                    fig_ov.add_trace(go.Scatter(
                         x=fp["days"],
                         y=fp["transfer"],
                         mode="lines+markers",
-                        name="Option 1: Inter-Store Transfer (Day 1 Arrival)",
-                        line=dict(color="#2563eb", width=3.5),
-                        marker=dict(size=7)
+                        name=f"AI Proposed Baseline ({pay['qty']} units)",
+                        line=dict(color="#94a3b8", width=2, dash="dash"),
+                        marker=dict(size=5)
                     ))
-                    fig.add_hline(
-                        y=0,
-                        line_dash="dash",
-                        line_color="#dc2626",
-                        line_width=2,
-                        annotation_text="⚠️ Stockout Hazard Line (Zero Stock)",
-                        annotation_position="bottom right",
-                        annotation_font_color="#dc2626"
-                    )
-                    fig.update_layout(
-                        title=dict(
-                            text=f"Projected Inventory Levels (Next 14 Days): {p['sku_name']} @ {p['location']}",
-                            font=dict(size=13, color="#1e293b")
-                        ),
-                        xaxis=dict(title="Days Ahead", dtick=1, gridcolor="#f1f5f9"),
-                        yaxis=dict(title="Projected Stock (Units)", gridcolor="#f1f5f9"),
-                        hovermode="x unified",
-                        height=340,
-                        margin=dict(l=40, r=40, t=50, b=40),
-                        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-                        plot_bgcolor="white",
-                        paper_bgcolor="white"
-                    )
-                    st.plotly_chart(fig, use_container_width=True)
+                fig_ov.add_hline(y=0, line_dash="dash", line_color="#dc2626", annotation_text="Hazard Line")
+                fig_ov.update_layout(
+                    title=f"Dynamic Recalibration: Ramesh's Counter-Proposal ({override_qty} units) vs AI Draft ({pay['qty']} units)",
+                    xaxis_title="Days",
+                    yaxis_title="Stock (Units)",
+                    height=250,
+                    margin=dict(l=30, r=30, t=40, b=30),
+                    template="plotly_white"
+                )
+                st.plotly_chart(fig_ov, use_container_width=True)
+                
+                if not recalc["is_valid"]:
+                    st.error(f"⚠️ {recalc['warning']}")
+                else:
+                    st.success(f"✅ Safe transfer! Donor retains {recalc['donor_cover_days']} days buffer (>=15 days required).")
+                    if st.button(f"🚀 Approve & Execute Counter-Proposal ({override_qty} units)", key=f"app_ov_{pid}", type="primary"):
+                        mod_pay = dict(pay)
+                        mod_pay["qty"] = override_qty
+                        apply_action_approval(pid, act["action_type"], mod_pay)
+                        st.success(f"Counter-proposal approved with {override_qty} units! Inventory updated.")
+                        st.rerun()
 
-                opt_data = []
-                for opt in p["evaluated_options"]:
-                    opt_data.append({
-                        "Option Name": f"{opt['option_name']} [{opt.get('source', '')}]",
-                        "Delivery Time": f"{opt.get('lead_time_days', opt.get('delivery_time_days', 1))} days",
-                        "Total Cash Outlay": f"₹{opt.get('cash_impact_inr', opt.get('estimated_cost_inr', 0.0)):,.2f}",
-                        "Feasibility": opt.get("feasibility_status", opt.get("feasibility", "FEASIBLE")),
-                        "Summary": opt.get("trade_off_summary", opt.get("pros_cons", ""))
-                    })
-                st.dataframe(pd.DataFrame(opt_data), use_container_width=True, hide_index=True)
-                st.markdown(f"**🎯 AI Agent Recommendation Rationale:** {p['decision_rationale']}")
+        btn_col1, btn_col2, btn_col3 = st.columns([2, 1.5, 4])
+        with btn_col1:
+            if st.button(f"✅ Approve & Execute Draft", key=f"app_{pid}", type="primary"):
+                apply_action_approval(pid, act["action_type"], pay)
+                st.success(f"Action {act['action_type']} approved by Ramesh Kulkarni! State committed.")
+                st.rerun()
+        with btn_col2:
+            if st.button(f"❌ Reject", key=f"rej_{pid}"):
+                apply_action_rejection(pid)
+                st.warning(f"Action for {pid} rejected and recorded.")
+                st.rerun()
+    else:
+        st.caption(f"Status: Handled in audit log.")
 
-            # Simulated Action Box
-            act = p["simulated_action"]
-            pay = act["payload"]
+
+# ------------------------------------------------------------------------------
+# TAB 1: MORNING FEED
+# ------------------------------------------------------------------------------
+with tab_feed:
+    # 1. Initialize session state for selected problem
+    if "selected_problem_id" not in st.session_state:
+        gokak_prob = next((p for p in briefing.get("problems", []) if p.get("sku") == "FILTER-HYD-01" and p.get("location") == "Gokak"), None)
+        if gokak_prob:
+            st.session_state.selected_problem_id = gokak_prob["problem_id"]
+        elif briefing.get("problems"):
+            st.session_state.selected_problem_id = briefing["problems"][0]["problem_id"]
+        else:
+            st.session_state.selected_problem_id = None
+
+    # 2. Dedicated Chaos Injection Toolbar Row (Eliminates horizontal overlap)
+    with st.container():
+        c_title, c_chaos = st.columns([1, 2])
+        with c_title:
+            st.markdown("### 📋 Morning Operational Tasks")
+        with c_chaos:
+            st.markdown("**Chaos Injection Rig:**")
+            b1, b2, b3, b4 = st.columns(4)
+            if b1.button("🌪️ Demand Surge (3x)", key="btn_chaos_surge", use_container_width=True):
+                st.session_state.chaos_events.append({
+                    "scenario": "DEMAND_SPIKE",
+                    "event_type": "DEMAND_SURGE",
+                    "sku": "FILTER-HYD-01",
+                    "location": "Gokak",
+                    "multiplier_or_days": 3.0
+                })
+                st.toast("⚡ Injected 3x demand surge at Gokak!")
+                st.rerun()
+            if b2.button("🚧 Block Route", key="btn_chaos_block", use_container_width=True):
+                st.session_state.chaos_events.append({
+                    "scenario": "TRANSFER_ROADBLOCK",
+                    "event_type": "TRANSFER_BLOCKED",
+                    "sku": "FILTER-HYD-01",
+                    "from_location": "Belgaum",
+                    "to_location": "Gokak",
+                    "multiplier_or_days": 1.0
+                })
+                st.toast("⚡ Injected Belgaum transfer route block!")
+                st.rerun()
+            if b3.button("📈 Supplier Delay (+5d)", key="btn_chaos_delay", use_container_width=True):
+                st.session_state.chaos_events.append({
+                    "scenario": "SUPPLIER_HIKE",
+                    "event_type": "SUPPLIER_DELAY",
+                    "sku": "FILTER-HYD-01",
+                    "location": "Gokak",
+                    "multiplier_or_days": 5.0
+                })
+                st.toast("⚡ Injected supplier lead time delay (+5d)!")
+                st.rerun()
+            if b4.button("🔄 Reset Baseline", key="btn_chaos_reset", use_container_width=True):
+                st.session_state.chaos_events = []
+                seed_all_data(DATA_DIR)
+                if os.path.exists(AUDIT_LOG_FILE):
+                    os.remove(AUDIT_LOG_FILE)
+                st.success("Benchmark state restored!")
+                st.rerun()
+
+    st.divider()
+
+    # 3. Two-Column Split Pane: Left (Active Incidents Cards), Right (Task Workspace & Action)
+    col_tasks, col_workspace = st.columns([0.35, 0.65], gap="large")
+
+    with col_tasks:
+        st.subheader(f"Active Incidents ({len(briefing.get('problems', []))})")
+        
+        # Severity filter inside the task pane
+        sev_filter = st.selectbox("Filter Severity:", ["All", "CRITICAL", "HIGH", "MEDIUM"], key="pane_sev_filter")
+        filtered_problems = briefing.get("problems", [])
+        if sev_filter != "All":
+            filtered_problems = [p for p in filtered_problems if p["severity"] == sev_filter]
+
+        if not filtered_problems:
+            st.info("No incidents match the selected severity filter.")
+
+        for prob in filtered_problems:
+            pid = prob["problem_id"]
+            is_active = (pid == st.session_state.selected_problem_id)
+            is_handled = pid in approved_problem_ids
+
+            sev = prob.get("severity", "MEDIUM")
+            sev_color = "#EF4444" if sev == "CRITICAL" else ("#F59E0B" if sev == "HIGH" else "#3B82F6")
+            cat_code = prob.get("category_code", "")
             
-            st.markdown(f"""
-            <div class="action-box">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                    <div>
-                        <span class="badge-action">Simulated Action: {act['action_type']}</span>
-                        <span style="margin-left: 0.5rem; font-weight: 600; font-size: 0.9rem; color: #14532d;">
-                            Quantity: {pay['qty']} units • Total Estimated Cost: ₹{pay['total_estimated_cost_inr']:,.2f}
-                        </span>
+            m_prob = prob.get("domain_metrics", {})
+            stock_val = m_prob.get("current_stock", 0)
+            cover_val = m_prob.get("days_of_cover", 0.0)
+            gap_val = m_prob.get("stockout_gap_days", 0.0)
+            
+            with st.container(border=True):
+                st.markdown(
+                    f"""
+                    <div style="border-left: 4px solid {sev_color}; padding-left: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: {sev_color}; font-weight: 800; font-size: 0.8rem;">[{sev}] {cat_code}</span>
+                            <span style="font-size: 0.75rem; color: {'#16a34a' if is_handled else '#d97706'}; font-weight: 600;">
+                                {'✓ Done' if is_handled else '● Pending'}
+                            </span>
+                        </div>
+                        <h4 style="margin: 3px 0 2px 0; font-size: 1rem; color: #0f172a;">{prob.get('location', '')} — {prob.get('sku', '')}</h4>
+                        <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 6px;">{prob.get('sku_name', '')}</div>
+                        <p style="margin: 0; font-size: 0.82rem; color: #334155; font-family: monospace;">
+                            Stock: <b>{stock_val}</b> | Cover: <b>{cover_val:.1f}d</b> | Gap: <b>{gap_val:.1f}d</b>
+                        </p>
                     </div>
-                    <div style="font-size: 0.85rem; color: #166534; font-weight: 600;">
-                        Expected Arrival: {pay['expected_delivery_date']}
-                    </div>
-                </div>
-                <div style="font-size: 0.9rem; color: #1f2937;">
-                    <b>Route:</b> {pay['from_location_or_supplier']} ➔ <b>{pay['to_location']}</b> &nbsp;|&nbsp; 
-                    <b>Urgency:</b> {pay['urgency']} &nbsp;|&nbsp; 
-                    <b>Human Gate:</b> Simulated Draft (Mandatory Ramesh Kulkarni Approval Required)
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+                    """,
+                    unsafe_allow_html=True
+                )
+                
+                button_label = "● Viewing Active Task" if is_active else "👉 Inspect & Resolve ➔"
+                if st.button(button_label, key=f"select_btn_{pid}", use_container_width=True, disabled=is_active):
+                    st.session_state.selected_problem_id = pid
+                    st.rerun()
 
-            # Human-in-the-Loop Counter-Proposal & Approval Gate
-            if not is_handled:
-                # Dynamic Override Input for Transfers
-                if act["action_type"] == "TRANSFER_REQUEST":
-                    with st.expander("✏️ Ramesh's Counter-Proposal (Override Proposed Transfer Qty)", expanded=False):
-                        override_qty = st.number_input(
-                            f"Proposed Transfer Qty for {p['sku']} ({pay['from_location_or_supplier']} ➔ {pay['to_location']}):",
-                            min_value=1,
-                            max_value=100,
-                            value=pay["qty"],
-                            key=f"ov_{pid}"
-                        )
-                        recalc = validate_and_recalculate_transfer(
-                            from_loc=pay["from_location_or_supplier"],
-                            to_loc=pay["to_location"],
-                            sku=pay["sku"],
-                            requested_qty=override_qty,
-                            inventory=raw_inventory,
-                            sales=raw_sales
-                        )
-                        
-                        rc1, rc2, rc3 = st.columns(3)
-                        with rc1:
-                            st.metric("Recipient Cover Post-Override", f"{recalc['recipient_cover_days']} days", delta=f"{recalc['recipient_cover_days'] - m['days_of_cover']:.1f} days")
-                        with rc2:
-                            donor_status = "SAFE (>=15d)" if recalc["is_valid"] else "BREACH (<15d)"
-                            st.metric("Donor Cover Post-Override", f"{recalc['donor_cover_days']} days", delta=donor_status, delta_color="normal" if recalc["is_valid"] else "inverse")
-                        with rc3:
-                            st.metric("Revised Handling Outlay", "₹250.00", delta="Zero New Working Capital")
+    with col_workspace:
+        # Retrieve the currently selected incident
+        active_prob = next(
+            (p for p in briefing.get("problems", []) if p["problem_id"] == st.session_state.selected_problem_id),
+            None
+        )
+        if not active_prob and filtered_problems:
+            active_prob = filtered_problems[0]
+            st.session_state.selected_problem_id = active_prob["problem_id"]
 
-                        # Dynamic Forward Trajectory Recalibration
-                        v_burn = ad.get("v_predicted", m.get("daily_burn_rate", 1.0))
-                        ov_proj = generate_14day_projections(
-                            current_stock=m["current_stock"],
-                            daily_burn=v_burn if v_burn > 0 else 1.0,
-                            transfer_qty=override_qty,
-                            primary_lead_time=m["primary_supplier_lead_time_days"],
-                            expedited_lead_time=3,
-                            expedited_qty=20,
-                            transfer_arrival_day=1
-                        )
-                        fig_ov = go.Figure()
-                        fig_ov.add_trace(go.Scatter(
-                            x=ov_proj["days"],
-                            y=ov_proj["transfer"],
-                            mode="lines+markers",
-                            name=f"Counter-Proposal Curve ({override_qty} units)",
-                            line=dict(color="#10b981", width=3),
-                            marker=dict(size=6)
-                        ))
-                        if fp and "transfer" in fp:
-                            fig_ov.add_trace(go.Scatter(
-                                x=fp["days"],
-                                y=fp["transfer"],
-                                mode="lines+markers",
-                                name=f"AI Proposed Baseline ({pay['qty']} units)",
-                                line=dict(color="#94a3b8", width=2, dash="dash"),
-                                marker=dict(size=5)
-                            ))
-                        fig_ov.add_hline(y=0, line_dash="dash", line_color="#dc2626", annotation_text="Hazard Line")
-                        fig_ov.update_layout(
-                            title=f"Dynamic Recalibration: Ramesh's Counter-Proposal ({override_qty} units) vs AI Draft ({pay['qty']} units)",
-                            xaxis_title="Days",
-                            yaxis_title="Stock (Units)",
-                            height=250,
-                            margin=dict(l=30, r=30, t=40, b=30),
-                            template="plotly_white"
-                        )
-                        st.plotly_chart(fig_ov, use_container_width=True)
-                        
-                        if not recalc["is_valid"]:
-                            st.error(f"⚠️ {recalc['warning']}")
-                        else:
-                            st.success(f"✅ Safe transfer! Donor retains {recalc['donor_cover_days']} days buffer (>=15 days required).")
-                            if st.button(f"🚀 Approve & Execute Counter-Proposal ({override_qty} units)", key=f"app_ov_{pid}", type="primary"):
-                                mod_pay = dict(pay)
-                                mod_pay["qty"] = override_qty
-                                apply_action_approval(pid, act["action_type"], mod_pay)
-                                st.success(f"Counter-proposal approved with {override_qty} units! Inventory updated.")
-                                st.rerun()
-
-                btn_col1, btn_col2, btn_col3 = st.columns([2, 1.5, 4])
-                with btn_col1:
-                    if st.button(f"✅ Approve & Execute Draft", key=f"app_{pid}", type="primary"):
-                        apply_action_approval(pid, act["action_type"], pay)
-                        st.success(f"Action {act['action_type']} approved by Ramesh Kulkarni! State committed.")
-                        st.rerun()
-                with btn_col2:
-                    if st.button(f"❌ Reject", key=f"rej_{pid}"):
-                        apply_action_rejection(pid)
-                        st.warning(f"Action for {pid} rejected and recorded.")
-                        st.rerun()
-            else:
-                st.caption(f"Status: Handled in audit log.")
-
-            st.markdown("---")
+        if active_prob:
+            render_active_task_workspace(active_prob, approved_problem_ids, raw_inventory, raw_sales)
+        else:
+            st.info("Select an incident from the morning queue on the left to inspect evidence and execute actions.")
 
 # ------------------------------------------------------------------------------
 # TAB 2: MULTI-ECHELON INVENTORY
