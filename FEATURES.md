@@ -3,7 +3,7 @@
 **Track:** Cypher 2026 - Hackathon Challenge 01 (Agentic AI for Supply Chain)  
 **Operating Persona:** Autonomous AI Purchasing Colleague for **Ramesh Kulkarni** (Head of Purchasing)  
 **Operating Network:** 6 Retail Stores (*Gokak, Belgaum, Dharwad, Hubli, Bagalkot, Nippani*) & 2 Central Distribution Warehouses (*Belgaum Central Warehouse, Hubli Regional Warehouse*) across North Karnataka.  
-**Tech Stack:** Python 3.10+, FastAPI, Streamlit, Pandas, Plotly, Pydantic, Pytest  
+**Tech Stack:** Python 3.10+, FastAPI, NAVORA Terracotta/Cream UI (HTML5/Vanilla CSS/JS), Streamlit, Pandas, Plotly, Pydantic, Pytest  
 
 ---
 
@@ -119,30 +119,26 @@ Rather than merely displaying static reports or relying on unreliable LLM arithm
 
 ---
 
-### 3. Interactive Streamlit Executive Cockpit (`app/dashboard.py`)
+### 3. User Interfaces: NAVORA Operations Engine & Streamlit Cockpit
 
-- **Morning Priority Action Feed:**
-  - Problems ranked by severity (`CRITICAL`, `HIGH`, `MEDIUM`) with adaptive velocity indicators ($v_{30}$, $v_{7}$, Trend factor, Days of Cover, Stockout Gap).
-  - Complete mathematical transparency formula block with explicit commercial metrics ($v$, $D$, $\Delta$, $T$, Margin, Lost Revenue).
-- **Commercial Impact Scorecard:**
-  Side-by-side executive KPI cards:
-  - **Net Direct Cost (INR)**: ₹250 flat handling vs ₹28,000+ external supplier outlays.
-  - **Lost Units Averted**: Units protected against stockout deficit.
-  - **Working Capital Outflow**: ₹0.00 (internal asset reallocation) vs external capital commitment.
-  - **Downtime Risk Days**: 0 Days under transfer vs prolonged stockout under status quo.
-- **Interactive Plotly Forward Trajectory Graph:**
-  - Day-by-day 14-day stock trajectory curves across Status Quo (red dot), Expedited Vendor PO (amber dash), and Inter-Store Transfer (blue solid).
-  - Horizontal red dashed **Stockout Hazard Line** at $Y = 0$.
-- **Ramesh's Counter-Proposal Tool (Human Gate):**
-  - Numeric quantity override input with instant live recalculation of recipient cover days and donor buffer retention.
-  - Live dynamic Plotly comparison chart: Ramesh's Counter-Proposal curve vs AI Draft curve.
-  - Dynamic safety alert if requested quantity breaches donor's 15-day safety margin.
-  - Dedicated **[Approve & Execute Counter-Proposal]**, **[Approve & Execute Draft]**, and **[Reject]** buttons.
-- **Judge / Chaos Simulator Sidebar:**
-  - 🌪️ *Inject 3x Surge at Gokak*
-  - 🚧 *Block Belgaum Transfer Route*
-  - 📈 *Increase Supplier Lead Time by 5 Days*
-  - Live toast feedback and automatic runtime pipeline adaptation.
+#### 3.1. NAVORA Autonomous Operations Engine Dashboard (`NAVORA/dashboard.html` & `NAVORA/main.py`)
+Served directly at `http://127.0.0.1:8000/` as an executive-grade, standalone single-page application built with modern terracotta & warm cream glassmorphic aesthetics:
+- **Multi-Incident Network Dropdown Scanner:** Dynamically scans and switches across all 19 detected network problems across the 8 North Karnataka facilities (covering all 5 problem categories).
+- **Dark / Light Mode Toggle:** Seamless color scheme transitions between rich dark terracotta (`#181412`) and warm cream light mode (`#FAF6F0`).
+- **Closed-Form Mathematical Telemetry Proof Box (Rule 2 & Rule 11):** Explicitly renders formula proofs for Adaptive Consumption Velocity ($v_{\text{pred}}$, Trend $T$), Inventory Cover ($D$), Deficit Gap ($\Delta$), and Projected Margin at Risk.
+- **14-Day Forward Trajectory Projections (Rule 4):** Interactive SVG visualization displaying day-by-day projected inventory levels for Status Quo (🔴 cliff), Expedited Vendor PO (🟡), and Inter-Warehouse Transfer (🔵) with a dashed **Zero-Stock Hazard Line** and dynamic Counter-Proposal curve (🟢).
+- **Commercial Impact Scorecard (Rule 5):** 4 executive KPI cards demonstrating Net Direct Outlay (₹250 vs ₹28,000+), Lost Units Averted (14 units), Working Capital Outflow (₹0.00), and Downtime Risk (0 Days).
+- **Human-in-the-Loop Counter-Proposal Drawer (Rule 6, Rule 9, Rule 10):** Natural-language quantity adjustments with real-time recalculation and a dynamic **Donor Safety Buffer Alert** (green compliant badge for $\ge 15.0$ days cover; red glowing alert for buffer breach $< 15.0$ days with maximum safe transfer guidance).
+- **Live Chaos Injection Toolbar (Rule 12):** Quick-action perturbation buttons directly in the top command bar (`🌪️ Demand Surge 3x`, `🚧 Block Route`, `📈 Supplier Delay +5d`, and `🔄 Reset Baseline`) with active perturbations tracking.
+- **Embedded Inspection Modals:** Direct access to `🏢 Network Inventory (8 Facilities)`, `📜 Audit Ledger History`, and `Inspect JSON Telemetry`.
+
+#### 3.2. Interactive Streamlit Executive Cockpit (`app/dashboard.py`)
+Served at `http://127.0.0.1:8501/` for analytical deep-dives:
+- **Morning Priority Action Feed:** Problems ranked by severity (`CRITICAL`, `HIGH`, `MEDIUM`) with adaptive velocity indicators ($v_{30}$, $v_{7}$, Trend factor, Days of Cover, Stockout Gap).
+- **Commercial Impact Scorecard:** Side-by-side executive KPI cards detailing INR savings and working capital protection.
+- **Interactive Plotly Forward Trajectory Graph:** Day-by-day 14-day stock trajectory curves across Status Quo, Expedited Vendor PO, and Inter-Store Transfer with zero-stock hazard line.
+- **Ramesh's Counter-Proposal Tool (Human Gate):** Numeric quantity override input with instant live recalculation of recipient cover days and donor buffer retention.
+- **Judge / Chaos Simulator Sidebar:** Interactive triggers for surge, roadblock, and supplier delays.
 - **Multi-Echelon Network Stock Explorer:** Complete visibility across 6 stores and 2 central warehouses.
 - **Supplier Friction & Reliability Audit:** Real-time contract variance, lead-time feasibility, and MOQ risk tracking.
 - **Immutable Audit Trail:** Chronological log of approved and rejected human decisions with timestamps and execution details.
@@ -151,6 +147,7 @@ Rather than merely displaying static reports or relying on unreliable LLM arithm
 
 ### 4. Production REST API Endpoints (`app/server.py`)
 
+#### Core Kaveri Copilot & Governance Endpoints
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/health` | Service liveness health check |
@@ -165,11 +162,22 @@ Rather than merely displaying static reports or relying on unreliable LLM arithm
 | `GET` | `/audit-log` | Returns historical record of all human decisions |
 | `POST` | `/reset-data` | Restores benchmark state and clears active chaos events |
 
+#### NAVORA Direct Frontend Integration Endpoints
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/api/telemetry` | Returns structured telemetry for selected problem (or Gokak benchmark default) plus `all_incidents` list for the UI switcher |
+| `POST` | `/api/recalculate` | Instant closed-form recalculation with donor safety buffer ($\ge 15.0$ days) checks and forward projections |
+| `POST` | `/api/actions/approve` | Executes action approval, mutates inventory balances, and generates dispatch receipt with transaction ID |
+| `POST` | `/api/actions/reject` | Dismisses incident and records rejection reason code into audit trail |
+| `GET` | `/api/ledger` | Returns real-time multi-echelon inventory and transaction audit ledger |
+| `POST` | `/api/chaos` | Injects operational chaos perturbations (`DEMAND_SPIKE`, `TRANSFER_ROADBLOCK`, `SUPPLIER_HIKE`) |
+| `POST` | `/api/reset` | Resets data to pristine benchmark state and clears active chaos perturbations |
+
 ---
 
 ### 5. Automated Verification Suite (`tests/test_decisions.py`)
 
-All **26 automated test assertions** pass cleanly in **1.49 seconds**:
+All **26 automated test assertions** pass cleanly in **1.90 seconds**:
 
 ```bash
 python -m pytest tests/test_decisions.py -v
@@ -188,6 +196,12 @@ python -m pytest tests/test_decisions.py -v
 10. `test_chaos_injection_resilience`: Injects route block and asserts autonomous agent fallback to expedited procurement.
 11. `test_briefing_and_approval_api`: Validates FastAPI approval pipeline and inventory balance mutations.
 
+#### Live End-to-End Backend Audit Script:
+```bash
+python kaveri_copilot/scripts/test_live_backend.py
+```
+Validates all 5 operational pillars against real running HTTP endpoints with pass/fail markers.
+
 ---
 
 ## ⚡ Quick-Start Execution Commands
@@ -196,12 +210,19 @@ python -m pytest tests/test_decisions.py -v
 # 1. Run Automated Test Suite (26/26 tests passing)
 pytest tests/test_decisions.py -v
 
-# 2. Launch FastAPI Backend Server (Port 8000)
-uvicorn app.server:app --host 0.0.0.0 --port 8000
+# 2. Run Live Backend Contract Audit
+python kaveri_copilot/scripts/test_live_backend.py
 
-# 3. Launch Streamlit Executive Cockpit (Port 8501)
+# 3. Launch NAVORA Modern Operations Engine UI & Backend (Port 8000)
+python NAVORA/main.py
+# Or: uvicorn app.server:app --host 0.0.0.0 --port 8000
+# Access UI: http://127.0.0.1:8000/
+# API Docs:  http://127.0.0.1:8000/docs
+
+# 4. Launch Streamlit Executive Cockpit (Port 8501)
 streamlit run app/dashboard.py --server.port 8501
 
-# 4. Or launch both via runner script
+# 5. Launch both via runner script
 ./run.sh
 ```
+
