@@ -28,11 +28,22 @@ from engine.domain_math import (
     validate_and_recalculate_transfer,
     compute_adaptive_velocity,
     calculate_donor_transfer_safety,
-    generate_14day_projections
+    generate_14day_projections,
+    check_is_po_overdue,
+    clamp_inventory_projection
 )
-from engine.decision_agent import DecisionEngine, find_best_donor_location
+from engine.decision_agent import (
+    DecisionEngine,
+    find_best_donor_location,
+    find_best_donor_location_with_reservations
+)
 from engine.mock_data_gen import seed_all_data
-from app.server import app
+from app.server import (
+    app,
+    PROCESSED_ACTION_HASHES,
+    ACTIVE_TRANSFER_RESERVATIONS,
+    ACTIVE_CHAOS_EVENTS
+)
 
 
 @pytest.fixture(autouse=True)
@@ -43,6 +54,10 @@ def reset_test_data():
     audit_file = os.path.join(data_dir, "audit_log.json")
     if os.path.exists(audit_file):
         os.remove(audit_file)
+    PROCESSED_ACTION_HASHES.clear()
+    ACTIVE_TRANSFER_RESERVATIONS.clear()
+    ACTIVE_CHAOS_EVENTS.clear()
+
 
 
 class TestDomainMathEngine:
@@ -549,5 +564,76 @@ def test_telemetry_endpoint_404_on_nonexistent():
     assert response.status_code == 404
     response2 = client.get("/api/telemetry?sku=UNKNOWN-SKU&location=UNKNOWN-LOC")
     assert response2.status_code == 404
+
+
+def test_simulation_date_overdue_anchor():
+    """Verify overdue detection uses explicit simulation date rather than system clock."""
+    # Delivery date is 2026-10-05, sim date is 2026-10-09 -> Must be overdue
+    assert check_is_po_overdue("2026-10-05", "PENDING", simulation_date_str="2026-10-09") is True
+    # Delivery date is 2026-10-12, sim date is 2026-10-09 -> Not overdue
+    assert check_is_po_overdue("2026-10-12", "PENDING", simulation_date_str="2026-10-09") is False
+    # Delivered PO is never overdue
+    assert check_is_po_overdue("2026-10-05", "DELIVERED", simulation_date_str="2026-10-09") is False
+
+
+def test_negative_stock_clamping_and_lost_units():
+    """Ensure projection values never fall below 0.0 even under severe demand spikes."""
+    res = clamp_inventory_projection(starting_stock=5.0, daily_burn=4.0, horizon_days=5)
+    # Day 0: 5 - 4 = 1.0; Day 1: 1 - 4 = 0.0 (lost: 3.0); Day 2: lost: +4 = 7.0
+    assert min(res["projected_stock"]) == 0.0
+    assert res["projected_stock"] == [1.0, 0.0, 0.0, 0.0, 0.0]
+    assert res["unmet_demand_lost_units"][-1] == 15.0
+
+
+def test_shared_donor_reservation_deduction():
+    """Verify candidate with gross surplus is rejected if existing reservations leave <15d cover."""
+    mock_inv = pd.DataFrame([{"sku": "SEAL-01", "location": "Belgaum Central Warehouse", "current_stock": 20}])
+    mock_sales = pd.DataFrame([{"sku": "SEAL-01", "location": "Belgaum Central Warehouse", "qty_sold": 1.0}])
+    
+    # 20 stock - 10 already reserved = 10 effective stock.
+    # Needing 5 leaves 5 units -> 5 / 1.0 = 5 days cover (< 15d min) -> must be rejected
+    donor = find_best_donor_location_with_reservations(
+        mock_inv, mock_sales, "SEAL-01", "Gokak", needed_qty=5,
+        active_reservations={"Belgaum Central Warehouse:SEAL-01": 10}
+    )
+    assert donor is None
+
+
+def test_approval_idempotency_duplicate_conflict():
+    """Verify that duplicate POST /action/approve calls return HTTP 409 Conflict."""
+    client = TestClient(app)
+    body = {
+        "problem_id": "PRB-TEST-IDEMPOTENT-01",
+        "action_type": "TRANSFER_REQUEST",
+        "payload": {
+            "sku": "FILTER-HYD-01",
+            "from_location": "Belgaum",
+            "to_location": "Gokak",
+            "qty": 5
+        }
+    }
+    res1 = client.post("/action/approve", json=body)
+    assert res1.status_code == 200
+    res2 = client.post("/action/approve", json=body)
+    assert res2.status_code == 409
+
+
+def test_approval_safety_buffer_violation_400():
+    """Verify that transfer attempting to over-draft donor below 15 days returns HTTP 400."""
+    client = TestClient(app)
+    body = {
+        "problem_id": "PRB-TEST-UNSAFE-01",
+        "action_type": "TRANSFER_REQUEST",
+        "payload": {
+            "sku": "FILTER-HYD-01",
+            "from_location": "Belgaum",
+            "to_location": "Gokak",
+            "qty": 35  # Belgaum has 40 stock, burn 2.0 -> needs 30 safe reserve. Transferring 35 leaves 5 (2.5d cover < 15.0d)
+        }
+    }
+    res = client.post("/action/approve", json=body)
+    assert res.status_code == 400
+    assert "Safety buffer violation" in res.json()["detail"] or "15.0" in res.json()["detail"]
+
 
 

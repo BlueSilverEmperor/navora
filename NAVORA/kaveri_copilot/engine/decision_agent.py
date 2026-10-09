@@ -30,58 +30,89 @@ from engine.domain_math import (
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data"))
 
 
-def find_best_donor_location(
+def find_best_donor_location_with_reservations(
     inventory_df: Union[pd.DataFrame, List[Dict[str, Any]]],
     sales_df: Union[pd.DataFrame, List[Dict[str, Any]]],
     sku: str,
     target_location: str,
     needed_qty: int,
-) -> Optional[Dict[str, Any]]:
-    """Scans all network locations to identify the optimal qualified surplus donor."""
+    active_reservations: Optional[Dict[str, int]] = None,
+) -> Optional[dict]:
+    """Scans network donors accounting for already reserved units from pending transfer drafts."""
     if isinstance(inventory_df, list):
         inventory_df = pd.DataFrame(inventory_df)
     if isinstance(sales_df, list):
         sales_df = pd.DataFrame(sales_df)
 
+    active_res = active_reservations or {}
     stock_col = "current_stock" if "current_stock" in inventory_df.columns else "stock"
 
     candidates = inventory_df[
-        (inventory_df["sku"] == sku) & (inventory_df["location"] != target_location)
+        (inventory_df["sku"] == sku)
+        & (inventory_df["location"] != target_location)
     ]
 
     feasible_donors = []
 
     for _, row in candidates.iterrows():
         loc = row["location"]
-        stock = int(row[stock_col])
+        gross_stock = int(row[stock_col])
+        reserved = active_res.get(f"{loc}:{sku}", 0)
+        effective_available_stock = max(0, gross_stock - reserved)
 
-        sub_sales = sales_df[(sales_df["sku"] == sku) & (sales_df["location"] == loc)]
+        sub_sales = sales_df[
+            (sales_df["sku"] == sku) & (sales_df["location"] == loc)
+        ]
         donor_v = (
             float(sub_sales["qty_sold"].tail(30).mean())
             if len(sub_sales) > 0
             else 0.05
         )
 
-        safety = calculate_donor_transfer_safety(stock, donor_v, needed_qty)
+        # Evaluate safety buffer against effective available stock
+        safety = calculate_donor_transfer_safety(
+            effective_available_stock, donor_v, needed_qty
+        )
         if safety["is_safe"]:
             feasible_donors.append({
                 "donor_location": loc,
                 "location": loc,
-                "current_stock": stock,
-                "stock": stock,
+                "gross_stock": gross_stock,
+                "current_stock": gross_stock,
+                "stock": gross_stock,
+                "reserved_stock": reserved,
+                "effective_stock": effective_available_stock,
                 "donor_velocity": donor_v,
+                "burn_rate": donor_v,
                 "remaining_cover_days": safety["remaining_cover_days"],
                 "max_safe_transfer_qty": safety["max_safe_transfer_qty"],
                 "surplus": safety["max_safe_transfer_qty"],
-                "burn_rate": donor_v,
-                "cover_days": round(stock / donor_v, 1) if donor_v > 0 else 999.0
+                "cover_days": round(effective_available_stock / donor_v, 1) if donor_v > 0 else 999.0
             })
 
     if not feasible_donors:
         return None
 
-    # Rank by maximum remaining cover runway
     return max(feasible_donors, key=lambda x: x["remaining_cover_days"])
+
+
+def find_best_donor_location(
+    inventory_df: Union[pd.DataFrame, List[Dict[str, Any]]],
+    sales_df: Union[pd.DataFrame, List[Dict[str, Any]]],
+    sku: str,
+    target_location: str,
+    needed_qty: int,
+    active_reservations: Optional[Dict[str, int]] = None,
+) -> Optional[Dict[str, Any]]:
+    """Scans all network locations to identify the optimal qualified surplus donor."""
+    return find_best_donor_location_with_reservations(
+        inventory_df=inventory_df,
+        sales_df=sales_df,
+        sku=sku,
+        target_location=target_location,
+        needed_qty=needed_qty,
+        active_reservations=active_reservations,
+    )
 
 
 class DecisionEngine:
@@ -92,7 +123,8 @@ class DecisionEngine:
         blocked_routes: Optional[List[Any]] = None,
         demand_multipliers: Optional[Dict[str, float]] = None,
         supplier_overrides: Optional[Dict[str, Any]] = None,
-        chaos_events: Optional[List[Dict[str, Any]]] = None
+        chaos_events: Optional[List[Dict[str, Any]]] = None,
+        active_reservations: Optional[Dict[str, int]] = None
     ):
         self.data_dir = data_dir
         self.current_date = current_date
@@ -100,6 +132,7 @@ class DecisionEngine:
         self.demand_multipliers = demand_multipliers or {}
         self.supplier_overrides = supplier_overrides or {}
         self.chaos_events = chaos_events or []
+        self.active_reservations = active_reservations or {}
         self.products: List[Dict[str, Any]] = []
         self.inventory: List[Dict[str, Any]] = []
         self.sales: List[Dict[str, Any]] = []
@@ -281,7 +314,9 @@ class DecisionEngine:
             if self.is_route_blocked(loc, exclude_location, sku):
                 continue
 
-            stock = inv["stock"]
+            gross_stock = inv["stock"]
+            reserved = self.active_reservations.get(f"{loc}:{sku}", 0)
+            stock = max(0, gross_stock - reserved)
             burn = calculate_daily_burn_rate(self.sales, sku, loc, days_observed=30)
             safety = calculate_donor_transfer_safety(stock, burn, needed_qty)
 

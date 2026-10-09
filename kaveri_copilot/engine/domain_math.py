@@ -276,8 +276,7 @@ def evaluate_sku_location(
     for po in incoming:
         exp_dt_str = po.get("expected_date")
         if exp_dt_str:
-            exp_dt = datetime.strptime(exp_dt_str, "%Y-%m-%d")
-            if exp_dt < curr_dt and po.get("status") != "DELIVERED":
+            if check_is_po_overdue(exp_dt_str, po.get("status", "PENDING"), simulation_date_str=current_date):
                 overdue_pos.append(po)
 
     # Demand shift evaluation
@@ -484,4 +483,53 @@ def validate_and_recalculate_transfer(
         "recipient_cover_days": recip_cover,
         "warning": warning
     }
+
+
+def check_is_po_overdue(
+    expected_delivery_date_str: str,
+    po_status: str,
+    simulation_date_str: str = "2026-10-09",
+) -> bool:
+    """Evaluates overdue PO status against explicit simulation date, never system clock."""
+    if str(po_status).upper() in ["DELIVERED", "CANCELLED"]:
+        return False
+
+    sim_date = datetime.strptime(simulation_date_str, "%Y-%m-%d").date()
+    expected_date = datetime.strptime(expected_delivery_date_str, "%Y-%m-%d").date()
+    return expected_date < sim_date
+
+
+def clamp_inventory_projection(
+    starting_stock: float,
+    daily_burn: float,
+    horizon_days: int = 15,
+    incoming_shipments: Optional[Dict[int, float]] = None,
+) -> Dict[str, List[float]]:
+    """Clamps physical inventory to 0.0 and accumulates unfulfilled demand."""
+    incoming = incoming_shipments or {}
+    stock_path = []
+    unmet_demand_path = []
+
+    curr_stock = max(0.0, float(starting_stock))
+    accumulated_lost = 0.0
+
+    for day in range(horizon_days):
+        if day in incoming:
+            curr_stock += incoming[day]
+
+        if curr_stock >= daily_burn:
+            curr_stock -= daily_burn
+        else:
+            deficit = daily_burn - curr_stock
+            curr_stock = 0.0
+            accumulated_lost += deficit
+
+        stock_path.append(round(curr_stock, 1))
+        unmet_demand_path.append(round(accumulated_lost, 1))
+
+    return {
+        "projected_stock": stock_path,
+        "unmet_demand_lost_units": unmet_demand_path,
+    }
+
 

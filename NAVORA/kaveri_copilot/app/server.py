@@ -8,8 +8,9 @@ import json
 import os
 import sys
 import uuid
+import hashlib
 from datetime import datetime
-from typing import Dict, Any, List, Optional, Union
+from typing import Dict, Any, List, Optional, Union, Set
 
 # Ensure kaveri_copilot base directory is in sys.path
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -28,6 +29,8 @@ from engine.mock_data_gen import seed_all_data
 DATA_DIR = os.path.join(BASE_DIR, "data")
 AUDIT_LOG_FILE = os.path.join(DATA_DIR, "audit_log.json")
 ACTIVE_CHAOS_EVENTS: List[Dict[str, Any]] = []
+PROCESSED_ACTION_HASHES: Set[str] = set()
+ACTIVE_TRANSFER_RESERVATIONS: Dict[str, int] = {}
 
 app = FastAPI(
     title="Kaveri Spares & Hydraulics - Supply Chain Copilot API",
@@ -75,8 +78,38 @@ class ActionApprovalRequest(BaseModel):
     problem_id: str
     action_type: str = Field(..., description="TRANSFER_REQUEST, PURCHASE_ORDER, or SUPPLIER_EXPEDITE_NOTICE")
     payload: Union[ActionPayload, Dict[str, Any]]
-    approved_by: str = "Ramesh Kulkarni (Head of Purchasing)"
+    approved_by: Optional[str] = "Ramesh Kulkarni (Head of Purchasing)"
     notes: Optional[str] = "Approved via Autonomous Supply Chain Copilot"
+    client_request_id: Optional[str] = None
+
+
+ApproveActionRequest = ActionApprovalRequest
+
+
+def log_audit_trail_entry(
+    problem_id: str,
+    action_type: str,
+    status: str,
+    payload: dict,
+    approved_by: str = "Ramesh Kulkarni (Head of Purchasing)",
+    execution_details: dict = None,
+    notes: str = None
+) -> Dict[str, Any]:
+    logs = load_audit_log()
+    audit_entry = {
+        "audit_id": f"AUD-{uuid.uuid4().hex[:8].upper()}",
+        "timestamp": datetime.now().isoformat(),
+        "problem_id": problem_id,
+        "action_type": action_type,
+        "status": status,
+        "approved_by": approved_by,
+        "payload": payload,
+        "execution_details": execution_details or {},
+        "notes": notes or "Approved via Autonomous Supply Chain Copilot"
+    }
+    logs.insert(0, audit_entry)
+    save_audit_log(logs)
+    return audit_entry
 
 
 class ActionRejectRequest(BaseModel):
@@ -111,6 +144,8 @@ def get_dashboard_ui():
 def reset_benchmark_state():
     """Resets data to pristine benchmark state and clears active chaos events."""
     ACTIVE_CHAOS_EVENTS.clear()
+    PROCESSED_ACTION_HASHES.clear()
+    ACTIVE_TRANSFER_RESERVATIONS.clear()
     seed_all_data(DATA_DIR)
     if os.path.exists(AUDIT_LOG_FILE):
         os.remove(AUDIT_LOG_FILE)
@@ -142,45 +177,97 @@ def approve_action(req: ActionApprovalRequest):
     """
     Human-in-the-loop signoff gate.
     Executes the simulated action payload, updates inventory/PO records,
-    and logs the decision into the audit trail.
+    and logs the decision into the audit trail with idempotency and safety buffer guards.
     """
-    inventory_path = os.path.join(DATA_DIR, "inventory.json")
-    po_path = os.path.join(DATA_DIR, "purchase_orders.json")
-
-    with open(inventory_path, "r", encoding="utf-8") as f:
-        inventory = json.load(f)
-    with open(po_path, "r", encoding="utf-8") as f:
-        purchase_orders = json.load(f)
-
     if isinstance(req.payload, dict):
-        sku = req.payload.get("sku")
-        qty = req.payload.get("qty", 0)
-        from_loc_or_sup = req.payload.get("from_location_or_supplier") or req.payload.get("from_location") or ""
-        to_loc = req.payload.get("to_location", "")
-        exp_date = req.payload.get("expected_delivery_date", "")
         payload_dict = req.payload
+        sku = payload_dict.get("sku")
+        qty = int(payload_dict.get("qty", 0))
+        from_loc = payload_dict.get("from_location") or payload_dict.get("from_location_or_supplier") or ""
+        to_loc = payload_dict.get("to_location", "")
+        exp_date = payload_dict.get("expected_delivery_date", "")
     else:
+        payload_dict = req.payload.dict() if hasattr(req.payload, "dict") else req.payload.model_dump()
         sku = req.payload.sku
-        qty = req.payload.qty
-        from_loc_or_sup = req.payload.from_location_or_supplier or req.payload.from_location or ""
+        qty = int(req.payload.qty)
+        from_loc = req.payload.from_location or req.payload.from_location_or_supplier or ""
         to_loc = req.payload.to_location
         exp_date = req.payload.expected_delivery_date
-        payload_dict = req.payload.model_dump()
+
+    # 1. Idempotency Check
+    action_payload_signature = hashlib.sha256(
+        f"{req.problem_id}:{req.action_type}:{sku}:{from_loc}:{to_loc}:{qty}".encode()
+    ).hexdigest()
+
+    idempotency_key = req.client_request_id or action_payload_signature
+    if idempotency_key in PROCESSED_ACTION_HASHES:
+        raise HTTPException(
+            status_code=409,
+            detail="Duplicate action detected: this proposal has already been approved and executed."
+        )
 
     execution_details = {}
 
+    # 2. Atomic Pre-Commit Balance & Donor Buffer Verification
     if req.action_type == "TRANSFER_REQUEST":
-        donor_loc = from_loc_or_sup
-        if "Belgaum" in donor_loc and any(inv["sku"] == sku and inv["location"] == "Belgaum" for inv in inventory):
-            donor_loc = "Belgaum"
+        state = get_runtime_state()
+        inv_df = state["inventory"]
+
+        # Match donor location
+        donor_rows = inv_df[(inv_df["sku"] == sku) & (inv_df["location"] == from_loc)]
+        if donor_rows.empty and from_loc:
+            prefix = from_loc.split()[0]
+            donor_rows = inv_df[(inv_df["sku"] == sku) & (inv_df["location"].str.contains(prefix, case=False, na=False))]
+
+        if donor_rows.empty:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Donor location {from_loc} does not carry SKU {sku}."
+            )
+
+        matched_from_loc = donor_rows.iloc[0]["location"]
+        current_donor_stock = int(donor_rows.iloc[0]["current_stock"])
+
+        sales_df = state["sales"]
+        sub_sales = sales_df[(sales_df["sku"] == sku) & (sales_df["location"] == matched_from_loc)]
+        donor_v = (
+            float(sub_sales["qty_sold"].tail(30).mean())
+            if len(sub_sales) > 0
+            else 0.05
+        )
+
+        # Validate physical availability
+        if current_donor_stock < qty:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Insufficient stock: {matched_from_loc} has {current_donor_stock} units, cannot transfer {qty}."
+            )
+
+        # Validate 15-day safety retention constraint
+        post_transfer_cover = (current_donor_stock - qty) / (
+            donor_v if donor_v > 0 else 0.05
+        )
+        if post_transfer_cover < 15.0:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    f"Safety buffer violation: Transfer would leave donor {matched_from_loc} with "
+                    f"{round(post_transfer_cover, 1)} days cover (< 15.0 days minimum)."
+                )
+            )
+
+        # 3. Apply State Mutation to inventory.json
+        inventory_path = os.path.join(DATA_DIR, "inventory.json")
+        with open(inventory_path, "r", encoding="utf-8") as f:
+            inventory = json.load(f)
 
         donor_found = False
         recip_found = False
         for inv in inventory:
-            if inv["sku"] == sku and inv["location"] == donor_loc:
+            if inv["sku"] == sku and inv["location"] == matched_from_loc:
                 inv["stock"] = max(0, inv["stock"] - qty)
                 donor_found = True
-            elif inv["sku"] == sku and inv["location"] == to_loc:
+            elif inv["sku"] == sku and (inv["location"] == to_loc or to_loc in inv["location"]):
                 inv["stock"] = inv["stock"] + qty
                 recip_found = True
 
@@ -190,18 +277,29 @@ def approve_action(req: ActionApprovalRequest):
         with open(inventory_path, "w", encoding="utf-8") as f:
             json.dump(inventory, f, indent=2)
 
+        # Release any reservations
+        res_key = f"{matched_from_loc}:{sku}"
+        if res_key in ACTIVE_TRANSFER_RESERVATIONS:
+            ACTIVE_TRANSFER_RESERVATIONS[res_key] = max(
+                0, ACTIVE_TRANSFER_RESERVATIONS[res_key] - qty
+            )
+
         execution_details = {
             "type": "STOCK_REBALANCED",
             "transferred_qty": qty,
-            "from": from_loc_or_sup,
+            "from": matched_from_loc,
             "to": to_loc
         }
 
     elif req.action_type == "PURCHASE_ORDER":
+        po_path = os.path.join(DATA_DIR, "purchase_orders.json")
+        with open(po_path, "r", encoding="utf-8") as f:
+            purchase_orders = json.load(f)
+
         po_id = f"PO-{datetime.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:4].upper()}"
         new_po = {
             "po": po_id,
-            "supplier": from_loc_or_sup,
+            "supplier": from_loc,
             "sku": sku,
             "location": to_loc,
             "qty": qty,
@@ -215,47 +313,46 @@ def approve_action(req: ActionApprovalRequest):
         execution_details = {
             "type": "PURCHASE_ORDER_ISSUED",
             "po_number": po_id,
-            "supplier": from_loc_or_sup,
+            "supplier": from_loc,
             "qty": qty
         }
 
     elif req.action_type in ("SUPPLIER_EXPEDITE_NOTICE", "EXPEDITE_NOTICE"):
-        # Update matching overdue PO
-        updated = False
+        po_path = os.path.join(DATA_DIR, "purchase_orders.json")
+        with open(po_path, "r", encoding="utf-8") as f:
+            purchase_orders = json.load(f)
+
         for po in purchase_orders:
-            if po["sku"] == sku and (po.get("supplier") == from_loc_or_sup or po.get("location") == to_loc) and po.get("status") != "DELIVERED":
+            if po["sku"] == sku and (po.get("supplier") == from_loc or po.get("location") == to_loc) and po.get("status") != "DELIVERED":
                 po["status"] = "EXPEDITED"
-                updated = True
 
         with open(po_path, "w", encoding="utf-8") as f:
             json.dump(purchase_orders, f, indent=2)
 
         execution_details = {
             "type": "EXPEDITE_NOTICE_DISPATCHED",
-            "supplier": from_loc_or_sup,
+            "supplier": from_loc,
             "sku": sku
         }
 
-    # Record Audit Entry
-    logs = load_audit_log()
-    audit_entry = {
-        "audit_id": f"AUD-{uuid.uuid4().hex[:8].upper()}",
-        "timestamp": datetime.now().isoformat(),
-        "problem_id": req.problem_id,
-        "action_type": req.action_type,
-        "status": "APPROVED",
-        "approved_by": req.approved_by,
-        "payload": payload_dict,
-        "execution_details": execution_details,
-        "notes": req.notes
-    }
-    logs.insert(0, audit_entry)
-    save_audit_log(logs)
+    # 4. Mark Idempotency Signature & Record Audit Log
+    PROCESSED_ACTION_HASHES.add(idempotency_key)
+    record_entry = log_audit_trail_entry(
+        problem_id=req.problem_id,
+        action_type=req.action_type,
+        status="APPROVED",
+        payload=payload_dict,
+        approved_by=req.approved_by or "Ramesh Kulkarni (Head of Purchasing)",
+        execution_details=execution_details,
+        notes=req.notes or "Approved via Autonomous Supply Chain Copilot"
+    )
 
     return {
         "status": "SUCCESS",
-        "message": f"Action {req.action_type} successfully approved and executed.",
-        "audit_entry": audit_entry
+        "action_id": idempotency_key,
+        "message": f"Action {req.action_type} successfully approved and balances mutated for {sku}.",
+        "audit_entry": record_entry,
+        "audit_record": record_entry
     }
 
 

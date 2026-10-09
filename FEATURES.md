@@ -243,7 +243,7 @@ Validates all 5 operational pillars against real running HTTP endpoints with pas
 ## ⚡ Quick-Start Execution Commands
 
 ```bash
-# 1. Run Automated Test Suite (26/26 tests passing)
+# 1. Run Automated Test Suite (35/35 tests passing)
 pytest tests/test_decisions.py -v
 
 # 2. Run Live Backend Contract Audit
@@ -261,4 +261,22 @@ streamlit run app/dashboard.py --server.port 8501
 # 5. Launch both via runner script
 ./run.sh
 ```
+
+---
+
+## 🛡️ Production Vulnerability Hardening (35/35 Tests Passing)
+
+1. **Simulation Date Desync Eliminated:**
+   - Business logic uncoupled from system clock (`datetime.today()` / `datetime.now()`).
+   - All overdue checks anchored to configurable `simulation_date` (`"2026-10-09"` default) via `check_is_po_overdue()`.
+2. **Double-Action Race & Idempotency Protection:**
+   - In-memory `PROCESSED_ACTION_HASHES` tracking with SHA-256 signatures or client-supplied `client_request_id`.
+   - `POST /action/approve` immediately rejects duplicate calls with `HTTP 409 Conflict`.
+3. **Shared Donor Contention Guard:**
+   - Multi-store transfer conflicts prevented through active reservation tracking (`ACTIVE_TRANSFER_RESERVATIONS`).
+   - Donor viability evaluated against `effective_available_stock = max(0, gross_stock - reserved)`.
+   - Transfers verified before commit to ensure donor retains $\ge 15.0$ days cover, returning `HTTP 400 Bad Request` on breach.
+4. **Physical Floor Clamping & Unfulfilled Demand Metrics:**
+   - `clamp_inventory_projection()` guarantees projected inventory never dips below `0.0`.
+   - Accumulated unfulfilled stockout deficits are tracked in `unmet_demand_lost_units`.
 
