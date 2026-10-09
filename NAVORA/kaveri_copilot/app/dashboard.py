@@ -628,7 +628,7 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     st.markdown("<hr style='border: none; border-top: 1px solid #382525; margin: 16px 0;'>", unsafe_allow_html=True)
-    st.markdown("<h4 style='color: #FFFFFF; font-size: 1.05rem; font-weight: 700; margin-bottom: 6px;'>⚡ Live Chaos Rig</h4>", unsafe_allow_html=True)
+    st.markdown("<h4 style='color: #FFFFFF; font-size: 1.05rem; font-weight: 700; margin-bottom: 6px;'>⚡ Chaos Engine</h4>", unsafe_allow_html=True)
     st.markdown("<p style='color: #F3F4F6; font-size: 0.9rem; font-weight: 500; margin-bottom: 12px;'>Inject shocks to evaluate real-time agent adaptability:</p>", unsafe_allow_html=True)
     
     if st.button("🌪️ 3x Demand Spike (Gokak)", use_container_width=True):

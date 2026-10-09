@@ -185,9 +185,9 @@ Built with a sleek, high-contrast industrial aesthetic engineered for intense su
 3. **`🔍 Supplier Friction & Reliability Audit`:** Supplier audit tracking purchase order lead times, contract markup variances, MOQ feasibility constraints, and reliability ratings.
 4. **`📜 Immutable Audit Trail`:** Chronological ledger of all approved and rejected human decisions with timestamps, operator identity, and mutated balances.
 
-##### ⚡ Dedicated Sidebar Operating Controls & Chaos Rig
+##### ⚡ Dedicated Sidebar Operating Controls & Chaos Engine
 - Operating Persona & Network config (6 retail stores + 2 central distribution hubs).
-- **Chaos Testing Rig (Rule 12):** Isolated in the sidebar to prevent UI overlap collisions, featuring runtime triggers for `🌪️ Demand Surge 3x`, `🚧 Block Route Gokak-Belgaum`, `📈 Supplier Delay +5d`, and `🔄 Reset Baseline`.
+- **Chaos Engine Controls (Rule 12):** Isolated in the sidebar to prevent UI overlap collisions, featuring runtime triggers for `🌪️ Demand Surge 3x`, `🚧 Block Route Gokak-Belgaum`, `📈 Supplier Delay +5d`, and `🔄 Reset Baseline`.
 
 ---
 
