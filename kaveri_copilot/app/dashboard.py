@@ -41,21 +41,19 @@ st.set_page_config(
 )
 
 # ==============================================================================
-# 1. DARK CYBER-AMBER THEME INJECTION (MATCHING PIC 2 PALETTE & PIC 1 HIERARCHY)
+# UNIFIED DESIGN SYSTEM: OBSIDIAN & CYBER-AMBER TOKENS
 # ==============================================================================
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
-
-    /* Global Dark Cyber-Amber Backgrounds */
+    /* Global Base */
     .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
-        background-color: #120E0E !important;
+        background-color: #110E0E !important;
         color: #F3F4F6 !important;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
-
+    
     [data-testid="stSidebar"] {
-        background-color: #181313 !important;
+        background-color: #171212 !important;
         border-right: 1px solid #2B1E1E !important;
         color: #F3F4F6 !important;
     }
@@ -64,12 +62,37 @@ st.markdown("""
         color: #F3F4F6 !important;
     }
 
-    /* Top Banner Card */
+    /* Input Elements Uniformity */
+    .stTextInput input, .stNumberInput input {
+        background-color: #1F1717 !important;
+        color: #FFFFFF !important;
+        border: 1px solid #3E2929 !important;
+        border-radius: 6px !important;
+    }
+    .stTextInput input:focus, .stNumberInput input:focus {
+        border-color: #FF5733 !important;
+        box-shadow: 0 0 6px rgba(255, 87, 51, 0.4) !important;
+    }
+
+    /* Tab Uniformity */
+    button[data-baseweb="tab"] {
+        background-color: transparent !important;
+        color: #9CA3AF !important;
+        font-weight: 600 !important;
+        border-bottom: 2px solid transparent !important;
+        padding: 10px 18px !important;
+    }
+    button[data-baseweb="tab"][aria-selected="true"] {
+        color: #FF5733 !important;
+        border-bottom: 2px solid #FF5733 !important;
+    }
+
+    /* Top Executive Banner */
     .top-banner {
-        background: linear-gradient(135deg, #1E1717 0%, #151010 100%);
-        border: 1px solid #332424;
+        background: linear-gradient(135deg, #1C1515 0%, #130E0E 100%);
+        border: 1px solid #302020;
         border-radius: 12px;
-        padding: 24px 30px;
+        padding: 22px 28px;
         margin-bottom: 20px;
         display: flex;
         justify-content: space-between;
@@ -77,113 +100,119 @@ st.markdown("""
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
     }
 
-    /* 4 KPI Summary Strip Metric Cards */
-    .kpi-card {
-        background-color: #1A1414;
-        border: 1px solid #2D2020;
+    /* KPI Cards */
+    .kpi-box, .kpi-card {
+        background-color: #181212;
+        border: 1px solid #2B1E1E;
         border-radius: 10px;
         padding: 16px 20px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
         transition: transform 0.15s ease, border-color 0.15s ease;
     }
-    .kpi-card:hover {
+    .kpi-box:hover, .kpi-card:hover {
         border-color: #FF5733;
         transform: translateY(-2px);
     }
-    .kpi-val {
-        font-size: 2.1rem;
-        font-weight: 700;
-        color: #FFFFFF;
-        line-height: 1.1;
-        margin: 4px 0;
-        font-family: 'JetBrains Mono', monospace;
-    }
-    .kpi-label {
+    .kpi-title, .kpi-label {
         font-size: 0.78rem;
         color: #9CA3AF;
         text-transform: uppercase;
+        font-weight: 600;
         letter-spacing: 0.5px;
-        font-weight: 600;
     }
-    .kpi-sub-green {
-        color: #10B981;
-        font-size: 0.8rem;
-        font-weight: 600;
+    .kpi-number, .kpi-val {
+        font-size: 2.1rem;
+        font-weight: 800;
+        color: #FFFFFF;
+        margin: 4px 0;
+        line-height: 1.1;
+        font-family: 'JetBrains Mono', 'Courier New', monospace;
     }
-    .kpi-sub-red {
-        color: #EF4444;
-        font-size: 0.8rem;
-        font-weight: 600;
-    }
-    .kpi-sub-amber {
-        color: #FF6B4A;
-        font-size: 0.8rem;
-        font-weight: 600;
-    }
+    .kpi-foot-green, .kpi-sub-green { color: #10B981; font-size: 0.8rem; font-weight: 600; }
+    .kpi-foot-red, .kpi-sub-red { color: #EF4444; font-size: 0.8rem; font-weight: 600; }
+    .kpi-sub-amber { color: #FF6B4A; font-size: 0.8rem; font-weight: 600; }
 
-    /* Master-Detail Task Cards (Left Column) */
-    .task-card {
-        background-color: #1A1414;
-        border: 1px solid #2E2222;
+    /* Task Incident Feed Cards */
+    .incident-card, .task-card {
+        background-color: #181212;
+        border: 1px solid #2B1E1E;
         border-radius: 8px;
         padding: 14px 16px;
-        margin-bottom: 12px;
-        transition: all 0.2s ease;
+        margin-bottom: 10px;
+        transition: border 0.15s ease, background 0.15s ease;
     }
-    .task-card:hover {
+    .incident-card:hover, .task-card:hover {
         border-color: rgba(255, 87, 51, 0.5);
     }
-    .task-card-active {
-        background-color: #241818 !important;
+    .incident-card-active, .task-card-active {
+        background-color: #241616 !important;
         border: 1.5px solid #FF5733 !important;
-        box-shadow: 0 0 14px rgba(255, 87, 51, 0.2);
+        box-shadow: 0 0 10px rgba(255, 87, 51, 0.2);
+    }
+    
+    /* Monospace Math Block */
+    .math-terminal, .telemetry-card {
+        background-color: #0E0B0B !important;
+        border: 1px solid #2B1D1D !important;
+        border-left: 4px solid #FF5733 !important;
+        border-radius: 6px !important;
+        padding: 14px 18px !important;
+        font-family: "Courier New", "Roboto Mono", monospace !important;
+        font-size: 0.84rem !important;
+        color: #FFA38A !important;
+        line-height: 1.6 !important;
+        margin-bottom: 18px !important;
     }
 
-    /* Pill Badges */
+    /* Badges */
     .badge-critical {
-        background-color: #3B1212;
+        background-color: #381212;
         color: #EF4444;
-        font-size: 0.75rem;
+        font-size: 0.72rem;
         font-weight: 700;
-        padding: 3px 8px;
+        padding: 2px 7px;
         border-radius: 4px;
         border: 1px solid #7F1D1D;
+    }
+    .badge-tag, .badge-cat {
+        background-color: #1B202A;
+        color: #93C5FD;
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 2px 7px;
+        border-radius: 4px;
+        border: 1px solid #1E3A8A;
+        margin-left: 4px;
     }
     .badge-high {
         background-color: #3B2A12;
         color: #F59E0B;
-        font-size: 0.75rem;
+        font-size: 0.72rem;
         font-weight: 700;
-        padding: 3px 8px;
+        padding: 2px 7px;
         border-radius: 4px;
         border: 1px solid #78350F;
     }
     .badge-medium {
         background-color: #132B3A;
         color: #38BDF8;
-        font-size: 0.75rem;
+        font-size: 0.72rem;
         font-weight: 700;
-        padding: 3px 8px;
+        padding: 2px 7px;
         border-radius: 4px;
         border: 1px solid #0369A1;
-    }
-    .badge-cat {
-        background-color: #1F242D;
-        color: #93C5FD;
-        font-size: 0.75rem;
-        font-weight: 600;
-        padding: 3px 8px;
-        border-radius: 4px;
-        border: 1px solid #1E3A8A;
-        margin-left: 6px;
     }
 
     /* Diagnostic Cockpit Container */
     .diag-container {
-        background-color: #1A1414;
-        border: 1px solid #2D2020;
+        background-color: #181212;
+        border: 1px solid #2B1E1E;
         border-radius: 10px;
-        padding: 20px 24px;
-        margin-bottom: 20px;
+        padding: 18px 22px;
+        margin-bottom: 18px;
     }
 
     /* 6 Core Metrics Cards (Right Column) */
@@ -205,38 +234,8 @@ st.markdown("""
         font-size: 1.35rem;
         font-weight: 700;
         color: #FFFFFF;
-        font-family: 'JetBrains Mono', monospace;
+        font-family: 'JetBrains Mono', 'Courier New', monospace;
     }
-
-    /* Closed-Form Math Telemetry Proof Card */
-    .telemetry-card {
-        background-color: #0F0C0C !important;
-        border: 1px solid #2B1E1E !important;
-        border-left: 4px solid #FF5733 !important;
-        border-radius: 8px !important;
-        padding: 16px 20px !important;
-        margin-bottom: 20px !important;
-        font-family: 'JetBrains Mono', monospace !important;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4) !important;
-    }
-    .telemetry-header {
-        color: #FF8566 !important;
-        font-weight: 700 !important;
-        font-size: 0.92rem !important;
-        margin-bottom: 8px !important;
-        letter-spacing: 0.02em !important;
-    }
-    .telemetry-line {
-        color: #D1D5DB !important;
-        font-size: 0.85rem !important;
-        line-height: 1.7 !important;
-        margin-bottom: 4px !important;
-    }
-    .telemetry-tag-cyan { color: #38BDF8 !important; font-weight: 600 !important; }
-    .telemetry-tag-yellow { color: #FACC15 !important; font-weight: 600 !important; }
-    .telemetry-tag-red { color: #EF4444 !important; font-weight: 700 !important; }
-    .telemetry-tag-green { color: #10B981 !important; font-weight: 600 !important; }
-    .telemetry-tag-amber { color: #FF6B4A !important; font-weight: 600 !important; }
 
     /* Commercial Impact Scorecard Cards */
     .scorecard-card {
@@ -257,7 +256,7 @@ st.markdown("""
         font-size: 1.3rem;
         font-weight: 700;
         color: #FFFFFF;
-        font-family: 'JetBrains Mono', monospace;
+        font-family: 'JetBrains Mono', 'Courier New', monospace;
     }
     .scorecard-sub {
         font-size: 0.72rem;
@@ -310,17 +309,6 @@ st.markdown("""
     div.stButton > button[kind="primary"]:hover {
         color: #FFFFFF !important;
         transform: translateY(-1px) !important;
-    }
-
-    /* Tabs Styling */
-    button[data-baseweb="tab"] {
-        background-color: transparent !important;
-        color: #9CA3AF !important;
-        font-weight: 600 !important;
-    }
-    button[data-baseweb="tab"][aria-selected="true"] {
-        color: #FF5733 !important;
-        border-bottom-color: #FF5733 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -467,9 +455,9 @@ def reset_baseline():
 if "chaos_events" not in st.session_state:
     st.session_state.chaos_events = []
 
-# ==============================================================================
-# 2. SIDEBAR CONFIGURATION (EXACT PIC 1 STRUCTURE WITH DARK CYBER STYLING)
-# ==============================================================================
+# ---------------------------------------------------------
+# SIDEBAR CONTROLS
+# ---------------------------------------------------------
 with st.sidebar:
     st.markdown("### ⚙️ Operating Controls")
     sim_date = st.text_input("Simulation Date", value="2026/10/09")
@@ -479,20 +467,20 @@ with st.sidebar:
     st.markdown("👨‍💼 **Ramesh Kulkarni**  \n*Head of Purchasing*")
 
     st.markdown("#### Operations Network:")
-    st.caption("🏬 **6 Retail Stores:** Gokak, Belgaum, Dharwad, Hubli, Bagalkot, Nippani")
-    st.caption("🏭 **2 Central Warehouses:** Belgaum Central, Hubli Regional")
+    st.caption("🏬 6 Stores: Gokak, Belgaum, Dharwad, Hubli, Bagalkot, Nippani")
+    st.caption("🏭 2 Hubs: Belgaum Central, Hubli Regional")
 
     st.markdown("---")
-    st.markdown("#### ⚡ Judge / Chaos Test Suite")
-    st.caption("Inject live operational shocks to test autonomous resilience:")
+    st.markdown("#### ⚡ Live Chaos Rig")
+    st.caption("Inject shocks to evaluate real-time agent adaptability:")
     
-    if st.button("🌪️ 3x Surge (Gokak)", use_container_width=True):
+    if st.button("🌪️ 3x Demand Spike (Gokak)", use_container_width=True):
         inject_chaos("DEMAND_SPIKE")
     if st.button("🚧 Block Belgaum Route", use_container_width=True):
         inject_chaos("TRANSFER_ROADBLOCK")
-    if st.button("📈 Vendor Lead Time +5d", use_container_width=True):
+    if st.button("📈 Vendor Delay (+5 Days)", use_container_width=True):
         inject_chaos("SUPPLIER_HIKE")
-    if st.button("🔄 Reset Baseline State", use_container_width=True):
+    if st.button("🔄 Reset to Benchmark Baseline", use_container_width=True):
         reset_baseline()
 
     if st.session_state.chaos_events:
@@ -521,18 +509,18 @@ with open(os.path.join(DATA_DIR, "sales.json"), "r", encoding="utf-8") as f:
     raw_sales = json.load(f)
 
 
-# ==============================================================================
-# 4. TOP EXECUTIVE HEADER BANNER (MATCHING PIC 1 LAYOUT WITH PIC 2 PALETTE)
-# ==============================================================================
+# ---------------------------------------------------------
+# EXECUTIVE HEADER & KPI STRIP
+# ---------------------------------------------------------
 st.markdown("""
 <div class="top-banner">
     <div>
         <h1 style="margin: 0; font-size: 1.85rem; font-weight: 800; color: #FFFFFF;">Kaveri Spares & Hydraulics</h1>
-        <p style="margin: 6px 0 0 0; color: #9CA3AF; font-size: 0.95rem;">
+        <p style="margin: 4px 0 0 0; color: #9CA3AF; font-size: 0.92rem;">
             Autonomous Supply Chain Copilot & Purchasing Colleague for Ramesh Kulkarni
         </p>
     </div>
-    <div style="background-color: #231919; border: 1px solid #3E2929; border-radius: 8px; padding: 6px 14px; font-size: 0.85rem; font-weight: 600; color: #E5E7EB;">
+    <div style="background-color: #241818; border: 1px solid #3F2929; border-radius: 8px; padding: 6px 14px; font-size: 0.85rem; font-weight: 600; color: #E5E7EB;">
         Cypher 2026 • Challenge 01
     </div>
 </div>
@@ -541,44 +529,40 @@ st.markdown("""
 if st.session_state.chaos_events:
     st.error(f"🚨 **CHAOS INJECTION ACTIVE:** System is running under {len(st.session_state.chaos_events)} live operational shock(s). Observe the agent automatically adapting its options!")
 
-
-# ==============================================================================
-# 5. KPI SUMMARY STRIP (4 COLUMNS - EXACT PIC 1 METRICS WITH PIC 2 CYBER STYLING)
-# ==============================================================================
 summary = briefing["summary"]
-k1, k2, k3, k4 = st.columns(4)
+pending_count = sum(1 for p in briefing["problems"] if p["problem_id"] not in approved_problem_ids)
 
+k1, k2, k3, k4 = st.columns(4)
 with k1:
     st.markdown(f"""
-    <div class="kpi-card">
-        <div class="kpi-label">Total Operational Issues</div>
-        <div class="kpi-val">{summary["total_problems_detected"]}</div>
-        <div class="kpi-sub-green">↑ Across 8 Nodes</div>
+    <div class="kpi-box">
+        <span class="kpi-title">Total Operational Issues</span>
+        <div class="kpi-number">{summary["total_problems_detected"]}</div>
+        <span class="kpi-foot-green">↑ Across 8 Nodes</span>
     </div>
     """, unsafe_allow_html=True)
 with k2:
     st.markdown(f"""
-    <div class="kpi-card">
-        <div class="kpi-label">Critical Stockouts</div>
-        <div class="kpi-val" style="color: #EF4444;">{summary["critical_actions_required"]}</div>
-        <div class="kpi-sub-red">↑ Immediate Action Needed</div>
+    <div class="kpi-box">
+        <span class="kpi-title">Critical Stockouts</span>
+        <div class="kpi-number" style="color: #EF4444;">{summary["critical_actions_required"]}</div>
+        <span class="kpi-foot-red">↑ Immediate Action Needed</span>
     </div>
     """, unsafe_allow_html=True)
 with k3:
     st.markdown(f"""
-    <div class="kpi-card">
-        <div class="kpi-label">Top Attention SKU</div>
-        <div class="kpi-val" style="font-size: 1.45rem; line-height: 1.4; color: #FF6B4A;">{summary["top_focus_sku"]}</div>
-        <div class="kpi-sub-amber">↑ Hydraulic Filtration</div>
+    <div class="kpi-box">
+        <span class="kpi-title">Top Attention SKU</span>
+        <div class="kpi-number" style="font-size: 1.55rem; line-height: 1.35; color: #FF6B4A;">{summary["top_focus_sku"]}</div>
+        <span class="kpi-foot-green">↑ Hydraulic Filtration</span>
     </div>
     """, unsafe_allow_html=True)
 with k4:
-    pending_count = sum(1 for p in briefing["problems"] if p["problem_id"] not in approved_problem_ids)
     st.markdown(f"""
-    <div class="kpi-card">
-        <div class="kpi-label">Pending Human Gate Approvals</div>
-        <div class="kpi-val">{pending_count}</div>
-        <div class="kpi-sub-green">↑ {len(audit_log)} Decisions Logged</div>
+    <div class="kpi-box">
+        <span class="kpi-title">Pending Human Gate</span>
+        <div class="kpi-number">{pending_count}</div>
+        <span class="kpi-foot-green">↑ {len(audit_log)} Decisions Logged</span>
     </div>
     """, unsafe_allow_html=True)
 
@@ -594,6 +578,28 @@ tab_feed, tab_inv, tab_sup, tab_audit = st.tabs([
     "🔍 Supplier Friction & Reliability Audit",
     "📜 Immutable Audit Trail"
 ])
+
+
+# ==============================================================================
+# 3. PLOTLY THEME UNIFICATION FUNCTION
+# ==============================================================================
+def format_cyber_plotly_figure(fig: go.Figure) -> go.Figure:
+    """Enforces dark cyber-amber theme across Plotly trajectory curves."""
+    fig.update_layout(
+        plot_bgcolor='#140F0F',
+        paper_bgcolor='#140F0F',
+        font=dict(color='#9CA3AF', family='-apple-system, BlinkMacSystemFont, Segoe UI, Roboto'),
+        xaxis=dict(gridcolor='#251A1A', zerolinecolor='#3E2929', linecolor='#3E2929'),
+        yaxis=dict(gridcolor='#251A1A', zerolinecolor='#3E2929', linecolor='#3E2929'),
+        legend=dict(
+            bgcolor='rgba(26, 20, 20, 0.8)',
+            bordercolor='#3E2929',
+            borderwidth=1,
+            font=dict(color='#F3F4F6')
+        ),
+        margin=dict(l=20, r=20, t=30, b=20)
+    )
+    return fig
 
 
 # ==============================================================================
@@ -663,12 +669,12 @@ def render_cyber_detail_cockpit(p, approved_problem_ids, raw_inventory, raw_sale
     if "math_explainability" in p:
         me = p["math_explainability"]
         st.markdown(f"""
-<div class="telemetry-card">
-    <div class="telemetry-header">📐 DETERMINISTIC DOMAIN MATH &amp; TELEMETRY AUDIT:</div>
-    <div class="telemetry-line">• <b>Velocity:</b> <span class="telemetry-tag-cyan">{me.get('formula_velocity', '')}</span></div>
-    <div class="telemetry-line">• <b>Days of Cover:</b> <span class="telemetry-tag-yellow">{me.get('formula_cover', '')}</span></div>
-    <div class="telemetry-line">• <b>Deficit Gap:</b> <span class="telemetry-tag-red">{me.get('formula_gap', '')}</span></div>
-    <div class="telemetry-line">• <b>Commercial Risk Exposure:</b> Lead Time T = <span class="telemetry-tag-cyan">{me.get('T', 7)}d</span> | Margin = <span class="telemetry-tag-green">₹{me.get('unit_margin_inr', 0):,.2f}/unit</span> | Potential Lost Revenue = <span class="telemetry-tag-red">₹{me.get('projected_lost_revenue_inr', 0):,.2f}</span></div>
+<div class="math-terminal">
+    <div style="color: #FF8566; font-weight: 700; font-size: 0.92rem; margin-bottom: 8px; letter-spacing: 0.02em;">📐 DETERMINISTIC DOMAIN MATH &amp; TELEMETRY AUDIT:</div>
+    <div style="margin-bottom: 4px;">• <b>Velocity:</b> <span style="color: #38BDF8; font-weight: 600;">{me.get('formula_velocity', '')}</span></div>
+    <div style="margin-bottom: 4px;">• <b>Days of Cover:</b> <span style="color: #FACC15; font-weight: 600;">{me.get('formula_cover', '')}</span></div>
+    <div style="margin-bottom: 4px;">• <b>Deficit Gap:</b> <span style="color: #EF4444; font-weight: 700;">{me.get('formula_gap', '')}</span></div>
+    <div>• <b>Commercial Risk Exposure:</b> Lead Time T = <span style="color: #38BDF8; font-weight: 600;">{me.get('T', 7)}d</span> | Margin = <span style="color: #10B981; font-weight: 600;">₹{me.get('unit_margin_inr', 0):,.2f}/unit</span> | Potential Lost Revenue = <span style="color: #EF4444; font-weight: 700;">₹{me.get('projected_lost_revenue_inr', 0):,.2f}</span></div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -761,15 +767,13 @@ def render_cyber_detail_cockpit(p, approved_problem_ids, raw_inventory, raw_sale
                 text=f"Projected Inventory Levels: {p['sku_name']} @ {p['location']}",
                 font=dict(size=13, color="#F3F4F6")
             ),
-            xaxis=dict(title="Days Ahead", dtick=1, gridcolor="#2B1E1E", color="#9CA3AF"),
-            yaxis=dict(title="Projected Stock (Units)", gridcolor="#2B1E1E", color="#9CA3AF"),
+            xaxis=dict(title="Days Ahead", dtick=1),
+            yaxis=dict(title="Projected Stock (Units)"),
             hovermode="x unified",
             height=320,
-            margin=dict(l=40, r=40, t=50, b=40),
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, font=dict(color="#D1D5DB", size=10)),
-            plot_bgcolor="#141010",
-            paper_bgcolor="#1A1414"
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, font=dict(color="#D1D5DB", size=10))
         )
+        fig = format_cyber_plotly_figure(fig)
         st.plotly_chart(fig, use_container_width=True)
 
     # 6. Feasible Mitigation Pathways Table ($N >= 2$)
@@ -875,14 +879,12 @@ def render_cyber_detail_cockpit(p, approved_problem_ids, raw_inventory, raw_sale
                         text=f"Dynamic Recalibration: Ramesh's Counter-Proposal ({override_qty} units) vs AI Draft ({pay['qty']} units)",
                         font=dict(size=12, color="#F3F4F6")
                     ),
-                    xaxis=dict(title="Days", dtick=1, gridcolor="#2B1E1E", color="#9CA3AF"),
-                    yaxis=dict(title="Stock (Units)", gridcolor="#2B1E1E", color="#9CA3AF"),
+                    xaxis=dict(title="Days", dtick=1),
+                    yaxis=dict(title="Stock (Units)"),
                     height=240,
-                    margin=dict(l=30, r=30, t=40, b=30),
-                    plot_bgcolor="#141010",
-                    paper_bgcolor="#1A1414",
                     legend=dict(font=dict(color="#D1D5DB", size=10))
                 )
+                fig_ov = format_cyber_plotly_figure(fig_ov)
                 st.plotly_chart(fig_ov, use_container_width=True)
                 
                 if not recalc["is_valid"]:
@@ -911,115 +913,71 @@ def render_cyber_detail_cockpit(p, approved_problem_ids, raw_inventory, raw_sale
         st.caption("Status: Handled in audit log.")
 
 
-# ==============================================================================
-# TAB 1: MORNING FEED & MASTER-DETAIL WORKSPACE (PORTING PIC 1 WORKFLOW)
-# ==============================================================================
+# ---------------------------------------------------------
+# MAIN WORKSPACE & TABS
+# ---------------------------------------------------------
 with tab_feed:
-    # 1. Initialize session state for selected problem
-    if "selected_problem_id" not in st.session_state:
-        gokak_prob = next((p for p in briefing.get("problems", []) if p.get("sku") == "FILTER-HYD-01" and p.get("location") == "Gokak"), None)
-        if gokak_prob:
-            st.session_state.selected_problem_id = gokak_prob["problem_id"]
-        elif briefing.get("problems"):
-            st.session_state.selected_problem_id = briefing["problems"][0]["problem_id"]
-        else:
-            st.session_state.selected_problem_id = None
+    # Split: Left (Task List 38%) | Right (Cockpit Workspace 62%)
+    col_feed, col_cockpit = st.columns([0.38, 0.62], gap="large")
 
-    # 2. Chaos Injection Bar (Separated Above Worklist - Matching Pic 1)
-    c_hdr, c_rig = st.columns([0.38, 0.62])
-    with c_hdr:
-        st.markdown("### 📋 Morning Operational Tasks")
-    with c_rig:
-        st.markdown("<div style='text-align: right; color: #9CA3AF; font-size: 0.85rem; margin-bottom: 4px; font-weight: 600;'>Chaos Injection Rig:</div>", unsafe_allow_html=True)
-        b1, b2, b3, b4 = st.columns(4)
-        if b1.button("🌪️ Demand Surge (3x)", key="btn_chaos_surge", use_container_width=True):
-            inject_chaos("DEMAND_SPIKE")
-        if b2.button("🚧 Block Route", key="btn_chaos_block", use_container_width=True):
-            inject_chaos("TRANSFER_ROADBLOCK")
-        if b3.button("📈 Supplier Delay (+5d)", key="btn_chaos_delay", use_container_width=True):
-            inject_chaos("SUPPLIER_HIKE")
-        if b4.button("🔄 Reset Baseline", key="btn_chaos_reset", use_container_width=True):
-            reset_baseline()
+    # --- LEFT COLUMN: STACKED TASK WORKLIST ---
+    with col_feed:
+        st.markdown("#### 📋 Morning Operational Tasks")
+        st.caption("Select an incident to evaluate alternatives and take action:")
 
-    st.markdown("<hr style='border: 0.5px solid #2B1E1E; margin: 12px 0 20px 0;'>", unsafe_allow_html=True)
+        problems = briefing.get("problems", [])
+        if not st.session_state.get("selected_problem_id") and problems:
+            st.session_state.selected_problem_id = problems[0]["problem_id"]
 
-    # 3. Master-Detail Split (Left 38% Stacked Task Cards, Right 62% Resolution Cockpit)
-    col_list, col_detail = st.columns([0.38, 0.62], gap="large")
-
-    # --- LEFT COLUMN: STACKED TASK CARDS (NO DROPDOWNS) ---
-    with col_list:
-        st.markdown(f"#### Active Incidents ({len(briefing.get('problems', []))})")
-
-        # In-pane quick filter
-        sev_filter = st.selectbox("Filter Severity:", ["All", "CRITICAL", "HIGH", "MEDIUM"], key="pane_sev_filter")
-        filtered_problems = briefing.get("problems", [])
-        if sev_filter != "All":
-            filtered_problems = [p for p in filtered_problems if p["severity"] == sev_filter]
-
-        if not filtered_problems:
-            st.info("No incidents match the selected severity filter.")
-
-        for prob in filtered_problems:
+        for prob in problems:
             pid = prob["problem_id"]
-            is_active = (pid == st.session_state.selected_problem_id)
-            is_handled = pid in approved_problem_ids
-
-            active_cls = "task-card-active" if is_active else ""
+            is_active = pid == st.session_state.get("selected_problem_id")
+            active_class = "incident-card-active" if is_active else ""
             sev = prob.get("severity", "MEDIUM")
-            badge_cls = "badge-critical" if sev == "CRITICAL" else ("badge-high" if sev == "HIGH" else "badge-medium")
+            badge_style = "badge-critical" if sev == "CRITICAL" else "badge-tag"
 
-            m_prob = prob.get("domain_metrics", {})
-            stock_val = m_prob.get("current_stock", 0)
-            cover_val = m_prob.get("days_of_cover", 0.0)
-            gap_val = m_prob.get("stockout_gap_days", 0.0)
+            m_p = prob.get("domain_metrics", {})
+            stock_v = m_p.get("current_stock", prob.get("current_stock", 0))
+            cover_v = m_p.get("days_of_cover", prob.get("days_of_cover", 0.0))
+            gap_v = m_p.get("stockout_gap_days", prob.get("stockout_gap_days", 0.0))
 
             st.markdown(
                 f"""
-                <div class="task-card {active_cls}">
+                <div class="incident-card {active_class}">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                         <div>
-                            <span class="{badge_cls}">[{sev}]</span>
-                            <span class="badge-cat">{prob.get('category_code', 'CAT_A')}</span>
+                            <span class="{badge_style}">{sev}</span>
+                            <span class="badge-tag">{prob.get('category_code', '')}</span>
                         </div>
-                        <span style="font-size: 0.75rem; color: {'#10B981' if is_handled else '#F59E0B'}; font-weight: 600;">
-                            {'✓ Done' if is_handled else '⚡ AWAITING APPROVAL'}
-                        </span>
+                        <span style="font-size: 0.72rem; color: #F59E0B; font-weight: 600;">⚡ ACTION REQUIRED</span>
                     </div>
-                    <div style="font-weight: 700; font-size: 1.05rem; color: #FFFFFF; margin-bottom: 2px;">
+                    <div style="font-weight: 700; font-size: 1.0rem; color: #FFFFFF; margin-bottom: 2px;">
                         {prob.get('location', '')} — {prob.get('sku', '')}
                     </div>
-                    <div style="font-size: 0.8rem; color: #9CA3AF; margin-bottom: 8px;">
-                        {prob.get('sku_name', '')}
-                    </div>
-                    <div style="font-size: 0.82rem; color: #9CA3AF; font-family: 'JetBrains Mono', monospace;">
-                        Stock: <b style="color: #FFF;">{stock_val}</b> | 
-                        Cover: <b style="color: #FFF;">{cover_val:.1f}d</b> | 
-                        Gap: <b style="color: {'#EF4444' if gap_val > 0 else '#10B981'};">{gap_val:.1f}d</b>
+                    <div style="font-size: 0.8rem; color: #9CA3AF;">
+                        Stock: <b style="color: #FFF;">{stock_v}</b> | 
+                        Cover: <b style="color: #FFF;">{cover_v:.1f}d</b> | 
+                        Gap: <b style="color: #EF4444;">{gap_v:.1f}d</b>
                     </div>
                 </div>
                 """,
                 unsafe_allow_html=True
             )
 
-            btn_label = "● Viewing Active Task" if is_active else "Select & Resolve ➔"
-            if st.button(btn_label, key=f"card_btn_{pid}", use_container_width=True, disabled=is_active):
+            btn_label = "● Active Task" if is_active else "Inspect Evidence ➔"
+            if st.button(btn_label, key=f"task_btn_{pid}", use_container_width=True, disabled=is_active):
                 st.session_state.selected_problem_id = pid
                 st.rerun()
 
-    # --- RIGHT COLUMN: ACTIVE RESOLUTION COCKPIT ---
-    with col_detail:
-        active_prob = next(
-            (p for p in briefing.get("problems", []) if p["problem_id"] == st.session_state.selected_problem_id),
-            None
-        )
-        if not active_prob and filtered_problems:
-            active_prob = filtered_problems[0]
-            st.session_state.selected_problem_id = active_prob["problem_id"]
+    # --- RIGHT COLUMN: COCKPIT, MATH AUDIT & PROJECTIONS ---
+    with col_cockpit:
+        active_pid = st.session_state.get("selected_problem_id")
+        active_item = next((p for p in problems if p["problem_id"] == active_pid), None)
 
-        if active_prob:
-            render_cyber_detail_cockpit(active_prob, approved_problem_ids, raw_inventory, raw_sales)
+        if active_item:
+            render_cyber_detail_cockpit(active_item, approved_problem_ids, raw_inventory, raw_sales)
         else:
-            st.info("Select a morning incident card on the left to inspect evidence.")
+            st.info("Select an active incident from the morning queue.")
 
 
 # ==============================================================================
