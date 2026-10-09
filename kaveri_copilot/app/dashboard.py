@@ -62,7 +62,7 @@ st.markdown("""
         color: #F3F4F6 !important;
     }
 
-    /* Input Elements Uniformity */
+    /* Input & Select Elements Uniformity */
     .stTextInput input, .stNumberInput input {
         background-color: #1F1717 !important;
         color: #FFFFFF !important;
@@ -72,6 +72,43 @@ st.markdown("""
     .stTextInput input:focus, .stNumberInput input:focus {
         border-color: #FF5733 !important;
         box-shadow: 0 0 6px rgba(255, 87, 51, 0.4) !important;
+    }
+
+    /* Selectbox Dropdown Menu Dark Theme */
+    div[data-baseweb="select"] {
+        background-color: #1F1717 !important;
+        border: 1px solid #3E2929 !important;
+        border-radius: 6px !important;
+        color: #FFFFFF !important;
+    }
+    div[data-baseweb="select"] > div {
+        background-color: #1F1717 !important;
+        color: #FFFFFF !important;
+        border: none !important;
+    }
+    div[data-baseweb="select"]:focus-within {
+        border-color: #FF5733 !important;
+        box-shadow: 0 0 6px rgba(255, 87, 51, 0.4) !important;
+    }
+    div[data-baseweb="popover"], div[data-baseweb="popover"] > div, ul[role="listbox"], ul[data-testid="stVirtualDropdown"] {
+        background-color: #1A1414 !important;
+        border: 1px solid #3E2929 !important;
+        color: #F3F4F6 !important;
+    }
+    li[role="option"] {
+        background-color: #1A1414 !important;
+        color: #F3F4F6 !important;
+    }
+    li[role="option"]:hover, li[role="option"][aria-selected="true"] {
+        background-color: #2E1F1F !important;
+        color: #FF5733 !important;
+    }
+
+    /* DataFrame Table Styling */
+    div[data-testid="stDataFrame"], [data-testid="stTable"] {
+        background-color: #141010 !important;
+        border: 1px solid #2E2222 !important;
+        border-radius: 8px !important;
     }
 
     /* Tab Uniformity */
@@ -925,9 +962,28 @@ with tab_feed:
         st.markdown("#### 📋 Morning Operational Tasks")
         st.caption("Select an incident to evaluate alternatives and take action:")
 
-        problems = briefing.get("problems", [])
+        all_problems = briefing.get("problems", [])
+
+        # Severity Filter Dropdown Menu
+        sev_filter = st.selectbox(
+            "Filter Severity:",
+            ["All", "CRITICAL", "HIGH", "MEDIUM"],
+            index=0,
+            key="task_severity_filter"
+        )
+
+        if sev_filter != "All":
+            problems = [p for p in all_problems if p.get("severity") == sev_filter]
+        else:
+            problems = all_problems
+
         if not st.session_state.get("selected_problem_id") and problems:
             st.session_state.selected_problem_id = problems[0]["problem_id"]
+        elif st.session_state.get("selected_problem_id") and problems and not any(p["problem_id"] == st.session_state.selected_problem_id for p in problems):
+            st.session_state.selected_problem_id = problems[0]["problem_id"]
+
+        if not problems:
+            st.info(f"No active incidents match severity filter '{sev_filter}'.")
 
         for prob in problems:
             pid = prob["problem_id"]
