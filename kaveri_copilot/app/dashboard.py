@@ -67,14 +67,68 @@ st.markdown("""
         max-width: 100% !important;
     }
     
-    [data-testid="stSidebar"] {
+    /* Sidebar High-Contrast Styling */
+    [data-testid="stSidebar"], [data-testid="stSidebarContent"], [data-testid="stSidebar"] > div {
         background-color: #171212 !important;
         border-right: 1px solid #2B1E1E !important;
         color: #F3F4F6 !important;
     }
     
-    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, [data-testid="stSidebar"] h4 {
+    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, 
+    [data-testid="stSidebar"] h3, [data-testid="stSidebar"] h4,
+    [data-testid="stSidebar"] h5, [data-testid="stSidebar"] h6 {
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+    }
+
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] div {
+        color: #E5E7EB !important;
+    }
+
+    /* Form Labels (e.g. Simulation Date) */
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] label p,
+    [data-testid="stSidebar"] [data-testid="stWidgetLabel"],
+    [data-testid="stSidebar"] [data-testid="stWidgetLabel"] p,
+    [data-testid="stSidebar"] [data-testid="stWidgetLabel"] span {
+        color: #FF8566 !important; /* High-contrast cyber-amber / coral highlight */
+        font-size: 0.88rem !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.02em !important;
+    }
+
+    /* Captions and Secondary Text */
+    [data-testid="stSidebar"] [data-testid="stCaptionContainer"],
+    [data-testid="stSidebar"] [data-testid="stCaptionContainer"] p,
+    [data-testid="stSidebar"] .stCaption,
+    [data-testid="stSidebar"] small {
+        color: #D1D5DB !important; /* Crisp, high-contrast light gray */
+        font-size: 0.86rem !important;
+        line-height: 1.45 !important;
+        font-weight: 500 !important;
+    }
+
+    /* Sidebar Divider Lines */
+    [data-testid="stSidebar"] hr {
+        border-color: #382525 !important;
+        margin: 1.1rem 0 !important;
+    }
+
+    /* Sidebar Action Buttons */
+    [data-testid="stSidebar"] .stButton > button {
+        background-color: #221818 !important;
+        border: 1px solid #3E2929 !important;
         color: #F3F4F6 !important;
+        font-weight: 600 !important;
+        transition: all 0.15s ease !important;
+    }
+    [data-testid="stSidebar"] .stButton > button:hover {
+        background-color: #2F1E1E !important;
+        border-color: #FF5733 !important;
+        color: #FF6B4A !important;
+        box-shadow: 0 0 8px rgba(255, 87, 51, 0.3) !important;
     }
 
     /* Input & Select Elements Uniformity */
@@ -552,20 +606,30 @@ if "chaos_events" not in st.session_state:
 # SIDEBAR CONTROLS
 # ---------------------------------------------------------
 with st.sidebar:
-    st.markdown("### ⚙️ Operating Controls")
+    st.markdown("<h3 style='color: #FFFFFF; margin-top: 0; font-size: 1.25rem; font-weight: 700;'>⚙️ Operating Controls</h3>", unsafe_allow_html=True)
     sim_date = st.text_input("Simulation Date", value="2026/10/09")
 
-    st.markdown("---")
-    st.markdown("#### User Persona:")
-    st.markdown("👨‍💼 **Ramesh Kulkarni**  \n*Head of Purchasing*")
+    st.markdown("<hr style='border: none; border-top: 1px solid #382525; margin: 16px 0;'>", unsafe_allow_html=True)
+    
+    st.markdown("<h4 style='color: #FFFFFF; font-size: 1.05rem; font-weight: 700; margin-bottom: 8px;'>User Persona:</h4>", unsafe_allow_html=True)
+    st.markdown("""
+    <div style="background-color: #201717; border: 1px solid #3B2828; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px;">
+        <div style="font-size: 1.0rem; font-weight: 700; color: #FFFFFF;">👨‍💼 Ramesh Kulkarni</div>
+        <div style="font-size: 0.88rem; color: #FF8566; font-style: italic; margin-top: 2px;">Head of Purchasing</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    st.markdown("#### Operations Network:")
-    st.caption("🏬 6 Stores: Gokak, Belgaum, Dharwad, Hubli, Bagalkot, Nippani")
-    st.caption("🏭 2 Hubs: Belgaum Central, Hubli Regional")
+    st.markdown("<h4 style='color: #FFFFFF; font-size: 1.05rem; font-weight: 700; margin-bottom: 8px;'>Operations Network:</h4>", unsafe_allow_html=True)
+    st.markdown("""
+    <div style="background-color: #201717; border: 1px solid #3B2828; border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; font-size: 0.9rem; line-height: 1.6;">
+        <div style="color: #FFFFFF; margin-bottom: 8px;"><strong style="color: #FF8566;">🏬 6 Stores:</strong> Gokak, Belgaum, Dharwad, Hubli, Bagalkot, Nippani</div>
+        <div style="color: #FFFFFF;"><strong style="color: #FF8566;">🏭 2 Hubs:</strong> Belgaum Central, Hubli Regional</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    st.markdown("---")
-    st.markdown("#### ⚡ Live Chaos Rig")
-    st.caption("Inject shocks to evaluate real-time agent adaptability:")
+    st.markdown("<hr style='border: none; border-top: 1px solid #382525; margin: 16px 0;'>", unsafe_allow_html=True)
+    st.markdown("<h4 style='color: #FFFFFF; font-size: 1.05rem; font-weight: 700; margin-bottom: 6px;'>⚡ Live Chaos Rig</h4>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #F3F4F6; font-size: 0.9rem; font-weight: 500; margin-bottom: 12px;'>Inject shocks to evaluate real-time agent adaptability:</p>", unsafe_allow_html=True)
     
     if st.button("🌪️ 3x Demand Spike (Gokak)", use_container_width=True):
         inject_chaos("DEMAND_SPIKE")
