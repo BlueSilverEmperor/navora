@@ -23,8 +23,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from engine.decision_agent import DecisionEngine
-from engine.domain_math import validate_and_recalculate_transfer, evaluate_supplier_friction
+from engine.domain_math import validate_and_recalculate_transfer, evaluate_supplier_friction, compute_plan_diff
 from engine.mock_data_gen import seed_all_data
+from engine.persistence import (
+    log_audit_trail,
+    get_all_audit_logs,
+    is_action_already_processed,
+    record_action_processed,
+    create_stock_reservation,
+    release_stock_reservation,
+    get_active_stock_reservations,
+    record_rejection_memory,
+    get_all_rejection_memories,
+    clear_all_persistence
+)
 
 DATA_DIR = os.path.join(BASE_DIR, "data")
 AUDIT_LOG_FILE = os.path.join(DATA_DIR, "audit_log.json")
@@ -48,18 +60,12 @@ app.add_middleware(
 
 
 def load_audit_log() -> List[Dict[str, Any]]:
-    if not os.path.exists(AUDIT_LOG_FILE):
-        return []
-    try:
-        with open(AUDIT_LOG_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return []
+    return get_all_audit_logs()
 
 
 def save_audit_log(logs: List[Dict[str, Any]]):
-    with open(AUDIT_LOG_FILE, "w", encoding="utf-8") as f:
-        json.dump(logs, f, indent=2)
+    pass  # Maintained for interface compatibility; SQLite handles persistence
+
 
 
 class ActionPayload(BaseModel):
@@ -95,21 +101,15 @@ def log_audit_trail_entry(
     execution_details: dict = None,
     notes: str = None
 ) -> Dict[str, Any]:
-    logs = load_audit_log()
-    audit_entry = {
-        "audit_id": f"AUD-{uuid.uuid4().hex[:8].upper()}",
-        "timestamp": datetime.now().isoformat(),
-        "problem_id": problem_id,
-        "action_type": action_type,
-        "status": status,
-        "approved_by": approved_by,
-        "payload": payload,
-        "execution_details": execution_details or {},
-        "notes": notes or "Approved via Autonomous Supply Chain Copilot"
-    }
-    logs.insert(0, audit_entry)
-    save_audit_log(logs)
-    return audit_entry
+    return log_audit_trail(
+        problem_id=problem_id,
+        action_type=action_type,
+        status=status,
+        payload=payload,
+        approved_by=approved_by,
+        execution_details=execution_details or {},
+        notes=notes or "Approved via Autonomous Supply Chain Copilot"
+    )
 
 
 class ActionRejectRequest(BaseModel):
@@ -141,14 +141,12 @@ def get_dashboard_ui():
 
 
 @app.post("/reset-data")
+@app.post("/api/reset-data")
 def reset_benchmark_state():
-    """Resets data to pristine benchmark state and clears active chaos events."""
+    """Resets data to pristine benchmark state and clears active chaos events and persistence."""
     ACTIVE_CHAOS_EVENTS.clear()
-    PROCESSED_ACTION_HASHES.clear()
-    ACTIVE_TRANSFER_RESERVATIONS.clear()
+    clear_all_persistence()
     seed_all_data(DATA_DIR)
-    if os.path.exists(AUDIT_LOG_FILE):
-        os.remove(AUDIT_LOG_FILE)
     return {"status": "SUCCESS", "message": "Pristine benchmark state restored."}
 
 
@@ -162,17 +160,70 @@ def health_check():
 
 
 @app.get("/briefing")
+@app.get("/api/briefing")
 def get_morning_briefing(current_date: str = "2026-10-09"):
     """
     Runs the 6-step agentic pipeline and returns prioritized problems,
     domain metrics, evaluated options, and simulated action drafts.
     """
-    engine = DecisionEngine(data_dir=DATA_DIR, current_date=current_date, chaos_events=ACTIVE_CHAOS_EVENTS)
+    engine = DecisionEngine(
+        data_dir=DATA_DIR,
+        current_date=current_date,
+        chaos_events=ACTIVE_CHAOS_EVENTS,
+        active_reservations=get_active_stock_reservations()
+    )
     brief = engine.run_agentic_pipeline()
     return brief
 
 
+@app.get("/api/backtest")
+def get_backtest_metrics(days: int = 60):
+    """
+    Replays historical sales across the multi-echelon network and returns
+    stockouts prevented, lost units averted, and Rs. saved vs baseline.
+    """
+    from scripts.backtest import run_backtest
+    return run_backtest(data_dir=DATA_DIR, days=days)
+
+
+@app.get("/api/optimizer/transfers")
+def get_global_network_transfers(current_date: str = "2026-10-09"):
+    """
+    Solves all lateral inventory transfers jointly across the network using
+    PuLP Integer Linear Programming with greedy comparison and fallback.
+    """
+    engine = DecisionEngine(
+        data_dir=DATA_DIR,
+        current_date=current_date,
+        chaos_events=ACTIVE_CHAOS_EVENTS,
+        active_reservations=get_active_stock_reservations()
+    )
+    brief = engine.run_agentic_pipeline()
+    return brief.get("network_transfer_plan", {})
+
+
+@app.get("/api/suppliers/reliability")
+def get_supplier_reliability_audit(current_date: str = "2026-10-09"):
+    """
+    Computes actual vs promised delivery slippage per supplier and returns
+    learned adjusted lead times and reliability statuses.
+    """
+    engine = DecisionEngine(
+        data_dir=DATA_DIR,
+        current_date=current_date,
+        chaos_events=ACTIVE_CHAOS_EVENTS,
+        active_reservations=get_active_stock_reservations()
+    )
+    brief = engine.run_agentic_pipeline()
+    return brief.get("supplier_reliability", {})
+
+
+
+
+
+
 @app.post("/action/approve")
+@app.post("/api/action/approve")
 def approve_action(req: ActionApprovalRequest):
     """
     Human-in-the-loop signoff gate.
@@ -187,7 +238,7 @@ def approve_action(req: ActionApprovalRequest):
         to_loc = payload_dict.get("to_location", "")
         exp_date = payload_dict.get("expected_delivery_date", "")
     else:
-        payload_dict = req.payload.dict() if hasattr(req.payload, "dict") else req.payload.model_dump()
+        payload_dict = req.payload.model_dump() if hasattr(req.payload, "model_dump") else req.payload.dict()
         sku = req.payload.sku
         qty = int(req.payload.qty)
         from_loc = req.payload.from_location or req.payload.from_location_or_supplier or ""
@@ -200,7 +251,7 @@ def approve_action(req: ActionApprovalRequest):
     ).hexdigest()
 
     idempotency_key = req.client_request_id or action_payload_signature
-    if idempotency_key in PROCESSED_ACTION_HASHES:
+    if is_action_already_processed(idempotency_key):
         raise HTTPException(
             status_code=409,
             detail="Duplicate action detected: this proposal has already been approved and executed."
@@ -323,7 +374,7 @@ def approve_action(req: ActionApprovalRequest):
             purchase_orders = json.load(f)
 
         for po in purchase_orders:
-            if po["sku"] == sku and (po.get("supplier") == from_loc or po.get("location") == to_loc) and po.get("status") != "DELIVERED":
+            if po["sku"] == sku and (po.get("supplier") == from_loc or po.get("location") == to_loc) and po.get("status") not in ("DELIVERED", "CANCELLED"):
                 po["status"] = "EXPEDITED"
 
         with open(po_path, "w", encoding="utf-8") as f:
@@ -335,8 +386,9 @@ def approve_action(req: ActionApprovalRequest):
             "sku": sku
         }
 
-    # 4. Mark Idempotency Signature & Record Audit Log
-    PROCESSED_ACTION_HASHES.add(idempotency_key)
+    # 4. Mark Idempotency Signature & Release Reservation & Record Audit Log
+    record_action_processed(idempotency_key, req.problem_id)
+    release_stock_reservation(req.problem_id)
     record_entry = log_audit_trail_entry(
         problem_id=req.problem_id,
         action_type=req.action_type,
@@ -357,29 +409,65 @@ def approve_action(req: ActionApprovalRequest):
 
 
 @app.post("/action/reject")
+@app.post("/api/action/reject")
 def reject_action(req: ActionRejectRequest):
-    """Logs rejection of a proposed action."""
-    logs = load_audit_log()
-    audit_entry = {
-        "audit_id": f"AUD-{uuid.uuid4().hex[:8].upper()}",
-        "timestamp": datetime.now().isoformat(),
-        "problem_id": req.problem_id,
-        "action_type": "REJECTION",
-        "status": "REJECTED",
-        "approved_by": req.rejected_by,
-        "payload": {},
-        "notes": req.reason
-    }
-    logs.insert(0, audit_entry)
-    save_audit_log(logs)
+    """Logs rejection of a proposed action, frees held stock reservations, and stores rejection memory."""
+    release_stock_reservation(req.problem_id)
+    audit_entry = log_audit_trail_entry(
+        problem_id=req.problem_id,
+        action_type="REJECTION",
+        status="REJECTED",
+        payload={},
+        approved_by=req.rejected_by,
+        notes=req.reason
+    )
+
+    # Resolve incident metadata to record rejection memory
+    engine = DecisionEngine(data_dir=DATA_DIR)
+    brief = engine.run_agentic_pipeline()
+    prob = next((p for p in brief.get("problems", []) if p["problem_id"] == req.problem_id), None)
+    sku = prob.get("sku") if prob else None
+    loc = prob.get("location") if prob else None
+    src = prob.get("simulated_action", {}).get("payload", {}).get("from_location_or_supplier") if prob else None
+    act_type = prob.get("simulated_action", {}).get("action_type") if prob else None
+
+    mem = record_rejection_memory(
+        problem_id=req.problem_id,
+        sku=sku,
+        location=loc,
+        rejected_source=src,
+        action_type=act_type,
+        rejection_reason=req.reason
+    )
 
     return {
         "status": "REJECTED",
-        "message": f"Problem {req.problem_id} marked as rejected by {req.rejected_by}."
+        "message": f"Problem {req.problem_id} marked as rejected by {req.rejected_by}.",
+        "rejection_memory": mem
+    }
+
+
+@app.post("/action/dismiss")
+@app.post("/api/action/dismiss")
+def dismiss_action(req: ActionRejectRequest):
+    """Dismisses an incident and releases any associated reservations."""
+    release_stock_reservation(req.problem_id)
+    audit_entry = log_audit_trail_entry(
+        problem_id=req.problem_id,
+        action_type="DISMISSAL",
+        status="DISMISSED",
+        payload={},
+        approved_by=req.rejected_by,
+        notes=req.reason
+    )
+    return {
+        "status": "DISMISSED",
+        "message": f"Problem {req.problem_id} dismissed."
     }
 
 
 @app.get("/inventory")
+@app.get("/api/inventory")
 def get_inventory():
     """Returns current multi-echelon stock levels joined with product metadata."""
     inventory_path = os.path.join(DATA_DIR, "inventory.json")
@@ -408,6 +496,7 @@ def get_inventory():
 
 
 @app.get("/audit-log")
+@app.get("/api/audit-log")
 def get_audit_log():
     """Returns historical log of human decisions."""
     return load_audit_log()
@@ -469,6 +558,8 @@ def get_runtime_state(current_date: str = "2026-10-09") -> Dict[str, Any]:
 
 
 @app.post("/action/recalculate-override")
+@app.post("/api/action/recalculate-override")
+@app.post("/api/recalculate-override")
 def recalculate_override(req: RecalculateOverrideRequest):
     """
     Invokes calculate_donor_transfer_safety and returns revised cover days and 14-day projections without mutating state.
@@ -606,6 +697,7 @@ def override_recalculate(req: OverrideRecalculateRequest):
 
 
 @app.post("/chaos/inject")
+@app.post("/api/chaos/inject")
 def inject_chaos(req: ChaosInjectionRequest):
     """
     Directly injects operational anomalies (Demand Surges, Route Closures, Supplier Delays)
@@ -619,7 +711,7 @@ def inject_chaos(req: ChaosInjectionRequest):
         event_dict["multiplier_or_days"] = req.value if req.value is not None else 3.0
         event_dict["sku"] = req.sku or "FILTER-HYD-01"
         event_dict["location"] = req.location or "Gokak"
-    elif ev in ("TRANSFER_ROADBLOCK", "TRANSFER_BLOCKED", "Block Belgaum Transfer Route"):
+    elif ev in ("TRANSFER_ROADBLOCK", "TRANSFER_BLOCKED", "ROUTE_BLOCKED", "Block Belgaum Transfer Route"):
         event_dict["event_type"] = "TRANSFER_BLOCKED"
         event_dict["from_location"] = req.from_location or req.location or "Belgaum"
         event_dict["to_location"] = req.to_location or "Gokak"
@@ -630,25 +722,42 @@ def inject_chaos(req: ChaosInjectionRequest):
         event_dict["sku"] = req.sku or "FILTER-HYD-01"
         event_dict["location"] = req.location or "Gokak"
         event_dict["multiplier_or_days"] = req.value if req.value is not None else 5.0
+    elif ev in ("SUPPLIER_PRICE_HIKE", "PRICE_HIKE"):
+        event_dict["event_type"] = "SUPPLIER_PRICE_HIKE"
+        event_dict["sku"] = req.sku or "FILTER-HYD-01"
+        event_dict["location"] = req.location or "Gokak"
+        event_dict["multiplier_or_days"] = req.value if req.value is not None else 0.20
     elif not req.event_type:
         event_dict["event_type"] = "DEMAND_SURGE"
         if req.value is not None:
             event_dict["multiplier_or_days"] = req.value
 
+    # Capture plan before chaos injection
+    before_engine = DecisionEngine(
+        data_dir=DATA_DIR,
+        chaos_events=list(ACTIVE_CHAOS_EVENTS)
+    )
+    before_brief = before_engine.run_agentic_pipeline()
+
     ACTIVE_CHAOS_EVENTS.append(event_dict)
 
-    engine = DecisionEngine(
+    # Capture plan after chaos injection
+    after_engine = DecisionEngine(
         data_dir=DATA_DIR,
-        chaos_events=ACTIVE_CHAOS_EVENTS
+        chaos_events=list(ACTIVE_CHAOS_EVENTS)
     )
-    new_brief = engine.run_agentic_pipeline()
+    after_brief = after_engine.run_agentic_pipeline()
+
+    # Compute structured before vs after plan diff with reasons
+    plan_diff = compute_plan_diff(before_brief, after_brief, event_dict)
 
     return {
         "status": "INJECTED",
         "scenario": req.scenario or event_dict.get("event_type"),
         "event": event_dict,
         "active_events_count": len(ACTIVE_CHAOS_EVENTS),
-        "updated_briefing": new_brief
+        "plan_diff": plan_diff,
+        "updated_briefing": after_brief
     }
 
 

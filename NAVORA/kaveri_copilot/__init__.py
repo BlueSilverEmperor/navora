@@ -17,8 +17,7 @@ from engine.domain_math import (
     compute_sku_target_cover,
     compute_severity,
     compute_option_expected_cost,
-    compute_incident_scorecard,
-    simulate_monte_carlo_projections
+    compute_incident_scorecard
 )
 from engine.decision_agent import (
     find_best_donor_location,
@@ -30,20 +29,6 @@ from engine.llm_layer import (
     NumberGuard,
     HallucinatedNumberError,
     UserIntentAction,
-)
-from engine.global_optimizer import solve_global_transfer_network
-from engine.data_loader import (
-    ProductRecord,
-    InventoryRecord,
-    SalesRecord,
-    SupplierRecord,
-    PurchaseOrderRecord,
-    load_validated_datasets,
-    load_products,
-    load_inventory,
-    load_sales,
-    load_suppliers,
-    load_purchase_orders,
 )
 
 

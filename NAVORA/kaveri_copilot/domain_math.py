@@ -29,12 +29,6 @@ from engine.config import (
     SEVERITY_HIGH_RATIO,
     MIN_VELOCITY_VOLUME_THRESHOLD,
     VELOCITY_BLENDING_ALPHA,
-    DATA_QUALITY_MIN_RECORDS,
-    DATA_QUALITY_MIN_VOLUME,
-    DATA_QUALITY_MAX_DATE_GAP_DAYS,
-    CONFIDENCE_NORMAL,
-    CONFIDENCE_LOW_VOLUME,
-    CONFIDENCE_DATA_GAPS,
 )
 
 
@@ -64,10 +58,6 @@ def compute_adaptive_velocity(
             "stockout_gap_days": 0.0,
             "is_surge": False,
             "is_drop": False,
-            "data_quality_flag": "LOW_VOLUME",
-            "confidence_score": CONFIDENCE_LOW_VOLUME,
-            "human_escalation_required": True,
-            "record_count": 0,
         }
 
     sub = sales_df[(sales_df["sku"] == sku) & (sales_df["location"] == location)]
@@ -76,33 +66,7 @@ def compute_adaptive_velocity(
 
     window_sales = sub.tail(VELOCITY_BASELINE_WINDOW_DAYS)
     total_volume = float(window_sales["qty_sold"].sum()) if len(window_sales) > 0 else 0.0
-    record_count = len(sub)
     is_low_volume = bool(total_volume < MIN_VELOCITY_VOLUME_THRESHOLD)
-
-    # T24 Data-Quality Check: date gaps & low historical transaction volume
-    has_date_gaps = False
-    if record_count >= 2 and "date" in sub.columns:
-        try:
-            date_series = pd.to_datetime(sub["date"]).sort_values()
-            diffs = date_series.diff().dt.days.dropna()
-            if (diffs > DATA_QUALITY_MAX_DATE_GAP_DAYS).any():
-                has_date_gaps = True
-        except Exception:
-            has_date_gaps = False
-
-    is_low_data_volume = bool(record_count < DATA_QUALITY_MIN_RECORDS or total_volume < DATA_QUALITY_MIN_VOLUME)
-    if is_low_data_volume:
-        data_quality_flag = "LOW_VOLUME"
-        confidence_score = CONFIDENCE_LOW_VOLUME
-        human_escalation_required = True
-    elif has_date_gaps:
-        data_quality_flag = "DATA_GAPS_DETECTED"
-        confidence_score = CONFIDENCE_DATA_GAPS
-        human_escalation_required = True
-    else:
-        data_quality_flag = "NORMAL"
-        confidence_score = CONFIDENCE_NORMAL
-        human_escalation_required = False
 
     v_baseline = (
         float(sub["qty_sold"].tail(VELOCITY_BASELINE_WINDOW_DAYS).mean()) if len(sub) > 0 else 0.0
@@ -164,7 +128,6 @@ def compute_adaptive_velocity(
         "v_ewma": round(v_ewma, 2),
         "v_blended": round(v_blended, 2),
         "total_volume": int(total_volume),
-        "record_count": record_count,
         "is_low_volume": is_low_volume,
         "trend_factor": round(trend_factor, 2),
         "v_predicted": round(v_predicted, 2),
@@ -173,9 +136,6 @@ def compute_adaptive_velocity(
         "stockout_gap_days": stockout_gap,
         "is_surge": bool(not is_low_volume and trend_factor >= SURGE_EXPLOSIVE_RATIO and v_recent >= SURGE_MIN_RECENT_VELOCITY),
         "is_drop": bool(not is_low_volume and trend_factor <= CLIFF_DROP_RATIO and v_baseline >= SURGE_MIN_RECENT_VELOCITY),
-        "data_quality_flag": data_quality_flag,
-        "confidence_score": confidence_score,
-        "human_escalation_required": human_escalation_required,
     }
 
 
@@ -344,109 +304,12 @@ def generate_14day_projections(
         curr = max(0.0, curr - daily_burn)
         stock_transfer.append(round(curr, 1))
 
-    mc_status_quo = simulate_monte_carlo_projections(
-        starting_stock=current_stock,
-        daily_burn=daily_burn,
-        arrival_qty=status_quo_arrival_qty,
-        arrival_day=sq_arrival_day,
-        horizon_days=15,
-        num_runs=500,
-        seed=42
-    )
-
-    mc_expedited = simulate_monte_carlo_projections(
-        starting_stock=current_stock,
-        daily_burn=daily_burn,
-        arrival_qty=expedited_arrival_qty,
-        arrival_day=expedited_lead_time,
-        horizon_days=15,
-        num_runs=500,
-        seed=42
-    )
-
-    mc_transfer = simulate_monte_carlo_projections(
-        starting_stock=current_stock,
-        daily_burn=daily_burn,
-        arrival_qty=transfer_qty,
-        arrival_day=transfer_arrival_day,
-        horizon_days=15,
-        num_runs=500,
-        seed=42
-    )
-
     return {
         "days": days,
         "status_quo": stock_status_quo,
         "expedited": stock_expedited,
         "transfer": stock_transfer,
-        "stockout_probability_by_day_14": {
-            "status_quo": mc_status_quo["stockout_probability_by_day_14"],
-            "expedited": mc_expedited["stockout_probability_by_day_14"],
-            "transfer": mc_transfer["stockout_probability_by_day_14"],
-        },
-        "fan_chart": {
-            "status_quo": mc_status_quo,
-            "expedited": mc_expedited,
-            "transfer": mc_transfer,
-        },
-        "probabilistic": {
-            "num_runs": 500,
-            "seed": 42,
-            "status_quo": mc_status_quo,
-            "expedited": mc_expedited,
-            "transfer": mc_transfer,
-        }
     }
-
-
-def simulate_monte_carlo_projections(
-    starting_stock: float,
-    daily_burn: float,
-    arrival_qty: float = 0.0,
-    arrival_day: Optional[int] = None,
-    horizon_days: int = 15,
-    num_runs: int = 500,
-    seed: int = 42,
-    demand_std_dev: Optional[float] = None
-) -> Dict[str, Any]:
-    """
-    Monte Carlo demand variance simulation (seeded, 500 runs).
-    Returns fan chart percentiles (p10, p50, p90) and cumulative stockout probability by day 14.
-    """
-    np.random.seed(seed)
-    mu = max(0.05, float(daily_burn))
-    sigma = demand_std_dev if demand_std_dev is not None else max(0.3 * mu, 0.4)
-
-    # Matrix of shape (num_runs, horizon_days)
-    simulated_demand = np.maximum(0.0, np.random.normal(loc=mu, scale=sigma, size=(num_runs, horizon_days)))
-
-    # Track inventory paths across runs
-    inv_paths = np.zeros((num_runs, horizon_days))
-    curr = np.full(num_runs, float(starting_stock))
-    stockout_occurred = np.zeros(num_runs, dtype=bool)
-    stockout_prob_curve = []
-
-    for d in range(horizon_days):
-        if arrival_day is not None and d == arrival_day:
-            curr += arrival_qty
-        curr = np.maximum(0.0, curr - simulated_demand[:, d])
-        inv_paths[:, d] = curr
-        stockout_occurred |= (curr <= 0.0)
-        stockout_prob_curve.append(round(float(np.mean(stockout_occurred)), 3))
-
-    p10 = [round(float(x), 1) for x in np.percentile(inv_paths, 10, axis=0)]
-    p50 = [round(float(x), 1) for x in np.percentile(inv_paths, 50, axis=0)]
-    p90 = [round(float(x), 1) for x in np.percentile(inv_paths, 90, axis=0)]
-    stockout_prob_14 = stockout_prob_curve[-1]
-
-    return {
-        "p10": p10,
-        "p50": p50,
-        "p90": p90,
-        "stockout_probability_by_day_14": stockout_prob_14,
-        "stockout_probability_curve": stockout_prob_curve
-    }
-
 
 
 
@@ -507,95 +370,6 @@ def find_primary_supplier(suppliers: List[Dict[str, Any]], sku: str) -> Optional
 def find_secondary_suppliers(suppliers: List[Dict[str, Any]], sku: str) -> List[Dict[str, Any]]:
     """Retrieves non-primary (expedited/alternate) suppliers for a given SKU."""
     return [s for s in suppliers if s.get("sku") == sku and not s.get("is_primary", False)]
-
-
-def compute_supplier_reliability(
-    purchase_orders: List[Dict[str, Any]],
-    suppliers: List[Dict[str, Any]],
-    current_date: str = "2026-10-09"
-) -> Dict[str, Dict[str, Any]]:
-    """
-    Computes actual vs promised delivery slippage per supplier and adjusts quoted lead time.
-    Slippage = actual delivery date (or current date if delayed) - promised expected date.
-    Adjusted lead time = promised_lead_time + max(0, ceil(avg_slippage)).
-    """
-    try:
-        curr_dt = datetime.strptime(str(current_date)[:10], "%Y-%m-%d").date()
-    except Exception:
-        curr_dt = datetime(2026, 10, 9).date()
-
-    pos_by_supplier: Dict[str, List[Dict[str, Any]]] = {}
-    for po in purchase_orders:
-        sup_name = po.get("supplier")
-        if sup_name:
-            pos_by_supplier.setdefault(sup_name, []).append(po)
-
-    reliability_map: Dict[str, Dict[str, Any]] = {}
-
-    for sup in suppliers:
-        name = sup.get("supplier", "")
-        quoted_lead = int(sup.get("lead_time_days", 7))
-        sup_pos = pos_by_supplier.get(name, [])
-
-        slippages: List[float] = []
-        delayed_count = 0
-        delivered_count = 0
-
-        for po in sup_pos:
-            status = str(po.get("status", "")).upper()
-            exp_str = po.get("expected_date") or po.get("promised_date")
-            act_str = po.get("actual_delivery_date") or po.get("delivered_date")
-
-            if not exp_str:
-                continue
-
-            try:
-                exp_dt = datetime.strptime(str(exp_str)[:10], "%Y-%m-%d").date()
-            except Exception:
-                continue
-
-            if status in ("DELIVERED", "RECEIVED") and act_str:
-                delivered_count += 1
-                try:
-                    act_dt = datetime.strptime(str(act_str)[:10], "%Y-%m-%d").date()
-                    slip = (act_dt - exp_dt).days
-                    slippages.append(max(0.0, float(slip)))
-                    if slip > 0:
-                        delayed_count += 1
-                except Exception:
-                    slippages.append(0.0)
-            elif status in ("DELAYED", "OVERDUE") or (status not in ("CANCELLED", "DELIVERED") and exp_dt < curr_dt):
-                delayed_count += 1
-                slip = (curr_dt - exp_dt).days
-                slippages.append(max(0.0, float(slip)))
-            else:
-                slippages.append(0.0)
-
-        total_orders = len(sup_pos)
-        avg_slip = round(float(np.mean(slippages)), 1) if slippages else 0.0
-        on_time_rate = round(float(sum(1 for s in slippages if s <= 0.0)) / float(max(1, total_orders)), 2) if slippages else 1.0
-        adj_lead = int(quoted_lead + math.ceil(max(0.0, avg_slip)))
-
-        if avg_slip <= 0.0:
-            status_label = "RELIABLE"
-        elif avg_slip <= 2.0:
-            status_label = "WATCHLIST"
-        else:
-            status_label = "HIGH_RISK"
-
-        reliability_map[name] = {
-            "supplier": name,
-            "quoted_lead_time_days": quoted_lead,
-            "avg_slippage_days": avg_slip,
-            "adjusted_lead_time_days": adj_lead,
-            "total_orders": total_orders,
-            "delayed_orders": delayed_count,
-            "on_time_rate": on_time_rate,
-            "reliability_status": status_label
-        }
-
-    return reliability_map
-
 
 
 def get_incoming_pos(
@@ -764,10 +538,7 @@ def evaluate_sku_location(
         "severity_score": severity_score,
         "margin_at_risk": margin_at_risk,
         "time_to_stockout": time_to_stockout,
-        "primary_supplier": primary_sup,
-        "data_quality_flag": adaptive_velocity.get("data_quality_flag", "NORMAL"),
-        "confidence_score": adaptive_velocity.get("confidence_score", CONFIDENCE_NORMAL),
-        "human_escalation_required": adaptive_velocity.get("human_escalation_required", False),
+        "primary_supplier": primary_sup
     }
 
 
@@ -1076,128 +847,6 @@ def compute_incident_scorecard(
         "downtime_risk_days": downtime_days,
         "downtime_risk_str": f"{int(downtime_days)} Days" if downtime_days == int(downtime_days) else f"{downtime_days} Days",
     }
-
-
-def compute_plan_diff(
-    before_brief: Dict[str, Any],
-    after_brief: Dict[str, Any],
-    chaos_event: Optional[Dict[str, Any]] = None
-) -> Dict[str, Any]:
-    """
-    Computes structured diff between before-shock and after-shock recommendation plans with reasons.
-    """
-    before_problems = {p["problem_id"]: p for p in before_brief.get("problems", [])}
-    after_problems = {p["problem_id"]: p for p in after_brief.get("problems", [])}
-
-    all_pids = sorted(list(set(before_problems.keys()) | set(after_problems.keys())))
-    diffs = []
-
-    for pid in all_pids:
-        b_p = before_problems.get(pid)
-        a_p = after_problems.get(pid)
-
-        if not b_p and a_p:
-            diffs.append({
-                "problem_id": pid,
-                "sku": a_p.get("sku"),
-                "location": a_p.get("location"),
-                "change_type": "NEW_PROBLEM_EMERGED",
-                "has_changed": True,
-                "before_plan": None,
-                "after_plan": {
-                    "action_type": a_p.get("simulated_action", {}).get("action_type"),
-                    "source": a_p.get("simulated_action", {}).get("payload", {}).get("from_location_or_supplier"),
-                    "qty": a_p.get("simulated_action", {}).get("payload", {}).get("qty", 0),
-                    "cost_inr": a_p.get("simulated_action", {}).get("payload", {}).get("total_estimated_cost_inr", 0.0),
-                },
-                "change_reason": f"Operational shock triggered new incident at {a_p.get('location')}."
-            })
-            continue
-
-        if b_p and not a_p:
-            diffs.append({
-                "problem_id": pid,
-                "sku": b_p.get("sku"),
-                "location": b_p.get("location"),
-                "change_type": "PROBLEM_RESOLVED",
-                "has_changed": True,
-                "before_plan": {
-                    "action_type": b_p.get("simulated_action", {}).get("action_type"),
-                    "source": b_p.get("simulated_action", {}).get("payload", {}).get("from_location_or_supplier"),
-                    "qty": b_p.get("simulated_action", {}).get("payload", {}).get("qty", 0),
-                    "cost_inr": b_p.get("simulated_action", {}).get("payload", {}).get("total_estimated_cost_inr", 0.0),
-                },
-                "after_plan": None,
-                "change_reason": "Incident resolved or cleared by operational change."
-            })
-            continue
-
-        b_act = b_p.get("simulated_action", {})
-        a_act = a_p.get("simulated_action", {})
-        b_pay = b_act.get("payload", {})
-        a_pay = a_act.get("payload", {})
-
-        b_src = b_pay.get("from_location_or_supplier")
-        a_src = a_pay.get("from_location_or_supplier")
-        b_type = b_act.get("action_type")
-        a_type = a_act.get("action_type")
-        b_qty = b_pay.get("qty", 0)
-        a_qty = a_pay.get("qty", 0)
-        b_cost = b_pay.get("total_estimated_cost_inr", 0.0)
-        a_cost = a_pay.get("total_estimated_cost_inr", 0.0)
-
-        has_changed = (b_src != a_src) or (b_type != a_type) or (b_qty != a_qty)
-
-        reason_parts = []
-        if b_src != a_src:
-            reason_parts.append(f"Fulfillment source shifted from {b_src} to {a_src}")
-        if b_type != a_type:
-            reason_parts.append(f"Action escalated from {b_type} to {a_type}")
-        if b_qty != a_qty:
-            reason_parts.append(f"Order quantity adjusted from {b_qty} to {a_qty} units")
-
-        if not reason_parts:
-            change_reason = "Plan maintained: current recommendation remains optimal."
-        else:
-            ev_desc = ""
-            if chaos_event:
-                ev_type = str(chaos_event.get("event_type", ""))
-                if "BLOCK" in ev_type:
-                    ev_desc = "due to lateral route roadblock disruption"
-                elif "SURGE" in ev_type:
-                    ev_desc = "due to sudden demand acceleration"
-                elif "DELAY" in ev_type:
-                    ev_desc = "due to supplier delivery slippage"
-            change_reason = "; ".join(reason_parts) + (f" ({ev_desc})" if ev_desc else "") + "."
-
-        diffs.append({
-            "problem_id": pid,
-            "sku": a_p.get("sku"),
-            "location": a_p.get("location"),
-            "change_type": "PLAN_MUTATION" if has_changed else "UNCHANGED",
-            "has_changed": has_changed,
-            "before_plan": {
-                "action_type": b_type,
-                "source": b_src,
-                "qty": b_qty,
-                "cost_inr": b_cost,
-            },
-            "after_plan": {
-                "action_type": a_type,
-                "source": a_src,
-                "qty": a_qty,
-                "cost_inr": a_cost,
-            },
-            "change_reason": change_reason
-        })
-
-    changed_count = sum(1 for d in diffs if d["has_changed"])
-    return {
-        "total_problems": len(diffs),
-        "total_changed_plans": changed_count,
-        "diffs": diffs
-    }
-
 
 
 

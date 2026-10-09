@@ -26,16 +26,12 @@ from engine.domain_math import (
     generate_14day_projections,
     calculate_donor_transfer_safety,
     compute_sku_target_cover,
-    compute_dynamic_donor_buffer,
     compute_option_expected_cost,
     compute_incident_scorecard,
-    compute_supplier_reliability,
 )
 from engine.config import (
     DEFAULT_TRANSFER_HANDLING_COST,
-    DEFAULT_TRANSFER_UNIT_FREIGHT,
     DEFAULT_ROUTE_TRANSIT_DAYS,
-    DEFAULT_DONOR_SAFETY_DAYS,
     DEFAULT_CAPITAL_TRAP_DAYS,
     TREND_ACCELERATING_THRESHOLD,
     TREND_DECELERATING_THRESHOLD,
@@ -148,7 +144,6 @@ class DecisionEngine:
         chaos_events: Optional[List[Dict[str, Any]]] = None,
         active_reservations: Optional[Dict[str, int]] = None,
         transfer_handling_cost: Optional[float] = None,
-        rejection_memories: Optional[List[Dict[str, Any]]] = None,
     ):
         self.data_dir = data_dir
         self.current_date = current_date
@@ -162,14 +157,6 @@ class DecisionEngine:
             if transfer_handling_cost is not None
             else DEFAULT_TRANSFER_HANDLING_COST
         )
-        if rejection_memories is not None:
-            self.rejection_memories = list(rejection_memories)
-        else:
-            try:
-                from engine.persistence import get_all_rejection_memories
-                self.rejection_memories = get_all_rejection_memories()
-            except Exception:
-                self.rejection_memories = []
         self.products: List[Dict[str, Any]] = []
         self.inventory: List[Dict[str, Any]] = []
         self.sales: List[Dict[str, Any]] = []
@@ -179,33 +166,17 @@ class DecisionEngine:
         self.apply_in_memory_mutations()
 
     def load_data(self):
-        """Loads operational JSON/CSV records from the data directory with Pydantic validation."""
-        from engine.data_loader import load_validated_datasets
-        datasets = load_validated_datasets(self.data_dir)
-        self.products = datasets["products"]
-        self.inventory = datasets["inventory"]
-        self.sales = datasets["sales"]
-        self.suppliers = datasets["suppliers"]
-        self.purchase_orders = datasets["purchase_orders"]
-
-        # T21: Supplier Reliability Learning - adjust lead times based on historical delivery slippage
-        self.supplier_reliability = compute_supplier_reliability(
-            purchase_orders=self.purchase_orders,
-            suppliers=self.suppliers,
-            current_date=self.current_date
-        )
-        for s in self.suppliers:
-            name = s.get("supplier")
-            rel = self.supplier_reliability.get(name)
-            if rel:
-                s["quoted_lead_time_days"] = int(s.get("lead_time_days", 7))
-                s["adjusted_lead_time_days"] = int(rel["adjusted_lead_time_days"])
-                s["historical_slippage_days"] = float(rel["avg_slippage_days"])
-                s["on_time_rate"] = float(rel["on_time_rate"])
-                s["reliability_status"] = rel["reliability_status"]
-                # Use learned adjusted lead time in domain mathematics
-                s["lead_time_days"] = int(rel["adjusted_lead_time_days"])
-
+        """Loads operational JSON records from the data directory."""
+        with open(os.path.join(self.data_dir, "products.json"), "r", encoding="utf-8") as f:
+            self.products = json.load(f)
+        with open(os.path.join(self.data_dir, "inventory.json"), "r", encoding="utf-8") as f:
+            self.inventory = json.load(f)
+        with open(os.path.join(self.data_dir, "sales.json"), "r", encoding="utf-8") as f:
+            self.sales = json.load(f)
+        with open(os.path.join(self.data_dir, "suppliers.json"), "r", encoding="utf-8") as f:
+            self.suppliers = json.load(f)
+        with open(os.path.join(self.data_dir, "purchase_orders.json"), "r", encoding="utf-8") as f:
+            self.purchase_orders = json.load(f)
 
     def apply_in_memory_mutations(self):
         """Applies dynamic chaos events or state overrides."""
@@ -274,40 +245,6 @@ class DecisionEngine:
                 if match_from and match_to:
                     return True
         return False
-
-    def _apply_rejection_memory_penalties(self, sku: str, location: str, options: List[Dict[str, Any]]):
-        """
-        T23: Applies soft constraint penalty (+₹750 expected cost) to any option whose source
-        or action was previously rejected by a human operator for this (sku, location).
-        Annotates the option with the prior rejection reason and moves it down in ranking.
-        """
-        if not self.rejection_memories:
-            return
-
-        for opt in options:
-            opt_source = str(opt.get("source", "")).strip().lower()
-            opt_name = str(opt.get("option_name", "")).strip().lower()
-            for mem in self.rejection_memories:
-                m_sku = mem.get("sku")
-                m_loc = mem.get("location")
-                m_src = str(mem.get("rejected_source") or "").strip().lower()
-                m_reason = mem.get("rejection_reason", "Declined by operator")
-
-                sku_match = (not m_sku or m_sku == sku)
-                loc_match = (not m_loc or m_loc == location)
-
-                if sku_match and loc_match:
-                    src_match = bool(m_src and (m_src in opt_source or opt_source in m_src or m_src in opt_name))
-                    if src_match:
-                        penalty = 750.0  # INR soft penalty
-                        current_cost = float(opt.get("expected_cost", opt.get("estimated_cost_inr", 0.0)))
-                        opt["expected_cost"] = round(current_cost + penalty, 2)
-                        opt["rejection_penalty_applied"] = True
-                        opt["rejection_penalty_amount"] = penalty
-                        opt["rejection_reason_note"] = f"Soft Penalty (+₹{penalty:,.2f}): Operator previously rejected this source ({m_reason})"
-                        if "pros_cons" in opt and "[SOFT CONSTRAINT" not in opt["pros_cons"]:
-                            opt["pros_cons"] += f" [SOFT CONSTRAINT: Prior operator rejection noted: '{m_reason}']"
-                        break
 
     def get_product(self, sku: str) -> Dict[str, Any]:
         for p in self.products:
@@ -816,9 +753,6 @@ class DecisionEngine:
                     "trade_off_summary": f"Inaction causes {gap} days stockout and ₹{lost_revenue:,.2f} lost revenue."
                 })
 
-                # T23: Apply rejection memory soft constraints before ranking
-                self._apply_rejection_memory_penalties(sku, loc, options)
-
                 # Rank all options strictly by expected_cost (Feasible options first, lowest cost wins)
                 feasible_opts = [o for o in options if o.get("feasibility") == "FEASIBLE"]
                 infeasible_opts = [o for o in options if o.get("feasibility") != "FEASIBLE"]
@@ -902,12 +836,6 @@ class DecisionEngine:
                     order_qty=simulated_action["payload"].get("qty", 0)
                 )
 
-                if metrics.get("human_escalation_required"):
-                    simulated_action["escalation_policy"] = "MANUAL_SUPERVISION_REQUIRED"
-                    dq_flag = metrics.get("data_quality_flag", "NORMAL")
-                    conf = metrics.get("confidence_score", 0.95)
-                    decision_rationale += f" [DATA QUALITY ALERT: {dq_flag} detected (Confidence {conf:.0%}) - flagged for human escalation before execution.]"
-
                 detected_problems.append({
                     "problem_id": pid,
                     "category": final_category,
@@ -925,10 +853,7 @@ class DecisionEngine:
                     "scorecard": scorecard,
                     "forward_projections": self._generate_projections_for_problem(stock, burn, prim_lead, options, simulated_action, sku=sku, loc=loc),
                     "decision_rationale": decision_rationale,
-                    "simulated_action": simulated_action,
-                    "data_quality_flag": metrics.get("data_quality_flag", "NORMAL"),
-                    "confidence_score": metrics.get("confidence_score", 0.95),
-                    "human_escalation_required": metrics.get("human_escalation_required", False),
+                    "simulated_action": simulated_action
                 })
 
             # -------------------------------------------------------------
@@ -1025,12 +950,6 @@ class DecisionEngine:
                     order_qty=simulated_action["payload"].get("qty", 0)
                 )
 
-                if metrics.get("human_escalation_required"):
-                    simulated_action["escalation_policy"] = "MANUAL_SUPERVISION_REQUIRED"
-                    dq_flag = metrics.get("data_quality_flag", "NORMAL")
-                    conf = metrics.get("confidence_score", 0.95)
-                    decision_rationale += f" [DATA QUALITY ALERT: {dq_flag} detected (Confidence {conf:.0%}) - flagged for human escalation before execution.]"
-
                 detected_problems.append({
                     "problem_id": pid,
                     "category": final_category,
@@ -1051,10 +970,7 @@ class DecisionEngine:
                     "scorecard": scorecard,
                     "forward_projections": self._generate_projections_for_problem(stock, burn, prim_lead, options, simulated_action, sku=sku, loc=loc),
                     "decision_rationale": decision_rationale,
-                    "simulated_action": simulated_action,
-                    "data_quality_flag": metrics.get("data_quality_flag", "NORMAL"),
-                    "confidence_score": metrics.get("confidence_score", 0.95),
-                    "human_escalation_required": metrics.get("human_escalation_required", False),
+                    "simulated_action": simulated_action
                 })
 
             # -------------------------------------------------------------
@@ -1153,12 +1069,6 @@ class DecisionEngine:
                     order_qty=po_qty
                 )
 
-                if metrics.get("human_escalation_required"):
-                    simulated_action["escalation_policy"] = "MANUAL_SUPERVISION_REQUIRED"
-                    dq_flag = metrics.get("data_quality_flag", "NORMAL")
-                    conf = metrics.get("confidence_score", 0.95)
-                    decision_rationale += f" [DATA QUALITY ALERT: {dq_flag} detected (Confidence {conf:.0%}) - flagged for human escalation before execution.]"
-
                 detected_problems.append({
                     "problem_id": pid,
                     "category": final_category,
@@ -1179,10 +1089,7 @@ class DecisionEngine:
                     "scorecard": scorecard,
                     "forward_projections": self._generate_projections_for_problem(stock, burn, prim_lead, options, simulated_action, sku=sku, loc=loc),
                     "decision_rationale": decision_rationale,
-                    "simulated_action": simulated_action,
-                    "data_quality_flag": metrics.get("data_quality_flag", "NORMAL"),
-                    "confidence_score": metrics.get("confidence_score", 0.95),
-                    "human_escalation_required": metrics.get("human_escalation_required", False),
+                    "simulated_action": simulated_action
                 })
 
             # -------------------------------------------------------------
@@ -1298,12 +1205,6 @@ class DecisionEngine:
                     order_qty=target_reorder_qty
                 )
 
-                if metrics.get("human_escalation_required"):
-                    simulated_action["escalation_policy"] = "MANUAL_SUPERVISION_REQUIRED"
-                    dq_flag = metrics.get("data_quality_flag", "NORMAL")
-                    conf = metrics.get("confidence_score", 0.95)
-                    decision_rationale += f" [DATA QUALITY ALERT: {dq_flag} detected (Confidence {conf:.0%}) - flagged for human escalation before execution.]"
-
                 detected_problems.append({
                     "problem_id": pid,
                     "category": final_category,
@@ -1324,10 +1225,7 @@ class DecisionEngine:
                     "scorecard": scorecard,
                     "forward_projections": self._generate_projections_for_problem(stock, v_short, prim_lead, options, simulated_action, sku=sku, loc=loc),
                     "decision_rationale": decision_rationale,
-                    "simulated_action": simulated_action,
-                    "data_quality_flag": metrics.get("data_quality_flag", "NORMAL"),
-                    "confidence_score": metrics.get("confidence_score", 0.95),
-                    "human_escalation_required": metrics.get("human_escalation_required", False),
+                    "simulated_action": simulated_action
                 })
 
         # Rank problems: CRITICAL first, prioritized by commercial risk, highest velocity, and lowest cover
@@ -1351,64 +1249,11 @@ class DecisionEngine:
         critical_count = sum(1 for p in detected_problems if p["severity"] == "CRITICAL")
         top_focus = detected_problems[0]["sku"] if detected_problems else "N/A"
 
-        # Global Multi-Echelon Transfer Optimization across all detected incidents
-        demands = []
-        for p in detected_problems:
-            if p.get("category_code") in ("CAT_A_STOCKOUT", "CAT_D_VOLATILITY") or p.get("severity") in ("CRITICAL", "HIGH"):
-                act = p.get("simulated_action", {})
-                payload = act.get("payload", {})
-                needed = int(payload.get("qty", 0))
-                if needed > 0:
-                    demands.append({
-                        "demand_id": p["problem_id"],
-                        "sku": p["sku"],
-                        "location": p["location"],
-                        "needed_qty": needed,
-                        "margin_loss_per_unit": float(p["domain_metrics"].get("unit_margin", 350.0)),
-                        "supplier_price": float(p.get("domain_metrics", {}).get("primary_price", 1000.0))
-                    })
-
-        donors = []
-        for inv in self.inventory:
-            d_sku = inv["sku"]
-            d_loc = inv["location"]
-            d_stock = inv["stock"]
-            d_burn = calculate_daily_burn_rate(self.sales, d_sku, d_loc, days_observed=30)
-            sup = find_primary_supplier(self.suppliers, d_sku)
-            d_lead = int(sup.get("lead_time_days", 7)) if sup else 7
-            safety_cover = compute_dynamic_donor_buffer(d_lead, DEFAULT_DONOR_SAFETY_DAYS)
-            target_cover = compute_sku_target_cover(d_lead)
-            current_cover = calculate_days_of_cover(d_stock, d_burn)
-            safe_reserve = math.ceil(safety_cover * d_burn)
-            surplus = max(0, d_stock - safe_reserve)
-            if surplus > 0:
-                is_trap = current_cover > target_cover
-                donors.append({
-                    "donor_id": f"{d_loc}:{d_sku}",
-                    "sku": d_sku,
-                    "location": d_loc,
-                    "surplus_qty": surplus,
-                    "is_capital_trap": is_trap,
-                    "cover_days": current_cover
-                })
-
-        from engine.global_optimizer import solve_global_transfer_network
-        network_transfer_plan = solve_global_transfer_network(
-            demands=demands,
-            donors=donors,
-            blocked_routes=self.blocked_routes,
-            handling_cost=float(self.transfer_handling_cost),
-            unit_freight=DEFAULT_TRANSFER_UNIT_FREIGHT
-        )
-
         return {
             "summary": {
                 "total_problems_detected": len(detected_problems),
                 "critical_actions_required": critical_count,
                 "top_focus_sku": top_focus
             },
-            "problems": detected_problems,
-            "network_transfer_plan": network_transfer_plan,
-            "supplier_reliability": self.supplier_reliability
+            "problems": detected_problems
         }
-

@@ -26,18 +26,18 @@ Rather than merely displaying static reports or relying on unreliable LLM arithm
 
 | Rule | Operational Requirement | Architectural Implementation | Verification |
 | :--- | :--- | :--- | :--- |
-| **1. Grounded Telemetry** | Extract facts strictly from 5 core records | Ingests exclusively from `products`, `inventory`, `sales`, `suppliers`, and `purchase_orders` | [`mock_data_gen.py`](file:///c:/Users/sridh/Desktop/navora/kaveri_copilot/engine/mock_data_gen.py) |
-| **2. Deterministic Domain Math** | Closed-form arithmetic (zero LLM calculation) | Python functions for $v_{30}$, $v_{7}$, $D$, $\Delta$, and lost revenue | [`domain_math.py`](file:///c:/Users/sridh/Desktop/navora/kaveri_copilot/engine/domain_math.py) |
-| **3. Full 5-Problem Coverage** | Scan and classify all 5 supply chain failure modes | Imminent Stockouts, Capital Traps, Overdue POs, Demand Volatility, and Supplier Mismatches | [`decision_agent.py`](file:///c:/Users/sridh/Desktop/navora/kaveri_copilot/engine/decision_agent.py) |
-| **4. Mandated Alternatives ($N \ge 2$)** | Model $\ge 2$ feasible options with quantified trade-offs | Evaluates Network Transfer, Expedited Vendor PO, and Status Quo Inaction | [`decision_agent.py`](file:///c:/Users/sridh/Desktop/navora/kaveri_copilot/engine/decision_agent.py) |
-| **5. Commercial Quantification** | Trade-offs in days, direct INR outlay, lost margins | ₹250 handling vs supplier purchase outlays, unit margins, and lost sales | [`dashboard.py`](file:///c:/Users/sridh/Desktop/navora/kaveri_copilot/app/dashboard.py) |
-| **6. Network Balancing Priority** | Reallocate internal surplus before external capital | Donor locations with $>15$ days post-transfer cover prioritized over vendor POs | [`domain_math.py`](file:///c:/Users/sridh/Desktop/navora/kaveri_copilot/engine/domain_math.py#L83-L95) |
-| **7. Supplier Constraint Checks** | Check MOQs and lead-time feasibilities | Flags `INFEASIBLE_MOQ` if $\text{MOQ} > 3 \times Q_{\text{needed}}$ and flags delivery lead-time friction | [`domain_math.py`](file:///c:/Users/sridh/Desktop/navora/kaveri_copilot/engine/domain_math.py) |
-| **8. Structured Artifacts** | Generate fully populated machine-readable payloads | Pre-drafts `TRANSFER_REQUEST`, `PURCHASE_ORDER`, and `SUPPLIER_EXPEDITE_NOTICE` | [`decision_agent.py`](file:///c:/Users/sridh/Desktop/navora/kaveri_copilot/engine/decision_agent.py) |
-| **9. Mandatory Human Gate** | Explicit user approval before state modification | Simulated uncommitted drafts; state mutates only upon `/action/approve` | [`server.py`](file:///c:/Users/sridh/Desktop/navora/kaveri_copilot/app/server.py#L125-L223) |
-| **10. Dynamic Recalibration** | Instant recalculation when user modifies quantities | Dynamic cover and forward trajectory recalculated without state mutation | [`server.py`](file:///c:/Users/sridh/Desktop/navora/kaveri_copilot/app/server.py#L310-L360) |
-| **11. Transparent Explainability** | Explicit mathematical ratios ($v$, $D$, $\Delta$, $T$) | Formatted formulas displayed on every card with Plotly forward visual curves | [`dashboard.py`](file:///c:/Users/sridh/Desktop/navora/kaveri_copilot/app/dashboard.py) |
-| **12. Chaos Resilience** | Ingest real-time state perturbations & adapt | Live runtime injection testing (`DEMAND_SPIKE`, `TRANSFER_ROADBLOCK`, `SUPPLIER_HIKE`) | [`server.py`](file:///c:/Users/sridh/Desktop/navora/kaveri_copilot/app/server.py#L424-L450) |
+| **1. Grounded Telemetry** | Extract facts strictly from 5 core records | Ingests exclusively from `products`, `inventory`, `sales`, `suppliers`, and `purchase_orders` | [`mock_data_gen.py`](kaveri_copilot/engine/mock_data_gen.py) |
+| **2. Deterministic Domain Math** | Closed-form arithmetic (zero LLM calculation) | Python functions for $v_{30}$, $v_{7}$, $D$, $\Delta$, and lost revenue | [`domain_math.py`](kaveri_copilot/engine/domain_math.py) |
+| **3. Full 5-Problem Coverage** | Scan and classify all 5 supply chain failure modes | Imminent Stockouts, Capital Traps, Overdue POs, Demand Volatility, and Supplier Mismatches | [`decision_agent.py`](kaveri_copilot/engine/decision_agent.py) |
+| **4. Mandated Alternatives ($N \ge 2$)** | Model $\ge 2$ feasible options with quantified trade-offs | Evaluates Network Transfer, Expedited Vendor PO, and Status Quo Inaction | [`decision_agent.py`](kaveri_copilot/engine/decision_agent.py) |
+| **5. Commercial Quantification** | Trade-offs in days, direct INR outlay, lost margins | ₹250 handling vs supplier purchase outlays, unit margins, and lost sales | [`dashboard.py`](kaveri_copilot/app/dashboard.py) |
+| **6. Network Balancing Priority** | Reallocate internal surplus before external capital | Donor locations with $>15$ days post-transfer cover prioritized over vendor POs | [`domain_math.py`](kaveri_copilot/engine/domain_math.py) |
+| **7. Supplier Constraint Checks** | Check MOQs and lead-time feasibilities | Flags `INFEASIBLE_MOQ` if $\text{MOQ} > 3 \times Q_{\text{needed}}$ and flags delivery lead-time friction | [`domain_math.py`](kaveri_copilot/engine/domain_math.py) |
+| **8. Structured Artifacts** | Generate fully populated machine-readable payloads | Pre-drafts `TRANSFER_REQUEST`, `PURCHASE_ORDER`, and `SUPPLIER_EXPEDITE_NOTICE` | [`decision_agent.py`](kaveri_copilot/engine/decision_agent.py) |
+| **9. Mandatory Human Gate** | Explicit user approval before state modification | Simulated uncommitted drafts; state mutates only upon `/action/approve` | [`server.py`](kaveri_copilot/app/server.py) |
+| **10. Dynamic Recalibration** | Instant recalculation when user modifies quantities | Dynamic cover and forward trajectory recalculated without state mutation | [`server.py`](kaveri_copilot/app/server.py) |
+| **11. Transparent Explainability** | Explicit mathematical ratios ($v$, $D$, $\Delta$, $T$) | Formatted formulas displayed on every card with Plotly forward visual curves | [`dashboard.py`](kaveri_copilot/app/dashboard.py) |
+| **12. Chaos Resilience** | Ingest real-time state perturbations & adapt | Live runtime injection testing (`DEMAND_SPIKE`, `TRANSFER_ROADBLOCK`, `SUPPLIER_HIKE`) | [`server.py`](kaveri_copilot/app/server.py) |
 
 ---
 
@@ -286,7 +286,7 @@ streamlit run app/dashboard.py --server.port 8501
 
 ---
 
-## 🛡️ Production Vulnerability Hardening (35/35 Tests Passing)
+## 🛡️ Safety Hardening
 
 1. **Simulation Date Desync Eliminated:**
    - Business logic uncoupled from system clock (`datetime.today()` / `datetime.now()`).

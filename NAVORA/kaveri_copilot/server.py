@@ -23,7 +23,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from engine.decision_agent import DecisionEngine
-from engine.domain_math import validate_and_recalculate_transfer, evaluate_supplier_friction, compute_plan_diff
+from engine.domain_math import validate_and_recalculate_transfer, evaluate_supplier_friction
 from engine.mock_data_gen import seed_all_data
 from engine.persistence import (
     log_audit_trail,
@@ -33,8 +33,6 @@ from engine.persistence import (
     create_stock_reservation,
     release_stock_reservation,
     get_active_stock_reservations,
-    record_rejection_memory,
-    get_all_rejection_memories,
     clear_all_persistence
 )
 
@@ -141,7 +139,6 @@ def get_dashboard_ui():
 
 
 @app.post("/reset-data")
-@app.post("/api/reset-data")
 def reset_benchmark_state():
     """Resets data to pristine benchmark state and clears active chaos events and persistence."""
     ACTIVE_CHAOS_EVENTS.clear()
@@ -160,7 +157,6 @@ def health_check():
 
 
 @app.get("/briefing")
-@app.get("/api/briefing")
 def get_morning_briefing(current_date: str = "2026-10-09"):
     """
     Runs the 6-step agentic pipeline and returns prioritized problems,
@@ -176,54 +172,8 @@ def get_morning_briefing(current_date: str = "2026-10-09"):
     return brief
 
 
-@app.get("/api/backtest")
-def get_backtest_metrics(days: int = 60):
-    """
-    Replays historical sales across the multi-echelon network and returns
-    stockouts prevented, lost units averted, and Rs. saved vs baseline.
-    """
-    from scripts.backtest import run_backtest
-    return run_backtest(data_dir=DATA_DIR, days=days)
-
-
-@app.get("/api/optimizer/transfers")
-def get_global_network_transfers(current_date: str = "2026-10-09"):
-    """
-    Solves all lateral inventory transfers jointly across the network using
-    PuLP Integer Linear Programming with greedy comparison and fallback.
-    """
-    engine = DecisionEngine(
-        data_dir=DATA_DIR,
-        current_date=current_date,
-        chaos_events=ACTIVE_CHAOS_EVENTS,
-        active_reservations=get_active_stock_reservations()
-    )
-    brief = engine.run_agentic_pipeline()
-    return brief.get("network_transfer_plan", {})
-
-
-@app.get("/api/suppliers/reliability")
-def get_supplier_reliability_audit(current_date: str = "2026-10-09"):
-    """
-    Computes actual vs promised delivery slippage per supplier and returns
-    learned adjusted lead times and reliability statuses.
-    """
-    engine = DecisionEngine(
-        data_dir=DATA_DIR,
-        current_date=current_date,
-        chaos_events=ACTIVE_CHAOS_EVENTS,
-        active_reservations=get_active_stock_reservations()
-    )
-    brief = engine.run_agentic_pipeline()
-    return brief.get("supplier_reliability", {})
-
-
-
-
-
 
 @app.post("/action/approve")
-@app.post("/api/action/approve")
 def approve_action(req: ActionApprovalRequest):
     """
     Human-in-the-loop signoff gate.
@@ -238,7 +188,7 @@ def approve_action(req: ActionApprovalRequest):
         to_loc = payload_dict.get("to_location", "")
         exp_date = payload_dict.get("expected_delivery_date", "")
     else:
-        payload_dict = req.payload.model_dump() if hasattr(req.payload, "model_dump") else req.payload.dict()
+        payload_dict = req.payload.dict() if hasattr(req.payload, "dict") else req.payload.model_dump()
         sku = req.payload.sku
         qty = int(req.payload.qty)
         from_loc = req.payload.from_location or req.payload.from_location_or_supplier or ""
@@ -409,9 +359,8 @@ def approve_action(req: ActionApprovalRequest):
 
 
 @app.post("/action/reject")
-@app.post("/api/action/reject")
 def reject_action(req: ActionRejectRequest):
-    """Logs rejection of a proposed action, frees held stock reservations, and stores rejection memory."""
+    """Logs rejection of a proposed action and frees any held stock reservations."""
     release_stock_reservation(req.problem_id)
     audit_entry = log_audit_trail_entry(
         problem_id=req.problem_id,
@@ -421,34 +370,13 @@ def reject_action(req: ActionRejectRequest):
         approved_by=req.rejected_by,
         notes=req.reason
     )
-
-    # Resolve incident metadata to record rejection memory
-    engine = DecisionEngine(data_dir=DATA_DIR)
-    brief = engine.run_agentic_pipeline()
-    prob = next((p for p in brief.get("problems", []) if p["problem_id"] == req.problem_id), None)
-    sku = prob.get("sku") if prob else None
-    loc = prob.get("location") if prob else None
-    src = prob.get("simulated_action", {}).get("payload", {}).get("from_location_or_supplier") if prob else None
-    act_type = prob.get("simulated_action", {}).get("action_type") if prob else None
-
-    mem = record_rejection_memory(
-        problem_id=req.problem_id,
-        sku=sku,
-        location=loc,
-        rejected_source=src,
-        action_type=act_type,
-        rejection_reason=req.reason
-    )
-
     return {
         "status": "REJECTED",
-        "message": f"Problem {req.problem_id} marked as rejected by {req.rejected_by}.",
-        "rejection_memory": mem
+        "message": f"Problem {req.problem_id} marked as rejected by {req.rejected_by}."
     }
 
 
 @app.post("/action/dismiss")
-@app.post("/api/action/dismiss")
 def dismiss_action(req: ActionRejectRequest):
     """Dismisses an incident and releases any associated reservations."""
     release_stock_reservation(req.problem_id)
@@ -467,7 +395,6 @@ def dismiss_action(req: ActionRejectRequest):
 
 
 @app.get("/inventory")
-@app.get("/api/inventory")
 def get_inventory():
     """Returns current multi-echelon stock levels joined with product metadata."""
     inventory_path = os.path.join(DATA_DIR, "inventory.json")
@@ -496,7 +423,6 @@ def get_inventory():
 
 
 @app.get("/audit-log")
-@app.get("/api/audit-log")
 def get_audit_log():
     """Returns historical log of human decisions."""
     return load_audit_log()
@@ -558,8 +484,6 @@ def get_runtime_state(current_date: str = "2026-10-09") -> Dict[str, Any]:
 
 
 @app.post("/action/recalculate-override")
-@app.post("/api/action/recalculate-override")
-@app.post("/api/recalculate-override")
 def recalculate_override(req: RecalculateOverrideRequest):
     """
     Invokes calculate_donor_transfer_safety and returns revised cover days and 14-day projections without mutating state.
@@ -697,7 +621,6 @@ def override_recalculate(req: OverrideRecalculateRequest):
 
 
 @app.post("/chaos/inject")
-@app.post("/api/chaos/inject")
 def inject_chaos(req: ChaosInjectionRequest):
     """
     Directly injects operational anomalies (Demand Surges, Route Closures, Supplier Delays)
@@ -732,32 +655,20 @@ def inject_chaos(req: ChaosInjectionRequest):
         if req.value is not None:
             event_dict["multiplier_or_days"] = req.value
 
-    # Capture plan before chaos injection
-    before_engine = DecisionEngine(
-        data_dir=DATA_DIR,
-        chaos_events=list(ACTIVE_CHAOS_EVENTS)
-    )
-    before_brief = before_engine.run_agentic_pipeline()
-
     ACTIVE_CHAOS_EVENTS.append(event_dict)
 
-    # Capture plan after chaos injection
-    after_engine = DecisionEngine(
+    engine = DecisionEngine(
         data_dir=DATA_DIR,
-        chaos_events=list(ACTIVE_CHAOS_EVENTS)
+        chaos_events=ACTIVE_CHAOS_EVENTS
     )
-    after_brief = after_engine.run_agentic_pipeline()
-
-    # Compute structured before vs after plan diff with reasons
-    plan_diff = compute_plan_diff(before_brief, after_brief, event_dict)
+    new_brief = engine.run_agentic_pipeline()
 
     return {
         "status": "INJECTED",
         "scenario": req.scenario or event_dict.get("event_type"),
         "event": event_dict,
         "active_events_count": len(ACTIVE_CHAOS_EVENTS),
-        "plan_diff": plan_diff,
-        "updated_briefing": after_brief
+        "updated_briefing": new_brief
     }
 
 

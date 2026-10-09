@@ -20,10 +20,8 @@ if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
 import importlib
-import engine.config
 import engine.domain_math
 import engine.decision_agent
-importlib.reload(engine.config)
 importlib.reload(engine.domain_math)
 importlib.reload(engine.decision_agent)
 
@@ -686,32 +684,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 if st.session_state.chaos_events:
-    from engine.domain_math import compute_plan_diff
-    engine_base = DecisionEngine(data_dir=DATA_DIR, current_date=current_date_str, chaos_events=[])
-    brief_base = engine_base.run_agentic_pipeline()
-    plan_diff = compute_plan_diff(brief_base, briefing, st.session_state.chaos_events[-1])
-
-    st.error(f"🚨 **CHAOS INJECTION ACTIVE:** System is operating under {len(st.session_state.chaos_events)} live operational shock(s).")
-    with st.expander("⚡ **CHAOS PLAN DIFF (Before-Shock vs After-Shock Adaptation)**", expanded=True):
-        st.markdown(f"<div style='font-size: 0.88rem; color: #D1D5DB; margin-bottom: 8px;'><b>Autonomous Adaptations:</b> {plan_diff['total_changed_plans']} of {plan_diff['total_problems']} recommendations shifted dynamically.</div>", unsafe_allow_html=True)
-        for d in plan_diff["diffs"]:
-            if d["has_changed"]:
-                bp = d["before_plan"] or {}
-                ap = d["after_plan"] or {}
-                st.markdown(f"""
-                <div style="background-color: #1E1616; border: 1px solid #4B2A2A; border-left: 4px solid #F59E0B; border-radius: 6px; padding: 10px 14px; margin-bottom: 8px;">
-                    <div style="display: flex; justify-content: space-between; font-weight: 700; color: #FFFFFF; font-size: 0.92rem;">
-                        <span>📍 {d['location']} — {d['sku']} ({d['problem_id']})</span>
-                        <span style="color: #F59E0B; font-size: 0.82rem; font-weight: 700;">PLAN ADAPTATION</span>
-                    </div>
-                    <div style="display: flex; gap: 20px; font-size: 0.84rem; margin: 6px 0; font-family: monospace; flex-wrap: wrap;">
-                        <span style="color: #9CA3AF;">BEFORE: {bp.get('action_type', 'N/A')} from {bp.get('source', 'N/A')} ({bp.get('qty', 0)}u @ ₹{bp.get('cost_inr', 0):,.0f})</span>
-                        <span style="color: #38BDF8;">➔ AFTER: {ap.get('action_type', 'N/A')} from {ap.get('source', 'N/A')} ({ap.get('qty', 0)}u @ ₹{ap.get('cost_inr', 0):,.0f})</span>
-                    </div>
-                    <div style="font-size: 0.84rem; color: #E5E7EB;"><b>Reason for Change:</b> {d['change_reason']}</div>
-                </div>
-                """, unsafe_allow_html=True)
-
+    st.error(f"🚨 **CHAOS INJECTION ACTIVE:** System is running under {len(st.session_state.chaos_events)} live operational shock(s). Observe the agent automatically adapting its options!")
 
 summary = briefing["summary"]
 pending_count = sum(1 for p in briefing["problems"] if p["problem_id"] not in approved_problem_ids)
@@ -750,33 +723,7 @@ with k4:
     </div>
     """, unsafe_allow_html=True)
 
-# Historical Backtest Headline Strip
-@st.cache_data(ttl=3600)
-def load_backtest_headline():
-    try:
-        from scripts.backtest import run_backtest
-        return run_backtest(DATA_DIR, days=60)
-    except Exception:
-        return None
-
-bt_data = load_backtest_headline()
-if bt_data:
-    st.markdown(f"""
-    <div style="background: linear-gradient(90deg, #181212 0%, #201717 100%); border: 1px solid #3F2929; border-left: 4px solid #FF5733; border-radius: 8px; padding: 10px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-        <div style="font-size: 0.88rem; color: #E5E7EB;">
-            <strong style="color: #FF8566;">📈 60-Day Historical Backtest:</strong> Replayed {bt_data['days_simulated']} days across 8 network facilities.
-        </div>
-        <div style="display: flex; gap: 18px; font-family: monospace; font-size: 0.86rem; flex-wrap: wrap;">
-            <span>Stockouts Prevented: <strong style="color: #10B981;">+{bt_data['stockouts_prevented']}</strong></span>
-            <span>Lost Units Averted: <strong style="color: #38BDF8;">+{bt_data['lost_units_averted']}</strong></span>
-            <span>Capital Saved: <strong style="color: #F59E0B;">₹{bt_data['rs_saved']:,.0f}</strong></span>
-            <span>Net ROI: <strong style="color: #A78BFA;">+{bt_data['roi_percent']}%</strong></span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-else:
-    st.markdown("<div style='margin-bottom: 16px;'></div>", unsafe_allow_html=True)
-
+st.markdown("<div style='margin-bottom: 16px;'></div>", unsafe_allow_html=True)
 
 
 # ==============================================================================
@@ -986,40 +933,7 @@ def render_cyber_detail_cockpit(p, approved_problem_ids, raw_inventory, raw_sale
     fp = p.get("forward_projections")
     if fp and "days" in fp:
         st.markdown("##### 📈 14-Day Forward Visual Inventory Trajectories")
-        
-        # Probabilistic Monte Carlo Telemetry Badge
-        prob_data = fp.get("stockout_probability_by_day_14", {})
-        sq_risk = prob_data.get("status_quo", 0.0)
-        tr_risk = prob_data.get("transfer", 0.0)
-        ex_risk = prob_data.get("expedited", 0.0)
-        
-        st.markdown(f"""
-        <div style="background-color: #1A1313; border: 1px solid #382525; border-radius: 6px; padding: 6px 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 0.84rem; flex-wrap: wrap; gap: 8px;">
-            <div style="color: #E5E7EB;"><strong style="color: #FF8566;">🎲 Monte Carlo Risk (500 seeded runs):</strong> Stockout Probability by Day 14</div>
-            <div style="display: flex; gap: 14px; font-family: monospace;">
-                <span>Status Quo: <strong style="color: {'#EF4444' if sq_risk > 0.5 else '#F59E0B'};">{sq_risk * 100:.1f}%</strong></span>
-                <span>Expedited PO: <strong style="color: {'#F59E0B' if ex_risk > 0.2 else '#10B981'};">{ex_risk * 100:.1f}%</strong></span>
-                <span>Inter-Store Transfer: <strong style="color: #10B981;">{tr_risk * 100:.1f}%</strong></span>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
         fig = go.Figure()
-        
-        # Monte Carlo Fan Chart: Transfer 80% Confidence Band (p10 to p90)
-        fan = fp.get("fan_chart", {}).get("transfer") or fp.get("probabilistic", {}).get("transfer")
-        if fan and "p10" in fan and "p90" in fan:
-            fig.add_trace(go.Scatter(
-                x=fp["days"] + fp["days"][::-1],
-                y=fan["p90"] + fan["p10"][::-1],
-                fill="toself",
-                fillcolor="rgba(56, 189, 248, 0.12)",
-                line=dict(color="rgba(255,255,255,0)"),
-                hoverinfo="skip",
-                showlegend=True,
-                name="80% Projection Range"
-            ))
-
         fig.add_trace(go.Scatter(
             x=fp["days"],
             y=fp["status_quo"],
@@ -1332,34 +1246,24 @@ with tab_inv:
 # TAB 3: SUPPLIER FRICTION & RELIABILITY AUDIT
 # ==============================================================================
 with tab_sup:
-    st.subheader("Contracted Supplier Friction & Reliability Learning Audit")
-    st.caption("Assesses suppliers on price markup, MOQ lock-up, historical delivery slippage, and learned adjusted lead times.")
+    st.subheader("Contracted Supplier Friction & Reliability Audit")
+    st.caption("Assesses suppliers on price markup against contract baseline, delivery timing feasibility, and MOQ lock-up risks.")
     
     with open(os.path.join(DATA_DIR, "suppliers.json"), "r", encoding="utf-8") as f:
         sup_data = json.load(f)
     
-    rel_map = briefing.get("supplier_reliability", {})
     base_map = {s["sku"]: s["price"] for s in sup_data if s.get("is_primary", False)}
     aud_rows = []
     for s in sup_data:
         bp = base_map.get(s["sku"], s["price"])
         var = round(((s["price"] - bp) / bp) * 100.0, 1) if bp > 0 else 0.0
-        rel = rel_map.get(s["supplier"], {})
-        slip = rel.get("avg_slippage_days", 0.0)
-        adj_lead = rel.get("adjusted_lead_time_days", s.get("lead_time_days", 7))
-        ot_rate = rel.get("on_time_rate", 1.0)
-        rel_status = rel.get("reliability_status", "RELIABLE")
-
         aud_rows.append({
             "Supplier Name": s["supplier"],
             "Target SKU": s["sku"],
             "Tier": "Primary" if s.get("is_primary", False) else "Secondary / Rush",
             "Contract Price": f"₹{s['price']:,.2f}",
-            "Quoted Lead Time": f"{s.get('quoted_lead_time_days', s.get('lead_time_days', 7))}d",
-            "Historical Slippage": f"+{slip:.1f}d" if slip > 0 else "0.0d",
-            "Adjusted Lead Time": f"{adj_lead}d",
-            "On-Time Rate": f"{int(ot_rate * 100)}%",
-            "Reliability Status": rel_status,
+            "Price Variance": f"+{var}%" if var > 0 else "0%",
+            "Lead Time (Days)": s["lead_time_days"],
             "MOQ (Units)": s["moq"],
             "MOQ Friction Risk": "HIGH (Locked Capital)" if s["moq"] >= 50 else ("MEDIUM" if s["moq"] >= 20 else "LOW")
         })
