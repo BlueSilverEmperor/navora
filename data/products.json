@@ -1,0 +1,38 @@
+[
+  {
+    "sku": "FILTER-HYD-01",
+    "name": "Return Line Hydraulic Filter",
+    "machine_model": "JCB 3DX",
+    "category": "Hydraulic Filtration"
+  },
+  {
+    "sku": "VALVE-CTRL-02",
+    "name": "Proportional Main Control Valve",
+    "machine_model": "Komatsu PC210",
+    "category": "Hydraulic Valves"
+  },
+  {
+    "sku": "PUMP-GEAR-03",
+    "name": "Main Hydraulic Gear Pump",
+    "machine_model": "Tata Hitachi EX200",
+    "category": "Hydraulic Pumps"
+  },
+  {
+    "sku": "SEAL-KIT-04",
+    "name": "Boom Cylinder Seal Kit",
+    "machine_model": "Mahindra 575 DI",
+    "category": "Seals & O-Rings"
+  },
+  {
+    "sku": "HOSE-ASSEM-05",
+    "name": "High-Pressure Wire Braid Hose 1/2\"",
+    "machine_model": "CAT 424B",
+    "category": "Hydraulic Hoses"
+  },
+  {
+    "sku": "MOTOR-PIST-06",
+    "name": "Axial Piston Slew Motor",
+    "machine_model": "Kobelco SK210",
+    "category": "Hydraulic Motors"
+  }
+]

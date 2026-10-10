@@ -145,33 +145,9 @@
       border-radius: 4px;
     }
 
-    /* Sticky toggle button anchored at the edge */
+    /* Sticky toggle button hidden in favor of header Controls & Nav button */
     #sidebarToggleBtn {
-      position: fixed;
-      top: 14px;
-      left: 275px;
-      z-index: 101;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: var(--surface);
-      border: 1px solid var(--border-accent);
-      color: var(--text-primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: var(--shadow-sm);
-      transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s, transform 0.2s;
-    }
-    #sidebarToggleBtn:hover {
-      background: var(--surface-alt);
-      color: var(--sage-accent);
-      transform: scale(1.08);
-    }
-    #sidebar.collapsed ~ #sidebarToggleBtn,
-    body.sidebar-is-collapsed #sidebarToggleBtn {
-      left: 14px !important;
+      display: none !important;
     }
 
     /* Brand Header in Sidebar */
@@ -503,16 +479,44 @@
     }
 
     .top-header {
-      height: 56px;
-      min-height: 56px;
+      height: 60px;
+      min-height: 60px;
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 24px;
-      padding-left: 56px;
       z-index: 90;
+      position: sticky;
+      top: 0;
+    }
+
+    .top-header-left {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .controls-nav-btn {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    .controls-nav-btn:hover {
+      background: var(--surface-input);
+      border-color: var(--sage-accent);
+      color: var(--sage-accent);
     }
 
     .top-header-title-wrap {
@@ -521,64 +525,52 @@
       gap: 12px;
     }
     .top-header-title {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text-primary);
-      letter-spacing: -0.2px;
+      font-size: 19px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.3px;
+      line-height: 1;
     }
     .top-header-badge {
       font-size: 10px;
       font-weight: 700;
       text-transform: uppercase;
-      padding: 2px 7px;
-      border-radius: 4px;
-      background: rgba(143, 168, 123, 0.15);
-      color: var(--sage-accent);
-      border: 1px solid var(--border-accent);
+      padding: 3px 9px;
+      border-radius: 20px;
+      background: rgba(143, 168, 123, 0.12);
+      color: #8da97e;
+      border: 1px solid #2b3a2a;
       font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.6px;
     }
 
-    .top-header-meta {
+    .top-header-right {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 16px;
     }
-    .conn-status-pill {
+    .live-sim-anchor {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      background: var(--surface-input);
-      padding: 4px 10px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
+      gap: 8px;
+      font-size: 13px;
+      color: #8fa38c;
+      font-weight: 500;
     }
-    .conn-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #34D399;
-      box-shadow: 0 0 8px rgba(52, 211, 153, 0.6);
+    .live-sim-dot {
+      color: #22c55e;
+      font-size: 12px;
+      line-height: 1;
+      animation: pulseGreen 2s infinite;
     }
-    .header-inspect-btn {
-      background: var(--surface-alt);
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.2s;
+    @keyframes pulseGreen {
+      0%, 100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 5px #22c55e); }
+      50% { opacity: 0.5; transform: scale(0.85); filter: drop-shadow(0 0 1px #22c55e); }
     }
-    .header-inspect-btn:hover {
-      color: var(--text-primary);
-      border-color: var(--border-accent);
+    .live-sim-date {
+      color: #4ade80;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
     }
 
     /* Multi-View Navigation Tabs */
@@ -844,30 +836,41 @@
       border-left: 4px solid var(--alert-amber);
     }
 
-    /* Collapsed Banner (Pic 1 Style) */
+    /* 2-Tier Incident Banner (Exact match to screenshot) */
     .incident-banner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 20px;
+      padding: 18px 24px 16px 24px;
       cursor: pointer;
       user-select: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      background: var(--surface);
       transition: background 0.2s;
-      gap: 16px;
     }
     .incident-banner:hover {
       background: var(--surface-alt);
     }
 
-    .banner-left {
+    /* Banner Top Row */
+    .banner-top-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .banner-top-left {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .banner-badge-group {
       display: flex;
       align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
+      gap: 8px;
     }
     .pill-severity {
-      padding: 4px 10px;
-      border-radius: 20px;
+      padding: 3px 10px;
+      border-radius: 4px;
       font-size: 11px;
       font-weight: 800;
       letter-spacing: 0.5px;
@@ -875,93 +878,117 @@
       font-family: 'JetBrains Mono', monospace;
     }
     .pill-critical {
-      background: var(--alert-crimson-bg);
-      color: var(--alert-crimson);
-      border: 1px solid var(--alert-crimson-border);
-      box-shadow: 0 0 10px rgba(255, 92, 92, 0.15);
+      background: #781d1d;
+      color: #fca5a5;
+      border: 1px solid #991b1b;
     }
     .pill-warning {
-      background: var(--alert-amber-bg);
-      color: var(--alert-amber);
-      border: 1px solid var(--alert-amber-border);
+      background: #2e2210;
+      color: #f59e0b;
+      border: 1px solid #78350f;
     }
     .pill-category {
-      background: var(--surface-input);
-      color: var(--text-secondary);
-      border: 1px solid var(--border);
-      padding: 4px 8px;
-      border-radius: 6px;
+      background: #182218;
+      color: #8da97e;
+      border: 1px solid #283928;
+      padding: 3px 8px;
+      border-radius: 4px;
       font-family: 'JetBrains Mono', monospace;
       font-size: 11px;
-      font-weight: 600;
-    }
-
-    .banner-headline {
-      font-size: 15px;
       font-weight: 700;
-      color: var(--text-primary);
-      letter-spacing: -0.2px;
     }
 
-    .banner-telemetry-strip {
+    .banner-headline-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.3px;
+      line-height: 1.2;
+    }
+
+    .banner-metrics-subline {
       display: flex;
       align-items: center;
-      gap: 8px;
-      background: var(--surface-input);
-      padding: 4px 10px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
+      gap: 10px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-secondary);
+      font-size: 13px;
+      color: #9dae97;
+      margin-top: 2px;
     }
-    .telemetry-item strong {
-      color: var(--text-primary);
+    .metric-item strong {
+      color: #ffffff;
     }
-    .telemetry-item.alert-danger strong {
-      color: var(--alert-crimson);
+    .metric-item.metric-cover strong {
+      color: #f59e0b;
+    }
+    .metric-item.metric-gap strong {
+      color: #ef4444;
+    }
+    .metric-sep {
+      color: #3b4e3a;
+      user-select: none;
     }
 
-    .banner-right {
+    .banner-top-right {
       display: flex;
-      align-items: center;
-      gap: 14px;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
       flex-shrink: 0;
     }
-    .action-required-tag {
+    .action-required-pill {
+      background: #2b1d0c;
+      border: 1px solid #854d0e;
+      color: #f59e0b;
       font-size: 11px;
       font-weight: 800;
-      color: var(--alert-amber);
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      display: flex;
+      letter-spacing: 0.6px;
+      padding: 6px 14px;
+      border-radius: 6px;
+      display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
     }
-    .active-task-indicator {
+    .unfold-hint {
       display: flex;
       align-items: center;
       gap: 6px;
+      font-size: 11px;
+      color: #7f977c;
+    }
+    .unfold-chevron {
+      font-size: 9px;
+      transition: transform 0.2s ease;
+    }
+
+    /* Banner Bottom Row */
+    .banner-bottom-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid #1c261b;
+      padding-top: 12px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .active-task-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #c4d7c2;
+      font-weight: 500;
+    }
+    .active-task-dot {
+      color: #22c55e;
+      font-size: 9px;
+      filter: drop-shadow(0 0 4px #22c55e);
+    }
+    .sla-slippage-text {
+      font-family: 'JetBrains Mono', monospace;
       font-size: 12px;
-      font-weight: 600;
-      color: var(--text-secondary);
-    }
-    .task-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--sage-accent);
-      box-shadow: 0 0 8px var(--sage-accent);
-    }
-    .chevron-icon {
-      font-size: 12px;
-      color: var(--text-muted);
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .incident-card.expanded .chevron-icon {
-      transform: rotate(180deg);
-      color: var(--sage-accent);
+      color: #6d846b;
+      font-weight: 500;
     }
 
     /* =========================================================================
@@ -969,9 +996,9 @@
        ========================================================================= */
     .subcanvas-content {
       display: none;
-      padding: 0 20px 24px 20px;
-      border-top: 1px solid var(--border);
-      background: var(--surface);
+      padding: 0 24px 24px 24px;
+      border-top: 1px solid #202c1f;
+      background: #0f140f;
       animation: fadeIn 0.3s ease;
     }
     .incident-card.expanded .subcanvas-content {
@@ -983,129 +1010,197 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .diagnostic-banner {
-      margin-top: 18px;
-      background: var(--alert-crimson-bg);
-      border: 1px solid var(--alert-crimson-border);
+    /* 1. Diagnostic Banner Strip */
+    .diagnostic-banner-strip {
+      background: #141b13;
+      border: 1px solid #233122;
       border-radius: 8px;
-      padding: 12px 16px;
+      padding: 14px 18px;
+      margin-top: 18px;
       display: flex;
-      align-items: flex-start;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .diag-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
       gap: 12px;
     }
-    .diagnostic-icon {
-      font-size: 18px;
-      line-height: 1;
-      color: var(--alert-crimson);
-      margin-top: 2px;
+    .diag-title-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
     }
-    .diagnostic-text {
+    .diag-badge-severity {
+      color: #ef4444;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
+    .diag-badge-cat {
+      background: #182218;
+      border: 1px solid #283928;
+      color: #8da97e;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .diag-sku-name {
+      font-weight: 700;
+      color: #ffffff;
+      font-size: 15px;
+    }
+    .diag-location-pin {
+      background: #182218;
+      border: 1px solid #283928;
+      color: #8da97e;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .diag-approval-badge {
+      background: #271909;
+      border: 1px solid #78350f;
+      color: #f59e0b;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      padding: 5px 12px;
+      border-radius: 6px;
+    }
+    .diag-body-text {
       font-size: 13px;
-      color: var(--text-primary);
-      line-height: 1.5;
+      line-height: 1.6;
+      color: #cbd5e1;
     }
-    .diagnostic-text strong {
-      color: var(--alert-crimson);
+    .diag-label {
+      color: #ef4444;
+      font-weight: 800;
+    }
+    .hl-danger {
+      color: #ef4444;
+      font-weight: 700;
+    }
+    .hl-amber {
+      color: #f59e0b;
       font-weight: 700;
     }
 
+    /* 2. Telemetry 6-Card Grid */
     .telemetry-6grid {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
-      gap: 10px;
+      gap: 12px;
       margin-top: 16px;
     }
     .telem-card {
-      background: var(--surface-alt);
-      border: 1px solid var(--border);
+      background: #141b13;
+      border: 1px solid #233122;
       border-radius: 8px;
-      padding: 10px 12px;
+      padding: 12px 14px;
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      justify-content: space-between;
+      min-height: 78px;
     }
     .telem-card-label {
       font-size: 10px;
       font-weight: 700;
+      letter-spacing: 0.6px;
+      color: #7f977c;
+      font-family: 'JetBrains Mono', monospace;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-muted);
-      font-family: 'JetBrains Mono', monospace;
     }
-    .telem-card-value {
-      font-size: 16px;
+    .telem-card-tag {
+      color: #5d755b;
+      font-weight: 500;
+    }
+    .telem-card-val {
+      font-size: 20px;
       font-weight: 800;
-      color: var(--text-primary);
+      color: #ffffff;
       font-family: 'JetBrains Mono', monospace;
+      margin-top: 4px;
+    }
+    .telem-card-unit {
+      font-size: 12px;
+      font-weight: 600;
+      color: #7f977c;
+      margin-left: 2px;
     }
     .telem-card-sub {
       font-size: 10px;
-      color: var(--text-secondary);
+      font-weight: 700;
+      color: #34d399;
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: 2px;
+      text-transform: uppercase;
     }
-    .telem-card.crimson-glow {
-      border-color: var(--alert-crimson-border);
-      background: var(--alert-crimson-bg);
+    .val-amber {
+      color: #f59e0b !important;
     }
-    .telem-card.crimson-glow .telem-card-value {
-      color: var(--alert-crimson);
-    }
-    .telem-card.amber-glow {
-      border-color: var(--alert-amber-border);
-      background: var(--alert-amber-bg);
-    }
-    .telem-card.amber-glow .telem-card-value {
-      color: var(--alert-amber);
+    .val-crimson {
+      color: #ef4444 !important;
     }
 
+    /* 3. Deterministic Domain Math Audit Terminal */
     .domain-math-terminal {
-      margin-top: 16px;
-      background: var(--terminal-bg);
-      border: 1px solid var(--border-accent);
+      background: #101510;
+      border: 1px solid #222e21;
       border-radius: 8px;
-      padding: 14px 16px;
+      padding: 14px 18px;
+      margin-top: 16px;
       font-family: 'JetBrains Mono', monospace;
       font-size: 12px;
-      color: var(--text-primary);
-      position: relative;
     }
-    .terminal-header {
+    .terminal-header-row {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
-      padding-bottom: 6px;
-      border-bottom: 1px solid var(--border);
-      font-size: 11px;
-      color: var(--sage-accent);
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #1e281d;
     }
-    .terminal-copy-btn {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .terminal-copy-btn:hover {
-      color: var(--text-primary);
-      border-color: var(--sage-accent);
-    }
-    .terminal-lines {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      line-height: 1.6;
-    }
-    .term-line-formula {
-      color: var(--sage-accent);
-    }
-    .term-line-risk {
-      color: var(--alert-crimson);
+    .terminal-header-title {
+      color: #a3bca0;
       font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
+    .terminal-header-sub {
+      color: #5d755b;
+      font-size: 11px;
+    }
+    .terminal-bullet {
+      color: #d1ded0;
+      line-height: 1.8;
+      font-size: 12px;
+    }
+
+    /* Light Mode Overrides for Banner & Diagnostics */
+    [data-theme="light"] .top-header-title { color: var(--text-primary); }
+    [data-theme="light"] .banner-headline-title { color: var(--text-primary); }
+    [data-theme="light"] .banner-bottom-row { border-top-color: var(--border); }
+    [data-theme="light"] .active-task-line { color: var(--text-primary); }
+    [data-theme="light"] .subcanvas-content { background: var(--surface); border-top-color: var(--border); }
+    [data-theme="light"] .diagnostic-banner-strip { background: var(--surface-alt); border-color: var(--border); }
+    [data-theme="light"] .diag-sku-name { color: var(--text-primary); }
+    [data-theme="light"] .diag-body-text { color: var(--text-primary); }
+    [data-theme="light"] .telem-card { background: var(--surface-alt); border-color: var(--border); }
+    [data-theme="light"] .telem-card-val { color: var(--text-primary); }
+    [data-theme="light"] .domain-math-terminal { background: var(--surface-alt); border-color: var(--border); }
+    [data-theme="light"] .terminal-bullet { color: var(--text-primary); }
+    [data-theme="light"] .terminal-header-row { border-bottom-color: var(--border); }
 
     .chart-container-wrap {
       margin-top: 20px;
@@ -1788,20 +1883,23 @@
        MAIN CANVAS AREA
        ======================================================================= -->
   <main id="mainCanvas">
-    <!-- Top Header: Clean, Sleek, NO Settings/Chaos Buttons! -->
+    <!-- Top Header: Exactly matching user reference layout -->
     <header class="top-header">
-      <div class="top-header-title-wrap">
-        <div class="top-header-title">Supply Chain Copilot — Executive Operations Cockpit</div>
-        <span class="top-header-badge">NAVORA Multi-Agent v2.4</span>
-      </div>
-      <div class="top-header-meta">
-        <div class="conn-status-pill">
-          <span class="conn-dot"></span>
-          <span id="connStatusText">Stream Active (Port 8000)</span>
-        </div>
-        <button class="header-inspect-btn" onclick="openJsonModal()">
-          <span>{ }</span> Inspect State
+      <div class="top-header-left">
+        <button class="controls-nav-btn" onclick="toggleSidebar()" title="Toggle Controls &amp; Nav Sidebar [Ctrl+B]">
+          <span>☰</span> Controls &amp; Nav
         </button>
+        <div class="top-header-title-wrap">
+          <h1 class="top-header-title">North Karnataka Operations</h1>
+          <span class="top-header-badge">DETERMINISTIC AI</span>
+        </div>
+      </div>
+      <div class="top-header-right">
+        <div class="live-sim-anchor">
+          <span class="live-sim-dot">●</span>
+          <span>Live Simulation Anchor:</span>
+          <span class="live-sim-date" id="liveSimDateText">2026/10/09</span>
+        </div>
       </div>
     </header>
 
@@ -2263,90 +2361,131 @@
 
     filtered.forEach((item, index) => {
       const isExpanded = (index === 0 && !item.userToggled); // Top item expanded by default unless user toggled
+      const cardExpanded = item.isExpanded !== undefined ? item.isExpanded : isExpanded;
       const card = document.createElement('div');
-      card.className = `incident-card ${item.is_critical ? 'is-critical' : 'is-warning'} ${item.isExpanded || isExpanded ? 'expanded' : ''}`;
+      card.className = `incident-card ${item.is_critical ? 'is-critical' : 'is-warning'} ${cardExpanded ? 'expanded' : ''}`;
       card.id = `card_${item.problem_id}`;
 
+      // Format diagnosis highlighting
+      let rawDiag = item.diagnostic || '';
+      let diagContent = rawDiag;
+      if (rawDiag.toLowerCase().startsWith('diagnosis:')) {
+        diagContent = rawDiag.substring(10).trim();
+      }
+      let formattedDiag = diagContent
+        .replace(/(\b\d+\s*days?\s*overdue\b)/gi, '<span class="hl-danger">$1</span>')
+        .replace(/(\b[\d\.]+\s*days?\s*cover\b)/gi, '<span class="hl-amber">$1</span>');
+
+      // Task headline & SLA text matching screenshot
+      const taskHeadline = item.is_critical || (item.diagnostic && item.diagnostic.includes('PO'))
+        ? 'Overdue Vendor PO Hot-Shot Expedite Notice'
+        : 'Inter-Warehouse Courier Transfer & Stock Balancing Notice';
+      
+      const slaText = (item.diagnostic && item.diagnostic.toLowerCase().includes('overdue'))
+        ? 'SLA Slippage: 5 Days Overdue (Hosur Factory)'
+        : `SLA Runway: ${item.cover.toFixed(1)} Days Before Stockout`;
+
       card.innerHTML = `
-        <!-- Collapsed Banner (Pic 1 Style) -->
+        <!-- Incident Banner (2-Tier Header matching reference screenshot) -->
         <div class="incident-banner" onclick="toggleIncidentCard('${item.problem_id}')">
-          <div class="banner-left">
-            <span class="pill-severity ${item.is_critical ? 'pill-critical' : 'pill-warning'}">[${item.severity}]</span>
-            <span class="pill-category">${item.category_code}</span>
-            <span class="banner-headline">${item.location} — ${item.sku}</span>
-            <div class="banner-telemetry-strip">
-              <span class="telemetry-item ${item.stock <= 2 ? 'alert-danger' : ''}">Stock: <strong>${item.stock}</strong></span>
-              <span>|</span>
-              <span class="telemetry-item">Cover: <strong>${item.cover.toFixed(1)}d</strong></span>
-              <span>|</span>
-              <span class="telemetry-item">Gap: <strong>${item.gap.toFixed(1)}d</strong></span>
+          <!-- Top Row -->
+          <div class="banner-top-row">
+            <div class="banner-top-left">
+              <div class="banner-badge-group">
+                <span class="pill-severity ${item.is_critical ? 'pill-critical' : 'pill-warning'}">${item.severity}</span>
+                <span class="pill-category">${item.category_code}</span>
+              </div>
+              <div class="banner-headline-title">${item.location} — ${item.sku}</div>
+              <div class="banner-metrics-subline">
+                <span class="metric-item">Stock: <strong>${item.stock}</strong></span>
+                <span class="metric-sep">|</span>
+                <span class="metric-item metric-cover">Cover: <strong>${item.cover.toFixed(1)}d</strong></span>
+                <span class="metric-sep">|</span>
+                <span class="metric-item metric-gap">Gap: <strong>${item.gap.toFixed(1)}d</strong></span>
+              </div>
+            </div>
+            <div class="banner-top-right">
+              <div class="action-required-pill">⚡ ACTION REQUIRED</div>
+              <div class="unfold-hint">
+                <span>Click to unfold diagnostics</span>
+                <span class="unfold-chevron">${cardExpanded ? '▲' : '▼'}</span>
+              </div>
             </div>
           </div>
-          <div class="banner-right">
-            <span class="action-required-tag">⚡ ACTION REQUIRED</span>
-            <div class="active-task-indicator">
-              <span class="task-dot"></span>
-              <span>● Active Task</span>
-              <span class="chevron-icon">▼</span>
+
+          <!-- Bottom Row -->
+          <div class="banner-bottom-row">
+            <div class="active-task-line">
+              <span class="active-task-dot">●</span>
+              <span>Active Task — ${taskHeadline}</span>
+            </div>
+            <div class="sla-slippage-text">
+              ${slaText}
             </div>
           </div>
         </div>
 
-        <!-- Expanded Sub-Canvas (Pic 2 Style) -->
+        <!-- Expanded Sub-Canvas (Diagnostics Cockpit matching reference screenshot) -->
         <div class="subcanvas-content">
-          <!-- 1. Diagnostic Banner -->
-          <div class="diagnostic-banner">
-            <div class="diagnostic-icon">⚠️</div>
-            <div class="diagnostic-text">
-              <strong>DIAGNOSTIC FAILURE MODE ANALYSIS:</strong> ${item.diagnostic}
+          <!-- 1. Diagnostic Banner Strip -->
+          <div class="diagnostic-banner-strip">
+            <div class="diag-header-row">
+              <div class="diag-title-left">
+                <span class="diag-badge-severity">[${item.severity}]</span>
+                <span class="diag-badge-cat">${item.category_code}</span>
+                <span class="diag-sku-name">${item.sku_name || item.sku} (${item.sku})</span>
+                <span class="diag-location-pin">📍 ${item.location}</span>
+              </div>
+              <div class="diag-approval-badge">
+                ⚡ AWAITING RAMESH KULKARNI APPROVAL
+              </div>
+            </div>
+            <div class="diag-body-text">
+              <span class="diag-label">Diagnosis:</span> ${formattedDiag}
             </div>
           </div>
 
           <!-- 2. Telemetry 6-Card Grid -->
           <div class="telemetry-6grid">
             <div class="telem-card">
-              <span class="telem-card-label">V_BASELINE (30D)</span>
-              <span class="telem-card-value">${item.v_baseline.toFixed(2)}/d</span>
-              <span class="telem-card-sub">30-day moving average</span>
+              <span class="telem-card-label">V_BASELINE <span class="telem-card-tag">(30D)</span></span>
+              <span class="telem-card-val">${item.v_baseline.toFixed(2)}<span class="telem-card-unit">/d</span></span>
             </div>
             <div class="telem-card">
-              <span class="telem-card-label">V_RECENT (7D)</span>
-              <span class="telem-card-value">${item.v_recent.toFixed(2)}/d</span>
-              <span class="telem-card-sub">Recent burn velocity</span>
+              <span class="telem-card-label">V_RECENT <span class="telem-card-tag">(7D)</span></span>
+              <span class="telem-card-val">${item.v_recent.toFixed(2)}<span class="telem-card-unit">/d</span></span>
             </div>
             <div class="telem-card">
               <span class="telem-card-label">TREND FACTOR</span>
-              <span class="telem-card-value">${item.trend_factor.toFixed(1)}x ${item.trend_label}</span>
-              <span class="telem-card-sub">Ratio recent/baseline</span>
+              <span class="telem-card-val">${item.trend_factor.toFixed(1)}x</span>
+              <span class="telem-card-sub">${item.trend_label || 'STABLE'}</span>
             </div>
-            <div class="telem-card crimson-glow">
+            <div class="telem-card">
               <span class="telem-card-label">CURRENT STOCK</span>
-              <span class="telem-card-value">${item.stock} u</span>
-              <span class="telem-card-sub">Units on hand</span>
+              <span class="telem-card-val">${item.stock} <span class="telem-card-unit">U</span></span>
             </div>
-            <div class="telem-card crimson-glow">
+            <div class="telem-card">
               <span class="telem-card-label">COVER (D)</span>
-              <span class="telem-card-value">${item.cover.toFixed(1)}d</span>
-              <span class="telem-card-sub">Runway before stockout</span>
+              <span class="telem-card-val val-amber">${item.cover.toFixed(1)}d</span>
             </div>
-            <div class="telem-card amber-glow">
+            <div class="telem-card">
               <span class="telem-card-label">GAP (Δ)</span>
-              <span class="telem-card-value">${item.gap.toFixed(1)}d</span>
-              <span class="telem-card-sub">T(${item.lead_time_days}) - D(${item.cover.toFixed(1)})</span>
+              <span class="telem-card-val val-crimson">${item.gap.toFixed(1)}d</span>
             </div>
           </div>
 
-          <!-- 3. Deterministic Domain Math Terminal -->
+          <!-- 3. Closed-Form Deterministic Domain Math Terminal -->
           <div class="domain-math-terminal">
-            <div class="terminal-header">
-              <span>Deterministic Domain Math Telemetry Proof</span>
-              <button class="terminal-copy-btn" onclick="copyTerminalMath('${item.problem_id}')">Copy Proof</button>
+            <div class="terminal-header-row">
+              <div class="terminal-header-title">
+                <span>📐</span> DETERMINISTIC DOMAIN MATH &amp; TELEMETRY AUDIT:
+              </div>
+              <div class="terminal-header-sub">Closed-Form Calculations</div>
             </div>
             <div class="terminal-lines" id="mathLines_${item.problem_id}">
-              <div class="term-line-formula">${item.formula_velocity}</div>
-              <div class="term-line-formula">${item.formula_cover}</div>
-              <div class="term-line-formula">${item.formula_gap}</div>
-              <div class="term-line-risk">${item.formula_risk}</div>
+              <div class="terminal-bullet">• Velocity: v_pred = ${item.v_recent.toFixed(2)} units/day (Trend: ${item.trend_label || 'STABLE'}, ${item.trend_factor.toFixed(2)}x)</div>
+              <div class="terminal-bullet">• Days of Cover: D = Stock (${item.stock}) / v_pred (${item.v_recent.toFixed(2)}) = <span class="hl-amber">${item.cover.toFixed(1)} days</span></div>
+              <div class="terminal-bullet">• Deficit Gap: Δ = max(0, T (${item.lead_time_days || 15}) - D (${item.cover.toFixed(1)})) = <span class="hl-danger">${item.gap.toFixed(1)} days</span></div>
             </div>
           </div>
 
@@ -2486,6 +2625,10 @@
       item.userToggled = true;
       item.isExpanded = !card.classList.contains('expanded');
       card.classList.toggle('expanded');
+      const chevron = card.querySelector('.unfold-chevron');
+      if (chevron) {
+        chevron.textContent = card.classList.contains('expanded') ? '▲' : '▼';
+      }
     }
   }
 
@@ -3080,6 +3223,7 @@
   async function recalculateSimulation() {
     const dateInput = document.getElementById('simDateInput');
     if (dateInput) simulationDate = dateInput.value;
+    if (document.getElementById('liveSimDateText')) document.getElementById('liveSimDateText').textContent = simulationDate;
 
     showToast(`Recalculating agentic pipeline against epoch ${simulationDate}...`, '⏱️');
     await syncFromBackend();
@@ -3133,16 +3277,19 @@
       if (res.ok) {
         const brief = await res.json();
         backendRawBriefing = brief;
-        document.getElementById('connStatusText').textContent = 'Stream Active (Port 8000)';
+        const connEl = document.getElementById('connStatusText');
+        if (connEl) connEl.textContent = 'Stream Active (Port 8000)';
 
         // Update Summary KPI Strip
         const summary = brief.summary || {};
         const totalProblems = summary.total_problems || summary.total_problems_detected || (brief.problems ? brief.problems.length : 0);
         const critProblems = summary.critical_problems || summary.critical_actions_required || (brief.problems ? brief.problems.filter(p => p.severity === 'CRITICAL').length : 0);
 
-        document.getElementById('kpiTotalIssues').textContent = `${totalProblems} Detected`;
-        document.getElementById('kpiCriticalStockouts').textContent = `${critProblems} Critical`;
-        document.getElementById('kpiTopSku').textContent = summary.top_focus_sku || (brief.problems && brief.problems[0] ? `${brief.problems[0].location} — ${brief.problems[0].sku}` : 'Hubli — PUMP-GEAR-03');
+        if (document.getElementById('kpiTotalIssues')) document.getElementById('kpiTotalIssues').textContent = `${totalProblems} Detected`;
+        if (document.getElementById('kpiCriticalStockouts')) document.getElementById('kpiCriticalStockouts').textContent = `${critProblems} Critical`;
+        if (document.getElementById('kpiTopSku')) {
+          document.getElementById('kpiTopSku').textContent = summary.top_focus_sku || (brief.problems && brief.problems[0] ? `${brief.problems[0].location} — ${brief.problems[0].sku}` : 'Hubli — PUMP-GEAR-03');
+        }
 
         // Transform backend problems into rich UI models
         if (brief.problems && brief.problems.length > 0) {
@@ -3238,8 +3385,9 @@
         }
       }
     } catch (e) {
-      console.log('Briefing stream fallback active.');
-      document.getElementById('connStatusText').textContent = 'Stream Active (Local Mode)';
+      console.log('Briefing stream fallback active:', e);
+      const connEl = document.getElementById('connStatusText');
+      if (connEl) connEl.textContent = 'Stream Active (Local Mode)';
     }
 
     // Update severity pill counter badges and dropdown options

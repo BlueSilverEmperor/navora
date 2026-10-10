@@ -13,9 +13,10 @@ import pandas as pd
 from fastapi.testclient import TestClient
 
 # Ensure kaveri_copilot is in sys.path
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-if BASE_DIR not in sys.path:
-    sys.path.insert(0, BASE_DIR)
+_ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+for p in [os.path.join(_ROOT_DIR, "kaveri_copilot"), _ROOT_DIR]:
+    if os.path.exists(p) and p not in sys.path:
+        sys.path.insert(0, p)
 
 from engine.domain_math import (
     calculate_daily_burn_rate,
@@ -42,21 +43,33 @@ from app.server import (
     app,
     PROCESSED_ACTION_HASHES,
     ACTIVE_TRANSFER_RESERVATIONS,
-    ACTIVE_CHAOS_EVENTS
+    ACTIVE_CHAOS_EVENTS,
+    DATA_DIR
 )
+
+BASE_DIR = os.path.dirname(DATA_DIR)
+
+try:
+    from engine.persistence import clear_all_persistence
+except ImportError:
+    clear_all_persistence = None
 
 
 @pytest.fixture(autouse=True)
 def reset_test_data():
     """Ensure clean benchmark data before each test."""
-    data_dir = os.path.join(BASE_DIR, "data")
-    seed_all_data(data_dir)
-    audit_file = os.path.join(data_dir, "audit_log.json")
+    seed_all_data(DATA_DIR)
+    audit_file = os.path.join(DATA_DIR, "audit_log.json")
     if os.path.exists(audit_file):
         os.remove(audit_file)
     PROCESSED_ACTION_HASHES.clear()
     ACTIVE_TRANSFER_RESERVATIONS.clear()
     ACTIVE_CHAOS_EVENTS.clear()
+    if clear_all_persistence:
+        try:
+            clear_all_persistence()
+        except Exception:
+            pass
 
 
 

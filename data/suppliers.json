@@ -1,0 +1,74 @@
+[
+  {
+    "supplier": "Kirloskar Fluid Filters Pune",
+    "sku": "FILTER-HYD-01",
+    "price": 850.0,
+    "lead_time_days": 7,
+    "moq": 50,
+    "is_primary": true
+  },
+  {
+    "supplier": "FastTrack Spares Bengaluru",
+    "sku": "FILTER-HYD-01",
+    "price": 935.0,
+    "lead_time_days": 3,
+    "moq": 20,
+    "is_primary": false
+  },
+  {
+    "supplier": "Komatsu India Spares Chennai",
+    "sku": "VALVE-CTRL-02",
+    "price": 24500.0,
+    "lead_time_days": 14,
+    "moq": 5,
+    "is_primary": true
+  },
+  {
+    "supplier": "Deccan Fluid Power Hosur",
+    "sku": "PUMP-GEAR-03",
+    "price": 14200.0,
+    "lead_time_days": 10,
+    "moq": 10,
+    "is_primary": true
+  },
+  {
+    "supplier": "Hubli Spot Hydraulics",
+    "sku": "PUMP-GEAR-03",
+    "price": 16500.0,
+    "lead_time_days": 2,
+    "moq": 2,
+    "is_primary": false
+  },
+  {
+    "supplier": "Precision Polymers Pune",
+    "sku": "SEAL-KIT-04",
+    "price": 650.0,
+    "lead_time_days": 8,
+    "moq": 50,
+    "is_primary": true
+  },
+  {
+    "supplier": "HydroSeal Belgaum Express",
+    "sku": "SEAL-KIT-04",
+    "price": 780.0,
+    "lead_time_days": 2,
+    "moq": 25,
+    "is_primary": false
+  },
+  {
+    "supplier": "Gates Fluid Power India",
+    "sku": "HOSE-ASSEM-05",
+    "price": 1250.0,
+    "lead_time_days": 5,
+    "moq": 30,
+    "is_primary": true
+  },
+  {
+    "supplier": "Danfoss Hydraulics Pune",
+    "sku": "MOTOR-PIST-06",
+    "price": 38000.0,
+    "lead_time_days": 15,
+    "moq": 2,
+    "is_primary": true
+  }
+]

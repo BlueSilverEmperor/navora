@@ -145,6 +145,8 @@ def get_dashboard_ui():
 def reset_benchmark_state():
     """Resets data to pristine benchmark state and clears active chaos events and persistence."""
     ACTIVE_CHAOS_EVENTS.clear()
+    PROCESSED_ACTION_HASHES.clear()
+    ACTIVE_TRANSFER_RESERVATIONS.clear()
     clear_all_persistence()
     seed_all_data(DATA_DIR)
     return {"status": "SUCCESS", "message": "Pristine benchmark state restored."}
