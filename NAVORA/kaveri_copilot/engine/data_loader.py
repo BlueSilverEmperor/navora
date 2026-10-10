@@ -64,7 +64,7 @@ class PurchaseOrderRecord(BaseModel):
     po: str
     supplier: str
     sku: str
-    location: str
+    location: Optional[str] = None
     qty: int = Field(default=1, ge=0)
     expected_date: str
     status: str = "PENDING"
@@ -98,6 +98,7 @@ ALIASES = {
     "item_code": "sku",
     "due_date": "expected_date",
     "delivery_date": "expected_date",
+    "product_name": "name",
 }
 
 

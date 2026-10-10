@@ -27,12 +27,51 @@ importlib.reload(engine.config)
 importlib.reload(engine.domain_math)
 importlib.reload(engine.decision_agent)
 
-from engine.decision_agent import DecisionEngine
+from engine.decision_agent import DecisionEngine, extract_network_topology
 from engine.domain_math import validate_and_recalculate_transfer, generate_14day_projections
 from engine.mock_data_gen import seed_all_data
 
 DATA_DIR = os.path.join(BASE_DIR, "data")
 AUDIT_LOG_FILE = os.path.join(DATA_DIR, "audit_log.json")
+
+FACILITY_COORDS = {
+    "Belgaum Central Warehouse": (74.4977, 15.8497, "Warehouse"),
+    "Hubli Regional Warehouse": (75.1240, 15.3647, "Warehouse"),
+    "Belgaum WH": (74.4977, 15.8497, "Warehouse"),
+    "Hubli WH": (75.1240, 15.3647, "Warehouse"),
+    "Gokak": (74.8229, 16.1696, "Store"),
+    "Belgaum": (74.5200, 15.8600, "Store"),
+    "Dharwad": (75.0078, 15.4589, "Store"),
+    "Hubli": (75.1400, 15.3500, "Store"),
+    "Bagalkot": (75.6980, 16.1875, "Store"),
+    "Nippani": (74.3820, 16.3980, "Store"),
+    "Bijapur": (75.7139, 16.8302, "Store"),
+}
+
+def render_network_topology_graph(inventory_df: pd.DataFrame, is_dark_mode: bool = None) -> go.Figure:
+    """Renders interactive 2D geographic topology network graph with fallback coordinate mapping."""
+    topology = extract_network_topology(inventory_df)
+    fig = go.Figure()
+    for loc in topology["all_locations"]:
+        coords = FACILITY_COORDS.get(loc, (75.0, 15.5, "Store"))
+        lon, lat, facility_type = coords
+        is_wh = loc in topology["warehouses"]
+        fig.add_trace(go.Scattergeo(
+            lon=[lon],
+            lat=[lat],
+            text=[f"{loc} ({'Warehouse' if is_wh else 'Store'})"],
+            mode="markers+text",
+            marker=dict(
+                size=14 if is_wh else 10,
+                color="#8FA87B" if is_wh else "#F59E0B",
+                symbol="square" if is_wh else "circle"
+            ),
+            name=loc
+        ))
+    return fig
+
+def render_resource_network_graph(inventory_df: pd.DataFrame, is_dark_mode: bool = None) -> go.Figure:
+    return render_network_topology_graph(inventory_df, is_dark_mode)
 
 # Streamlit Page Config
 st.set_page_config(
@@ -640,12 +679,34 @@ def reset_baseline():
 if "chaos_events" not in st.session_state:
     st.session_state.chaos_events = []
 
+raw_inventory = []
+raw_sales = []
+inv_json = os.path.join(DATA_DIR, "inventory.json")
+inv_csv = os.path.join(DATA_DIR, "inventory.csv")
+if os.path.exists(inv_json):
+    with open(inv_json, "r", encoding="utf-8") as f:
+        raw_inventory = json.load(f)
+elif os.path.exists(inv_csv):
+    raw_inventory = pd.read_csv(inv_csv).to_dict("records")
+
+sales_json = os.path.join(DATA_DIR, "sales.json")
+sales_csv = os.path.join(DATA_DIR, "sales.csv")
+if os.path.exists(sales_json):
+    with open(sales_json, "r", encoding="utf-8") as f:
+        raw_sales = json.load(f)
+elif os.path.exists(sales_csv):
+    raw_sales = pd.read_csv(sales_csv).to_dict("records")
+
+inventory_df = pd.DataFrame(raw_inventory) if raw_inventory else pd.DataFrame(columns=["sku", "location", "stock"])
+network_topology = extract_network_topology(inventory_df)
+
 # ---------------------------------------------------------
 # SIDEBAR CONTROLS
 # ---------------------------------------------------------
 with st.sidebar:
     st.markdown(f"<h3 style='color: {tokens['text_primary']}; margin-top: 0; font-size: 1.25rem; font-weight: 700;'>⚙️ Operating Controls</h3>", unsafe_allow_html=True)
-    sim_date = st.text_input("Simulation Date", value="2026/10/09")
+    sim_date_input = st.text_input("Simulation Date", value="2026-11-16")
+    current_date_str = sim_date_input.replace("/", "-").strip() or "2026-11-16"
 
     st.markdown(f"<hr style='border: none; border-top: 1px solid {tokens['border']}; margin: 16px 0;'>", unsafe_allow_html=True)
     
@@ -658,10 +719,12 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     st.markdown(f"<h4 style='color: {tokens['text_primary']}; font-size: 1.05rem; font-weight: 700; margin-bottom: 8px;'>Operations Network:</h4>", unsafe_allow_html=True)
+    stores_list = network_topology["stores"]
+    hubs_list = network_topology["warehouses"]
     st.markdown(f"""
     <div style="background-color: {tokens['surface_alt']}; border: 1px solid {tokens['border']}; border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; font-size: 0.9rem; line-height: 1.6;">
-        <div style="color: {tokens['text_primary']}; margin-bottom: 8px;"><strong style="color: {tokens['sage_primary']};">🏬 6 Stores:</strong> Gokak, Belgaum, Dharwad, Hubli, Bagalkot, Nippani</div>
-        <div style="color: {tokens['text_primary']};"><strong style="color: {tokens['sage_primary']};">🏭 2 Hubs:</strong> Belgaum Central, Hubli Regional</div>
+        <div style="color: {tokens['text_primary']}; margin-bottom: 8px;"><strong style="color: {tokens['sage_primary']};">🏬 {len(stores_list)} Stores:</strong> {', '.join(stores_list)}</div>
+        <div style="color: {tokens['text_primary']};"><strong style="color: {tokens['sage_primary']};">🏭 {len(hubs_list)} Hubs:</strong> {', '.join(hubs_list)}</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -688,7 +751,6 @@ with st.sidebar:
 # ==============================================================================
 # 3. RUN ENGINE & DATA LOAD
 # ==============================================================================
-current_date_str = "2026-10-09"
 engine = DecisionEngine(
     data_dir=DATA_DIR,
     current_date=current_date_str,
@@ -697,11 +759,6 @@ engine = DecisionEngine(
 briefing = engine.run_agentic_pipeline()
 audit_log = load_audit()
 approved_problem_ids = {a["problem_id"] for a in audit_log}
-
-with open(os.path.join(DATA_DIR, "inventory.json"), "r", encoding="utf-8") as f:
-    raw_inventory = json.load(f)
-with open(os.path.join(DATA_DIR, "sales.json"), "r", encoding="utf-8") as f:
-    raw_sales = json.load(f)
 
 
 # ---------------------------------------------------------

@@ -36,7 +36,8 @@ from engine.domain_math import (
 from engine.decision_agent import (
     DecisionEngine,
     find_best_donor_location,
-    find_best_donor_location_with_reservations
+    find_best_donor_location_with_reservations,
+    extract_network_topology
 )
 from engine.mock_data_gen import seed_all_data
 from app.server import (
@@ -584,11 +585,17 @@ def test_telemetry_endpoint_404_on_nonexistent():
 def test_simulation_date_overdue_anchor():
     """Verify overdue detection uses explicit simulation date rather than system clock."""
     # Delivery date is 2026-10-05, sim date is 2026-10-09 -> Must be overdue
-    assert check_is_po_overdue("2026-10-05", "PENDING", simulation_date_str="2026-10-09") is True
+    is_overdue, days = check_is_po_overdue("2026-10-05", "PENDING", simulation_date_str="2026-10-09")
+    assert is_overdue is True
+    assert days == 4
     # Delivery date is 2026-10-12, sim date is 2026-10-09 -> Not overdue
-    assert check_is_po_overdue("2026-10-12", "PENDING", simulation_date_str="2026-10-09") is False
+    is_overdue2, days2 = check_is_po_overdue("2026-10-12", "PENDING", simulation_date_str="2026-10-09")
+    assert is_overdue2 is False
+    assert days2 == 0
     # Delivered PO is never overdue
-    assert check_is_po_overdue("2026-10-05", "DELIVERED", simulation_date_str="2026-10-09") is False
+    is_overdue3, days3 = check_is_po_overdue("2026-10-05", "DELIVERED", simulation_date_str="2026-10-09")
+    assert is_overdue3 is False
+    assert days3 == 0
 
 
 def test_negative_stock_clamping_and_lost_units():
@@ -1966,6 +1973,91 @@ def test_consolidated_api_unified_aliases():
     res_rst = client.post("/api/reset-data")
     assert res_rst.status_code == 200
     assert res_rst.json()["status"] == "SUCCESS"
+
+
+# ==============================================================================
+# T27: MULTI-DATASET ALIGNMENT, DYNAMIC TOPOLOGY & EDA ANOMALIES
+# ==============================================================================
+
+def test_overdue_po_4471_detection():
+    """Validates PO-4471 for SEL-3310 is detected as 6 days overdue on 2026-11-16."""
+    is_overdue, days = check_is_po_overdue(
+        expected_delivery_date="2026-11-10",
+        status="Open",
+        current_date="2026-11-16"
+    )
+    assert is_overdue is True
+    assert days == 6
+
+
+def test_bijapur_capital_trap_detection():
+    """Validates BRG-2207 at Bijapur with 180 units is flagged as CATEGORY_B Capital Trap."""
+    stock = 180.0
+    v_pred = 0.1
+    cover = calculate_days_of_cover(stock, v_pred)
+    assert cover >= 45.0
+    assert cover == 1800.0
+
+
+def test_clt_6120_supplier_friction_flags():
+    """Validates CLT-6120 MOQ of 200 and lead time of 21 days trigger friction warnings."""
+    friction = evaluate_supplier_friction(
+        supplier_lead_time=21,
+        supplier_moq=200,
+        needed_qty=4,
+        unit_price=3400.0,
+        baseline_price=3400.0
+    )
+    assert friction["is_moq_infeasible"] is True
+
+
+def test_dynamic_facility_discovery_topology():
+    """Validates dynamic extraction of retail stores vs central distribution warehouses without hardcoded location lists."""
+    mock_df = pd.DataFrame([
+        {"sku": "BRG-2207", "location": "Bijapur", "stock": 180},
+        {"sku": "BRG-2207", "location": "Gokak", "stock": 10},
+        {"sku": "BRG-2207", "location": "Belgaum WH", "stock": 60},
+        {"sku": "BRG-2207", "location": "Hubli Regional Warehouse", "stock": 55},
+        {"sku": "BRG-2207", "location": "Bagalkot", "stock": 5},
+    ])
+    topo = extract_network_topology(mock_df)
+    assert "Bijapur" in topo["stores"]
+    assert "Gokak" in topo["stores"]
+    assert "Bagalkot" in topo["stores"]
+    assert "Belgaum WH" in topo["warehouses"]
+    assert "Hubli Regional Warehouse" in topo["warehouses"]
+    assert len(topo["warehouses"]) == 2
+    assert len(topo["stores"]) == 3
+
+
+def test_dual_warehouse_zero_stock_routes_supplier_po():
+    """Validates that when central warehouses hold 0 stock, donor lookup does not crash and engine routes supplier procurement."""
+    mock_inv = pd.DataFrame([
+        {"sku": "FLT-1021", "location": "Gokak", "stock": 1},
+        {"sku": "FLT-1021", "location": "Belgaum WH", "stock": 0},
+        {"sku": "FLT-1021", "location": "Hubli WH", "stock": 0},
+    ])
+    mock_sales = pd.DataFrame([
+        {"sku": "FLT-1021", "location": "Gokak", "qty_sold": 3, "date": "2026-11-15"}
+    ])
+    donor = find_best_donor_location_with_reservations(
+        inventory_df=mock_inv,
+        sales_df=mock_sales,
+        sku="FLT-1021",
+        target_location="Gokak",
+        needed_qty=5
+    )
+    assert donor is None  # Neither warehouse has available surplus
+
+
+def test_briefing_simulation_date_param_overdue():
+    """Validates /briefing endpoint respects simulation_date query parameter."""
+    client = TestClient(app)
+    res = client.get("/briefing?simulation_date=2026-11-16")
+    assert res.status_code == 200
+    data = res.json()
+    assert "summary" in data
+    assert "problems" in data
 
 
 

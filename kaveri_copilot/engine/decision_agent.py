@@ -48,6 +48,34 @@ from engine.config import (
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data"))
 
 
+def extract_network_topology(inventory_df: Union[pd.DataFrame, List[Dict[str, Any]]]) -> dict:
+    """
+    Dynamically identifies retail stores vs central distribution warehouses
+    from ingested inventory telemetry without hardcoded location lists.
+    """
+    if isinstance(inventory_df, list):
+        inventory_df = pd.DataFrame(inventory_df)
+    if not isinstance(inventory_df, pd.DataFrame) or "location" not in inventory_df.columns:
+        return {"all_locations": [], "warehouses": [], "stores": []}
+    all_locations = sorted([str(loc).strip() for loc in inventory_df["location"].dropna().unique().tolist() if str(loc).strip()])
+
+    def is_wh(loc: str) -> bool:
+        l = loc.lower()
+        if any(term in l for term in ["wh", "warehouse", "central", "regional"]):
+            return True
+        words = l.replace("_", " ").replace("-", " ").split()
+        return "hub" in words
+
+    warehouses = [loc for loc in all_locations if is_wh(loc)]
+    stores = [loc for loc in all_locations if loc not in warehouses]
+
+    return {
+        "all_locations": all_locations,
+        "warehouses": warehouses,
+        "stores": stores
+    }
+
+
 def find_best_donor_location_with_reservations(
     inventory_df: Union[pd.DataFrame, List[Dict[str, Any]]],
     sales_df: Union[pd.DataFrame, List[Dict[str, Any]]],
@@ -66,6 +94,8 @@ def find_best_donor_location_with_reservations(
 
     active_res = active_reservations or {}
     stock_col = "current_stock" if "current_stock" in inventory_df.columns else "stock"
+
+    topology = extract_network_topology(inventory_df)
 
     candidates = inventory_df[
         (inventory_df["sku"] == sku)
@@ -96,6 +126,7 @@ def find_best_donor_location_with_reservations(
             donor_incoming_po_qty=donor_incoming_po_qty
         )
         if safety["is_safe"]:
+            is_wh = loc in topology["warehouses"]
             feasible_donors.append({
                 "donor_location": loc,
                 "location": loc,
@@ -109,13 +140,21 @@ def find_best_donor_location_with_reservations(
                 "remaining_cover_days": safety["remaining_cover_days"],
                 "max_safe_transfer_qty": safety["max_safe_transfer_qty"],
                 "surplus": safety["max_safe_transfer_qty"],
-                "cover_days": round(effective_available_stock / donor_v, 1) if donor_v > 0 else 999.0
+                "cover_days": round(effective_available_stock / donor_v, 1) if donor_v > 0 else 999.0,
+                "is_warehouse": is_wh
             })
 
     if not feasible_donors:
         return None
 
-    return max(feasible_donors, key=lambda x: x["remaining_cover_days"])
+    feasible_donors.sort(
+        key=lambda x: (
+            1 if x["is_warehouse"] else 0,
+            x["remaining_cover_days"]
+        ),
+        reverse=True
+    )
+    return feasible_donors[0]
 
 
 def find_best_donor_location(

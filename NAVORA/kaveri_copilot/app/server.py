@@ -17,7 +17,7 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -163,14 +163,18 @@ def health_check():
 
 @app.get("/briefing")
 @app.get("/api/briefing")
-def get_morning_briefing(current_date: str = "2026-10-09"):
+def get_morning_briefing(
+    current_date: Optional[str] = Query(default=None),
+    simulation_date: Optional[str] = Query(default="2026-11-16")
+):
     """
     Runs the 6-step agentic pipeline and returns prioritized problems,
     domain metrics, evaluated options, and simulated action drafts.
     """
+    sim_date = current_date if current_date is not None else (simulation_date or "2026-11-16")
     engine = DecisionEngine(
         data_dir=DATA_DIR,
-        current_date=current_date,
+        current_date=sim_date,
         chaos_events=ACTIVE_CHAOS_EVENTS,
         active_reservations=get_active_stock_reservations()
     )
@@ -202,14 +206,18 @@ def get_backtest_metrics(days: int = 60):
 
 
 @app.get("/api/optimizer/transfers")
-def get_global_network_transfers(current_date: str = "2026-10-09"):
+def get_global_network_transfers(
+    current_date: Optional[str] = Query(default=None),
+    simulation_date: Optional[str] = Query(default="2026-11-16")
+):
     """
     Solves all lateral inventory transfers jointly across the network using
     PuLP Integer Linear Programming with greedy comparison and fallback.
     """
+    sim_date = current_date if current_date is not None else (simulation_date or "2026-11-16")
     engine = DecisionEngine(
         data_dir=DATA_DIR,
-        current_date=current_date,
+        current_date=sim_date,
         chaos_events=ACTIVE_CHAOS_EVENTS,
         active_reservations=get_active_stock_reservations()
     )
@@ -218,14 +226,18 @@ def get_global_network_transfers(current_date: str = "2026-10-09"):
 
 
 @app.get("/api/suppliers/reliability")
-def get_supplier_reliability_audit(current_date: str = "2026-10-09"):
+def get_supplier_reliability_audit(
+    current_date: Optional[str] = Query(default=None),
+    simulation_date: Optional[str] = Query(default="2026-11-16")
+):
     """
     Computes actual vs promised delivery slippage per supplier and returns
     learned adjusted lead times and reliability statuses.
     """
+    sim_date = current_date if current_date is not None else (simulation_date or "2026-11-16")
     engine = DecisionEngine(
         data_dir=DATA_DIR,
-        current_date=current_date,
+        current_date=sim_date,
         chaos_events=ACTIVE_CHAOS_EVENTS,
         active_reservations=get_active_stock_reservations()
     )

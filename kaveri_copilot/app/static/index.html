@@ -1787,7 +1787,7 @@
         </div>
         <div class="sim-date-card">
           <div style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Simulation Epoch:</div>
-          <input type="text" id="simDateInput" class="sim-date-input" value="2026/10/09" title="Anchored Simulation Date">
+          <input type="text" id="simDateInput" class="sim-date-input" value="2026/11/16" title="Anchored Simulation Date">
           <button class="sim-recalc-btn" onclick="recalculateSimulation()">
             <span>↻</span> Recalculate Telemetry
           </button>
@@ -1821,7 +1821,7 @@
         <div class="network-card">
           <div class="network-stat-row">
             <span>Retail Stores (6):</span>
-            <strong>Gokak, Belgaum, Dharwad, Hubli, Bagalkot, Nippani</strong>
+            <strong>Gokak, Belgaum, Dharwad, Hubli, Bagalkot, Bijapur</strong>
           </div>
           <div class="network-stat-row">
             <span>Central Hubs (2):</span>
@@ -1835,6 +1835,7 @@
             <span class="network-chip" onclick="filterByLocationTag('Dharwad')">Dharwad</span>
             <span class="network-chip" onclick="filterByLocationTag('Hubli')">Hubli</span>
             <span class="network-chip" onclick="filterByLocationTag('Bagalkot')">Bagalkot</span>
+            <span class="network-chip" onclick="filterByLocationTag('Bijapur')">Bijapur</span>
             <span class="network-chip" onclick="filterByLocationTag('Nippani')">Nippani</span>
           </div>
         </div>
@@ -1898,7 +1899,7 @@
         <div class="live-sim-anchor">
           <span class="live-sim-dot">●</span>
           <span>Live Simulation Anchor:</span>
-          <span class="live-sim-date" id="liveSimDateText">2026/10/09</span>
+          <span class="live-sim-date" id="liveSimDateText">2026/11/16</span>
         </div>
       </div>
     </header>
@@ -1977,9 +1978,10 @@
                 <option value="Hubli">Hubli Store</option>
                 <option value="Gokak">Gokak Store</option>
                 <option value="Dharwad">Dharwad Store</option>
-                <option value="Nippani">Nippani Store</option>
+                <option value="Bijapur">Bijapur Store</option>
                 <option value="Bagalkot">Bagalkot Store</option>
                 <option value="Belgaum">Belgaum Store</option>
+                <option value="Nippani">Nippani Store</option>
                 <option value="Belgaum Central Warehouse">Belgaum Central Hub</option>
                 <option value="Hubli Regional Warehouse">Hubli Regional Hub</option>
               </select>
@@ -2030,6 +2032,7 @@
               <option value="Dharwad">Dharwad Store</option>
               <option value="Hubli">Hubli Store</option>
               <option value="Bagalkot">Bagalkot Store</option>
+              <option value="Bijapur">Bijapur Store</option>
               <option value="Nippani">Nippani Store</option>
             </select>
           </div>
@@ -2152,8 +2155,67 @@
   let inventoryData = [];
   let supplierData = [];
   let auditLogs = [];
-  let simulationDate = '2026/10/09';
+  let simulationDate = '2026/11/16';
   let backendRawBriefing = null;
+
+  // ---------------------------------------------------------------------------
+  // DYNAMIC FACILITY DISCOVERY & TOPOLOGY ADAPTER
+  // ---------------------------------------------------------------------------
+  function populateDynamicFacilities(locations) {
+    if (!locations || locations.length === 0) return;
+    const uniqueLocs = Array.from(new Set(locations.map(l => String(l).trim()))).filter(Boolean).sort();
+    if (uniqueLocs.length === 0) return;
+
+    const warehouses = uniqueLocs.filter(loc =>
+      ['wh', 'warehouse', 'central', 'regional', 'hub'].some(term => loc.toLowerCase().includes(term))
+    );
+    const stores = uniqueLocs.filter(loc => !warehouses.includes(loc));
+
+    // Update facility filter dropdown in feed
+    const feedSelect = document.getElementById('feedLocFilter');
+    if (feedSelect) {
+      const curVal = feedSelect.value;
+      let html = `<option value="ALL">All Facilities (${uniqueLocs.length} Nodes)</option>`;
+      uniqueLocs.forEach(loc => {
+        const isWh = warehouses.includes(loc);
+        html += `<option value="${loc}">${loc}${isWh ? ' Hub' : ' Store'}</option>`;
+      });
+      feedSelect.innerHTML = html;
+      if (uniqueLocs.includes(curVal) || curVal === 'ALL') feedSelect.value = curVal;
+    }
+
+    // Update facility filter dropdown in inventory view
+    const invSelect = document.getElementById('invLocSelect');
+    if (invSelect) {
+      const curVal = invSelect.value;
+      let html = `<option value="ALL">All Facilities (${uniqueLocs.length})</option>`;
+      uniqueLocs.forEach(loc => {
+        const isWh = warehouses.includes(loc);
+        html += `<option value="${loc}">${loc}${isWh ? ' Hub' : ' Store'}</option>`;
+      });
+      invSelect.innerHTML = html;
+      if (uniqueLocs.includes(curVal) || curVal === 'ALL') invSelect.value = curVal;
+    }
+
+    // Update sidebar network card summary & tag cloud
+    const tagCloud = document.querySelector('.network-tag-cloud');
+    if (tagCloud) {
+      let tagsHtml = '';
+      warehouses.forEach(w => {
+        tagsHtml += `<span class="network-chip hub" onclick="filterByLocationTag('${w}')">${w}</span> `;
+      });
+      stores.forEach(s => {
+        tagsHtml += `<span class="network-chip" onclick="filterByLocationTag('${s}')">${s}</span> `;
+      });
+      tagCloud.innerHTML = tagsHtml;
+    }
+
+    const statRows = document.querySelectorAll('.network-stat-row');
+    if (statRows && statRows.length >= 2) {
+      statRows[0].innerHTML = `<span>Retail Stores (${stores.length}):</span> <strong>${stores.join(', ')}</strong>`;
+      statRows[1].innerHTML = `<span>Central Hubs (${warehouses.length}):</span> <strong>${warehouses.join(', ')}</strong>`;
+    }
+  }
 
   // ---------------------------------------------------------------------------
   // PURE JAVASCRIPT SHA-256 HASH GENERATOR
@@ -3273,7 +3335,7 @@
     // 1. Fetch live briefing from backend
     try {
       const sanitizedDate = simulationDate.replace(/\//g, '-');
-      const res = await fetch(`/briefing?current_date=${encodeURIComponent(sanitizedDate)}`);
+      const res = await fetch(`/briefing?current_date=${encodeURIComponent(sanitizedDate)}&simulation_date=${encodeURIComponent(sanitizedDate)}`);
       if (res.ok) {
         const brief = await res.json();
         backendRawBriefing = brief;
@@ -3291,8 +3353,11 @@
           document.getElementById('kpiTopSku').textContent = summary.top_focus_sku || (brief.problems && brief.problems[0] ? `${brief.problems[0].location} — ${brief.problems[0].sku}` : 'Hubli — PUMP-GEAR-03');
         }
 
-        // Transform backend problems into rich UI models
+        // Dynamically discover facilities from briefing problems
         if (brief.problems && brief.problems.length > 0) {
+          const problemLocs = brief.problems.map(p => p.location).filter(Boolean);
+          if (problemLocs.length > 0) populateDynamicFacilities(problemLocs);
+
           allIncidents = brief.problems.map((p, idx) => {
             const m = p.domain_metrics || {};
             const math = p.math_explainability || {};
@@ -3421,6 +3486,8 @@
       const res = await fetch('/inventory');
       if (res.ok) {
         inventoryData = await res.json();
+        const invLocs = inventoryData.map(i => i.location).filter(Boolean);
+        if (invLocs.length > 0) populateDynamicFacilities(invLocs);
       }
     } catch (e) {}
 

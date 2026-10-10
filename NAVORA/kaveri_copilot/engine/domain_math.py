@@ -833,12 +833,17 @@ def detect_demand_shift(
 
 
 def evaluate_supplier_friction(
-    supplier: Dict[str, Any],
-    baseline_price: float,
-    Q_needed: int,
-    days_of_cover: float,
+    supplier: Optional[Dict[str, Any]] = None,
+    baseline_price: float = 1000.0,
+    Q_needed: Optional[int] = None,
+    days_of_cover: Optional[float] = None,
     holding_days: float = 90.0,
-    holding_cost_rate: float = ANNUAL_HOLDING_COST_RATE
+    holding_cost_rate: float = ANNUAL_HOLDING_COST_RATE,
+    *,
+    supplier_lead_time: Optional[int] = None,
+    supplier_moq: Optional[int] = None,
+    needed_qty: Optional[int] = None,
+    unit_price: Optional[float] = None,
 ) -> Dict[str, Any]:
     """
     Evaluates supplier feasibility with excess-cost scoring:
@@ -846,17 +851,20 @@ def evaluate_supplier_friction(
     - Keeps binary INFEASIBLE_MOQ flag only when moq > MOQ_OVERPURCHASE_RATIO_THRESHOLD * Q_needed.
     - Otherwise feasible with scored excess carrying cost.
     """
-    moq = int(supplier.get("moq", 1))
-    lead_time = int(supplier.get("lead_time_days", 7))
-    price = float(supplier.get("price", baseline_price))
+    sup_dict = supplier or {}
+    moq = int(supplier_moq if supplier_moq is not None else sup_dict.get("moq", 1))
+    lead_time = int(supplier_lead_time if supplier_lead_time is not None else sup_dict.get("lead_time_days", 7))
+    price = float(unit_price if unit_price is not None else sup_dict.get("price", baseline_price))
+    req_qty = int(needed_qty if needed_qty is not None else (Q_needed if Q_needed is not None else 1))
+    cover = float(days_of_cover if days_of_cover is not None else 10.0)
 
-    overpurchase_qty = max(0, moq - Q_needed)
+    overpurchase_qty = max(0, moq - req_qty)
     daily_rate = holding_cost_rate / 365.0
     excess_carrying_cost = round(overpurchase_qty * price * daily_rate * holding_days, 2)
 
-    moq_penalty = bool(moq > (MOQ_OVERPURCHASE_RATIO_THRESHOLD * Q_needed)) if Q_needed > 0 else False
+    moq_penalty = bool(moq > (MOQ_OVERPURCHASE_RATIO_THRESHOLD * req_qty)) if req_qty > 0 else False
     price_premium = round(((price - baseline_price) / baseline_price) * 100.0, 1) if baseline_price > 0 else 0.0
-    lead_time_breach = bool(lead_time > days_of_cover)
+    lead_time_breach = bool(lead_time > cover)
 
     if moq_penalty and lead_time_breach:
         feasibility_status = "INFEASIBLE_MOQ"
@@ -868,13 +876,14 @@ def evaluate_supplier_friction(
         feasibility_status = "FEASIBLE"
 
     return {
-        "supplier": supplier.get("supplier", "Unknown"),
+        "supplier": sup_dict.get("supplier", "Unknown"),
         "moq": moq,
         "lead_time_days": lead_time,
         "price": price,
         "overpurchase_qty": overpurchase_qty,
         "excess_carrying_cost": excess_carrying_cost,
         "moq_penalty": moq_penalty,
+        "is_moq_infeasible": moq_penalty,
         "price_premium_pct": price_premium,
         "lead_time_breach": lead_time_breach,
         "feasibility_status": feasibility_status
@@ -946,18 +955,64 @@ def validate_and_recalculate_transfer(
     }
 
 
-def check_is_po_overdue(
-    expected_delivery_date_str: str,
-    po_status: str,
-    simulation_date_str: str = "2026-10-09",
-) -> bool:
-    """Evaluates overdue PO status against explicit simulation date, never system clock."""
-    if str(po_status).upper() in ["DELIVERED", "CANCELLED"]:
-        return False
+DEFAULT_SIMULATION_DATE = "2026-11-16"
 
-    sim_date = datetime.strptime(simulation_date_str, "%Y-%m-%d").date()
-    expected_date = datetime.strptime(expected_delivery_date_str, "%Y-%m-%d").date()
-    return expected_date < sim_date
+
+class OverdueResult(tuple):
+    """
+    Two-tuple representing (is_overdue, days_overdue) that also evaluates
+    boolean truthiness according to is_overdue and supports equality comparisons.
+    """
+    def __new__(cls, is_overdue: bool, days_overdue: int):
+        return super().__new__(cls, (bool(is_overdue), int(days_overdue)))
+
+    @property
+    def is_overdue(self) -> bool:
+        return self[0]
+
+    @property
+    def days_overdue(self) -> int:
+        return self[1]
+
+    def __bool__(self) -> bool:
+        return self[0]
+
+    def __eq__(self, other):
+        if isinstance(other, bool):
+            return self[0] == other
+        return super().__eq__(other)
+
+
+def check_is_po_overdue(
+    expected_delivery_date: str = "",
+    status: str = "PENDING",
+    current_date: str = DEFAULT_SIMULATION_DATE,
+    simulation_date_str: Optional[str] = None,
+    expected_delivery_date_str: Optional[str] = None,
+    po_status: Optional[str] = None,
+) -> OverdueResult:
+    """
+    Evaluates whether an open purchase order is overdue relative to simulation date.
+    Terminal statuses ('Received', 'Delivered', 'Cancelled') are strictly excluded.
+    """
+    exp_date_raw = expected_delivery_date or expected_delivery_date_str or ""
+    stat_raw = po_status if po_status is not None else status
+    sim_date_val = simulation_date_str if simulation_date_str is not None else current_date
+
+    if str(stat_raw).strip().lower() in ["received", "delivered", "cancelled"]:
+        return OverdueResult(False, 0)
+
+    try:
+        exp_dt = datetime.strptime(str(exp_date_raw).strip(), "%Y-%m-%d").date()
+        sim_dt = datetime.strptime(str(sim_date_val).strip(), "%Y-%m-%d").date()
+    except Exception:
+        return OverdueResult(False, 0)
+
+    if exp_dt < sim_dt:
+        days_overdue = (sim_dt - exp_dt).days
+        return OverdueResult(True, days_overdue)
+
+    return OverdueResult(False, 0)
 
 
 def clamp_inventory_projection(
