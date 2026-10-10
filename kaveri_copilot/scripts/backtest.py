@@ -32,22 +32,24 @@ from engine.config import (
 )
 from engine.domain_math import compute_dynamic_donor_buffer
 
-DATA_DIR = os.path.join(BASE_DIR, "data")
+from engine.data_loader import load_validated_datasets, get_default_data_dir
+
+DATA_DIR = get_default_data_dir()
 
 
-def run_backtest(data_dir: str = DATA_DIR, days: int = 60) -> Dict[str, Any]:
+def run_backtest(data_dir: str = None, days: int = 60) -> Dict[str, Any]:
     """
     Simulates multi-echelon inventory replay over historical sales.
     """
-    # 1. Load data
-    with open(os.path.join(data_dir, "products.json"), "r", encoding="utf-8") as f:
-        products = json.load(f)
-    with open(os.path.join(data_dir, "suppliers.json"), "r", encoding="utf-8") as f:
-        suppliers = json.load(f)
-    with open(os.path.join(data_dir, "inventory.json"), "r", encoding="utf-8") as f:
-        init_inventory = json.load(f)
-    with open(os.path.join(data_dir, "sales.json"), "r", encoding="utf-8") as f:
-        sales = json.load(f)
+    if data_dir is None:
+        data_dir = DATA_DIR
+
+    # 1. Load data (supports both CSV and JSON)
+    datasets = load_validated_datasets(data_dir)
+    products = datasets["products"]
+    suppliers = datasets["suppliers"]
+    init_inventory = datasets["inventory"]
+    sales = datasets["sales"]
 
     sku_prices: Dict[str, float] = {}
     sku_lead_times: Dict[str, int] = {}

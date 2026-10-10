@@ -213,3 +213,92 @@ def load_suppliers(source: Union[str, List[Dict[str, Any]]]) -> List[Dict[str, A
 def load_purchase_orders(source: Union[str, List[Dict[str, Any]]]) -> List[Dict[str, Any]]:
     records = load_file_records(source) if isinstance(source, str) else source
     return validate_records(records, PurchaseOrderRecord)
+
+
+TABLE_SCHEMAS: Dict[str, Type[BaseModel]] = {
+    "products": ProductRecord,
+    "inventory": InventoryRecord,
+    "sales": SalesRecord,
+    "suppliers": SupplierRecord,
+    "purchase_orders": PurchaseOrderRecord,
+}
+
+
+def get_default_data_dir() -> str:
+    """
+    Resolves operational data directory with fallback precedence:
+    1. NAVORA_DATA_DIR environment variable
+    2. 01_spare_parts evaluation dataset directory (CSV files)
+    3. kaveri_copilot/data (JSON files)
+    """
+    env_dir = os.environ.get("NAVORA_DATA_DIR")
+    if env_dir and os.path.exists(env_dir):
+        return os.path.abspath(env_dir)
+
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    candidates = [
+        os.path.abspath(os.path.join(base_dir, "..", "01_spare_parts")),
+        os.path.abspath(os.path.join(base_dir, "01_spare_parts")),
+        os.path.abspath(os.path.join(os.getcwd(), "01_spare_parts")),
+        os.path.abspath("01_spare_parts"),
+    ]
+    for c in candidates:
+        if os.path.exists(c) and os.path.exists(os.path.join(c, "inventory.csv")):
+            return c
+
+    return os.path.join(base_dir, "data")
+
+
+def load_table_records(data_dir: str, table_name: str) -> List[Dict[str, Any]]:
+    """Loads records for a table from data_dir trying both .json and .csv with type validation."""
+    schema = TABLE_SCHEMAS.get(table_name)
+    if schema:
+        return load_dataset_from_dir(data_dir, table_name, schema)
+    json_path = os.path.join(data_dir, f"{table_name}.json")
+    csv_path = os.path.join(data_dir, f"{table_name}.csv")
+    if os.path.exists(json_path):
+        return load_file_records(json_path)
+    elif os.path.exists(csv_path):
+        return load_file_records(csv_path)
+    return []
+
+
+def save_table_records(data_dir: str, table_name: str, records: List[Dict[str, Any]]):
+    """Saves records back to data_dir in the existing format (.csv or .json)."""
+    json_path = os.path.join(data_dir, f"{table_name}.json")
+    csv_path = os.path.join(data_dir, f"{table_name}.csv")
+
+    has_csv = os.path.exists(csv_path)
+    has_json = os.path.exists(json_path)
+
+    # If JSON file exists or neither exists, write JSON
+    if has_json or not has_csv:
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(records, f, indent=2)
+
+    # If CSV file exists, write CSV preserving format
+    if has_csv:
+        if not records:
+            with open(csv_path, "w", newline="", encoding="utf-8") as f:
+                f.write("")
+            return
+
+        canonical_orders = {
+            "inventory": ["sku", "location", "stock"],
+            "purchase_orders": ["po", "supplier", "sku", "qty", "expected_date", "status"],
+            "products": ["sku", "name", "machine_model", "category"],
+            "sales": ["date", "sku", "location", "qty_sold"],
+            "suppliers": ["supplier", "sku", "price", "lead_time_days", "moq"],
+        }
+        raw_keys = list(records[0].keys())
+        if table_name in canonical_orders:
+            known = canonical_orders[table_name]
+            fieldnames = [c for c in known if any(c in r for r in records)] + [k for k in raw_keys if k not in known]
+        else:
+            fieldnames = raw_keys
+
+        with open(csv_path, "w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
+            writer.writeheader()
+            writer.writerows(records)
+

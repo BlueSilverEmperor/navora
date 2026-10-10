@@ -45,7 +45,9 @@ from engine.config import (
     DEFAULT_REVIEW_PERIOD_DAYS,
 )
 
-DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data"))
+from engine.data_loader import get_default_data_dir
+
+DATA_DIR = get_default_data_dir()
 
 
 def extract_network_topology(inventory_df: Union[pd.DataFrame, List[Dict[str, Any]]]) -> dict:
@@ -189,7 +191,7 @@ class DecisionEngine:
         transfer_handling_cost: Optional[float] = None,
         rejection_memories: Optional[List[Dict[str, Any]]] = None,
     ):
-        self.data_dir = data_dir
+        self.data_dir = data_dir or get_default_data_dir()
         self.current_date = current_date
         self.blocked_routes = blocked_routes or []
         self.demand_multipliers = demand_multipliers or {}

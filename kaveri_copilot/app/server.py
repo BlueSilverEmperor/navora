@@ -23,7 +23,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from engine.decision_agent import DecisionEngine
-from engine.domain_math import validate_and_recalculate_transfer, evaluate_supplier_friction, compute_plan_diff
+from engine.domain_math import (
+    validate_and_recalculate_transfer,
+    evaluate_supplier_friction,
+    compute_plan_diff,
+    calculate_daily_burn_rate,
+    calculate_days_of_cover,
+    calculate_donor_transfer_safety,
+)
 from engine.mock_data_gen import seed_all_data
 from engine.persistence import (
     log_audit_trail,
@@ -37,8 +44,14 @@ from engine.persistence import (
     get_all_rejection_memories,
     clear_all_persistence
 )
+from engine.data_loader import (
+    load_validated_datasets,
+    load_table_records,
+    save_table_records,
+    get_default_data_dir,
+)
 
-DATA_DIR = os.path.join(BASE_DIR, "data")
+DATA_DIR = get_default_data_dir()
 AUDIT_LOG_FILE = os.path.join(DATA_DIR, "audit_log.json")
 ACTIVE_CHAOS_EVENTS: List[Dict[str, Any]] = []
 PROCESSED_ACTION_HASHES: Set[str] = set()
@@ -148,7 +161,8 @@ def reset_benchmark_state():
     PROCESSED_ACTION_HASHES.clear()
     ACTIVE_TRANSFER_RESERVATIONS.clear()
     clear_all_persistence()
-    seed_all_data(DATA_DIR)
+    if os.path.exists(os.path.join(DATA_DIR, "inventory.json")):
+        seed_all_data(DATA_DIR)
     return {"status": "SUCCESS", "message": "Pristine benchmark state restored."}
 
 
@@ -293,31 +307,27 @@ def approve_action(req: ActionApprovalRequest):
 
     # 2. Atomic Pre-Commit Balance & Donor Buffer Verification
     if req.action_type == "TRANSFER_REQUEST":
-        state = get_runtime_state()
-        inv_df = state["inventory"]
+        inv_records = load_table_records(DATA_DIR, "inventory")
+        sales_records = load_table_records(DATA_DIR, "sales")
 
-        # Match donor location
-        donor_rows = inv_df[(inv_df["sku"] == sku) & (inv_df["location"] == from_loc)]
-        if donor_rows.empty and from_loc:
-            prefix = from_loc.split()[0]
-            donor_rows = inv_df[(inv_df["sku"] == sku) & (inv_df["location"].str.contains(prefix, case=False, na=False))]
+        matched_donor_row = None
+        for r in inv_records:
+            if r.get("sku") == sku:
+                loc = str(r.get("location", "")).strip()
+                f_clean = str(from_loc).strip()
+                if loc == f_clean or (f_clean and f_clean.lower() in loc.lower()) or (f_clean and loc.lower() in f_clean.lower()):
+                    matched_donor_row = r
+                    break
 
-        if donor_rows.empty:
+        if not matched_donor_row:
             raise HTTPException(
                 status_code=400,
                 detail=f"Donor location {from_loc} does not carry SKU {sku}."
             )
 
-        matched_from_loc = donor_rows.iloc[0]["location"]
-        current_donor_stock = int(donor_rows.iloc[0]["current_stock"])
-
-        sales_df = state["sales"]
-        sub_sales = sales_df[(sales_df["sku"] == sku) & (sales_df["location"] == matched_from_loc)]
-        donor_v = (
-            float(sub_sales["qty_sold"].tail(30).mean())
-            if len(sub_sales) > 0
-            else 0.05
-        )
+        matched_from_loc = matched_donor_row["location"]
+        current_donor_stock = int(matched_donor_row["stock"])
+        donor_v = calculate_daily_burn_rate(sales_records, sku, matched_from_loc, 30)
 
         # Validate physical availability
         if current_donor_stock < qty:
@@ -327,38 +337,33 @@ def approve_action(req: ActionApprovalRequest):
             )
 
         # Validate 15-day safety retention constraint
-        post_transfer_cover = (current_donor_stock - qty) / (
-            donor_v if donor_v > 0 else 0.05
-        )
-        if post_transfer_cover < 15.0:
+        safety = calculate_donor_transfer_safety(current_donor_stock, donor_v, qty)
+        if not safety["is_safe"]:
             raise HTTPException(
                 status_code=400,
                 detail=(
                     f"Safety buffer violation: Transfer would leave donor {matched_from_loc} with "
-                    f"{round(post_transfer_cover, 1)} days cover (< 15.0 days minimum)."
+                    f"{round(safety['remaining_cover_days'], 1)} days cover (< 15.0 days minimum)."
                 )
             )
 
-        # 3. Apply State Mutation to inventory.json
-        inventory_path = os.path.join(DATA_DIR, "inventory.json")
-        with open(inventory_path, "r", encoding="utf-8") as f:
-            inventory = json.load(f)
+        # 3. Apply State Mutation to inventory (supports CSV & JSON)
+        inventory = load_table_records(DATA_DIR, "inventory")
 
         donor_found = False
         recip_found = False
         for inv in inventory:
             if inv["sku"] == sku and inv["location"] == matched_from_loc:
-                inv["stock"] = max(0, inv["stock"] - qty)
+                inv["stock"] = max(0, int(inv["stock"]) - qty)
                 donor_found = True
-            elif inv["sku"] == sku and (inv["location"] == to_loc or to_loc in inv["location"]):
-                inv["stock"] = inv["stock"] + qty
+            elif inv["sku"] == sku and (inv["location"] == to_loc or to_loc in str(inv["location"])):
+                inv["stock"] = int(inv["stock"]) + qty
                 recip_found = True
 
         if not recip_found and to_loc:
             inventory.append({"sku": sku, "location": to_loc, "stock": qty})
 
-        with open(inventory_path, "w", encoding="utf-8") as f:
-            json.dump(inventory, f, indent=2)
+        save_table_records(DATA_DIR, "inventory", inventory)
 
         # Release any reservations
         res_key = f"{matched_from_loc}:{sku}"
@@ -375,9 +380,7 @@ def approve_action(req: ActionApprovalRequest):
         }
 
     elif req.action_type == "PURCHASE_ORDER":
-        po_path = os.path.join(DATA_DIR, "purchase_orders.json")
-        with open(po_path, "r", encoding="utf-8") as f:
-            purchase_orders = json.load(f)
+        purchase_orders = load_table_records(DATA_DIR, "purchase_orders")
 
         po_id = f"PO-{datetime.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:4].upper()}"
         new_po = {
@@ -390,8 +393,7 @@ def approve_action(req: ActionApprovalRequest):
             "status": "ORDERED"
         }
         purchase_orders.append(new_po)
-        with open(po_path, "w", encoding="utf-8") as f:
-            json.dump(purchase_orders, f, indent=2)
+        save_table_records(DATA_DIR, "purchase_orders", purchase_orders)
 
         execution_details = {
             "type": "PURCHASE_ORDER_ISSUED",
@@ -401,16 +403,13 @@ def approve_action(req: ActionApprovalRequest):
         }
 
     elif req.action_type in ("SUPPLIER_EXPEDITE_NOTICE", "EXPEDITE_NOTICE"):
-        po_path = os.path.join(DATA_DIR, "purchase_orders.json")
-        with open(po_path, "r", encoding="utf-8") as f:
-            purchase_orders = json.load(f)
+        purchase_orders = load_table_records(DATA_DIR, "purchase_orders")
 
         for po in purchase_orders:
             if po["sku"] == sku and (po.get("supplier") == from_loc or po.get("location") == to_loc) and po.get("status") not in ("DELIVERED", "CANCELLED"):
                 po["status"] = "EXPEDITED"
 
-        with open(po_path, "w", encoding="utf-8") as f:
-            json.dump(purchase_orders, f, indent=2)
+        save_table_records(DATA_DIR, "purchase_orders", purchase_orders)
 
         execution_details = {
             "type": "EXPEDITE_NOTICE_DISPATCHED",
@@ -506,13 +505,9 @@ def dismiss_action(req: ActionRejectRequest):
 @app.get("/api/inventory")
 def get_inventory():
     """Returns current multi-echelon stock levels joined with product metadata."""
-    inventory_path = os.path.join(DATA_DIR, "inventory.json")
-    products_path = os.path.join(DATA_DIR, "products.json")
-
-    with open(inventory_path, "r", encoding="utf-8") as f:
-        inventory = json.load(f)
-    with open(products_path, "r", encoding="utf-8") as f:
-        products = json.load(f)
+    datasets = load_validated_datasets(DATA_DIR)
+    inventory = datasets["inventory"]
+    products = datasets["products"]
 
     prod_map = {p["sku"]: p for p in products}
 
@@ -521,11 +516,11 @@ def get_inventory():
         prod = prod_map.get(inv["sku"], {})
         enriched.append({
             "sku": inv["sku"],
-            "name": prod.get("name", "Unknown"),
-            "machine_model": prod.get("machine_model", "Unknown"),
+            "name": prod.get("name") or prod.get("product_name", "Unknown"),
+            "machine_model": prod.get("machine_model", "Universal"),
             "category": prod.get("category", "General"),
             "location": inv["location"],
-            "stock": inv["stock"]
+            "stock": int(inv["stock"])
         })
 
     return enriched
@@ -600,13 +595,8 @@ def recalculate_override(req: RecalculateOverrideRequest):
     """
     Invokes calculate_donor_transfer_safety and returns revised cover days and 14-day projections without mutating state.
     """
-    inv_file = os.path.join(DATA_DIR, "inventory.json")
-    sales_file = os.path.join(DATA_DIR, "sales.json")
-
-    with open(inv_file, "r", encoding="utf-8") as f:
-        inventory = json.load(f)
-    with open(sales_file, "r", encoding="utf-8") as f:
-        sales = json.load(f)
+    inventory = load_table_records(DATA_DIR, "inventory")
+    sales = load_table_records(DATA_DIR, "sales")
 
     from engine.domain_math import (
         calculate_daily_burn_rate,
@@ -630,9 +620,9 @@ def recalculate_override(req: RecalculateOverrideRequest):
     for inv in inventory:
         if inv.get("sku") == req.sku:
             if inv.get("location") == donor_loc:
-                donor_stock = inv.get("stock", 0)
+                donor_stock = int(inv.get("stock", 0))
             elif inv.get("location") == req.target_location:
-                target_stock = inv.get("stock", 0)
+                target_stock = int(inv.get("stock", 0))
 
     safety = calculate_donor_transfer_safety(donor_stock, v_donor, req.override_qty)
 
@@ -645,19 +635,16 @@ def recalculate_override(req: RecalculateOverrideRequest):
     prim_lead = 7
     exp_lead = 3
     replenish_qty = 20
-    sup_file = os.path.join(DATA_DIR, "suppliers.json")
-    if os.path.exists(sup_file):
-        try:
-            with open(sup_file, "r", encoding="utf-8") as f:
-                suppliers = json.load(f)
-            sku_sups = [s for s in suppliers if s.get("sku") == req.sku]
-            if sku_sups:
-                prim_lead = int(sku_sups[0].get("lead_time_days", 7))
-                replenish_qty = int(sku_sups[0].get("moq", 20))
-                if len(sku_sups) > 1:
-                    exp_lead = int(sku_sups[1].get("lead_time_days", 3))
-        except Exception:
-            pass
+    try:
+        suppliers = load_table_records(DATA_DIR, "suppliers")
+        sku_sups = [s for s in suppliers if s.get("sku") == req.sku]
+        if sku_sups:
+            prim_lead = int(sku_sups[0].get("lead_time_days", 7))
+            replenish_qty = int(sku_sups[0].get("moq", 20))
+            if len(sku_sups) > 1:
+                exp_lead = int(sku_sups[1].get("lead_time_days", 3))
+    except Exception:
+        pass
 
     projections = generate_14day_projections(
         current_stock=target_stock,
@@ -691,13 +678,8 @@ def recalculate_override(req: RecalculateOverrideRequest):
 @app.post("/action/override-recalculate")
 def override_recalculate(req: OverrideRecalculateRequest):
     """Alias for recalculate-override supporting legacy schema."""
-    inv_file = os.path.join(DATA_DIR, "inventory.json")
-    sales_file = os.path.join(DATA_DIR, "sales.json")
-
-    with open(inv_file, "r", encoding="utf-8") as f:
-        inventory = json.load(f)
-    with open(sales_file, "r", encoding="utf-8") as f:
-        sales = json.load(f)
+    inventory = load_table_records(DATA_DIR, "inventory")
+    sales = load_table_records(DATA_DIR, "sales")
 
     from_loc = req.from_location
     to_loc = req.to_location
@@ -804,32 +786,35 @@ def audit_suppliers():
     Evaluates supplier reliability and friction metrics:
     price variance against contract baseline, lead time feasibility, and MOQ risk.
     """
-    sup_file = os.path.join(DATA_DIR, "suppliers.json")
-    with open(sup_file, "r", encoding="utf-8") as f:
-        suppliers = json.load(f)
+    datasets = load_validated_datasets(DATA_DIR)
+    suppliers = datasets["suppliers"]
 
-    # Determine baseline price per SKU from primary supplier
+    # Determine baseline price per SKU from primary supplier or first supplier
     baseline_map = {}
     for s in suppliers:
-        if s.get("is_primary", False):
-            baseline_map[s["sku"]] = s["price"]
+        if s.get("is_primary", False) and s["sku"] not in baseline_map:
+            baseline_map[s["sku"]] = float(s["price"])
+    for s in suppliers:
+        if s["sku"] not in baseline_map:
+            baseline_map[s["sku"]] = float(s["price"])
 
     audit_records = []
     for s in suppliers:
         sku = s["sku"]
-        base_price = baseline_map.get(sku, s["price"])
-        variance = round(((s["price"] - base_price) / base_price) * 100.0, 1) if base_price > 0 else 0.0
+        price_val = float(s["price"])
+        base_price = baseline_map.get(sku, price_val)
+        variance = round(((price_val - base_price) / base_price) * 100.0, 1) if base_price > 0 else 0.0
 
         audit_records.append({
             "supplier": s["supplier"],
             "sku": sku,
-            "contract_type": "PRIMARY" if s.get("is_primary", False) else "SECONDARY",
-            "unit_price_inr": s["price"],
+            "contract_type": "PRIMARY" if s.get("is_primary", False) or price_val == base_price else "SECONDARY",
+            "unit_price_inr": price_val,
             "baseline_price_inr": base_price,
             "price_variance_pct": variance,
-            "lead_time_days": s["lead_time_days"],
-            "moq": s["moq"],
-            "moq_risk": "HIGH" if s["moq"] >= 50 else ("MEDIUM" if s["moq"] >= 20 else "LOW"),
+            "lead_time_days": int(s["lead_time_days"]),
+            "moq": int(s["moq"]),
+            "moq_risk": "HIGH" if int(s["moq"]) >= 50 else ("MEDIUM" if int(s["moq"]) >= 20 else "LOW"),
             "status": "ACTIVE"
         })
 
@@ -1050,9 +1035,7 @@ def approve_navora(req: NavoraApproveRequest):
     res = approve_action(appr_req)
     audit_entry = res["audit_entry"]
     
-    inv_path = os.path.join(DATA_DIR, "inventory.json")
-    with open(inv_path, "r", encoding="utf-8") as f:
-        inv = json.load(f)
+    inv = load_table_records(DATA_DIR, "inventory")
     
     src_stock = next((i["stock"] for i in inv if i["sku"] == (req.sku or "FILTER-HYD-01") and i["location"] == (req.source_warehouse or "Belgaum")), 26)
     dest_stock = next((i["stock"] for i in inv if i["sku"] == (req.sku or "FILTER-HYD-01") and i["location"] == (req.destination_warehouse or "Gokak")), 22)

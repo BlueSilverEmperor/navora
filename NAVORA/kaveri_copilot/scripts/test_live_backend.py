@@ -112,7 +112,7 @@ def main():
     payload_recalc_safe = {
         "problem_id": "PROB-GOKAK-FILTER",
         "sku": "FILTER-HYD-01",
-        "donor_location": "Belgaum Central Warehouse",
+        "donor_location": "Belgaum",
         "target_location": "Gokak",
         "override_qty": 18
     }
@@ -128,7 +128,7 @@ def main():
     payload_recalc_unsafe = {
         "problem_id": "PROB-GOKAK-FILTER",
         "sku": "FILTER-HYD-01",
-        "donor_location": "Belgaum Central Warehouse",
+        "donor_location": "Belgaum",
         "target_location": "Gokak",
         "override_qty": 38
     }
@@ -149,7 +149,7 @@ def main():
         "payload": {
             "sku": "FILTER-HYD-01",
             "qty": 14,
-            "from_location": "Belgaum Central Warehouse",
+            "from_location": "Belgaum",
             "to_location": "Gokak",
             "unit_cost_inr": 0,
             "total_estimated_cost_inr": 250

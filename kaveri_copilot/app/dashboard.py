@@ -29,9 +29,14 @@ importlib.reload(engine.decision_agent)
 
 from engine.decision_agent import DecisionEngine, extract_network_topology
 from engine.domain_math import validate_and_recalculate_transfer, generate_14day_projections
-from engine.mock_data_gen import seed_all_data
+from engine.data_loader import (
+    load_validated_datasets,
+    load_table_records,
+    save_table_records,
+    get_default_data_dir,
+)
 
-DATA_DIR = os.path.join(BASE_DIR, "data")
+DATA_DIR = get_default_data_dir()
 AUDIT_LOG_FILE = os.path.join(DATA_DIR, "audit_log.json")
 
 FACILITY_COORDS = {
@@ -557,13 +562,8 @@ def save_audit(logs):
 
 
 def apply_action_approval(problem_id, action_type, payload):
-    inv_file = os.path.join(DATA_DIR, "inventory.json")
-    po_file = os.path.join(DATA_DIR, "purchase_orders.json")
-
-    with open(inv_file, "r", encoding="utf-8") as f:
-        inventory = json.load(f)
-    with open(po_file, "r", encoding="utf-8") as f:
-        pos = json.load(f)
+    inventory = load_table_records(DATA_DIR, "inventory")
+    pos = load_table_records(DATA_DIR, "purchase_orders")
 
     sku = payload["sku"]
     qty = payload["qty"]
@@ -573,11 +573,10 @@ def apply_action_approval(problem_id, action_type, payload):
     if action_type == "TRANSFER_REQUEST":
         for item in inventory:
             if item["sku"] == sku and item["location"] == from_src:
-                item["stock"] = max(0, item["stock"] - qty)
+                item["stock"] = max(0, int(item["stock"]) - qty)
             elif item["sku"] == sku and item["location"] == to_loc:
-                item["stock"] += qty
-        with open(inv_file, "w", encoding="utf-8") as f:
-            json.dump(inventory, f, indent=2)
+                item["stock"] = int(item["stock"]) + qty
+        save_table_records(DATA_DIR, "inventory", inventory)
 
     elif action_type == "PURCHASE_ORDER":
         po_id = f"PO-{datetime.now().strftime('%m%d%H%M')}"
@@ -590,15 +589,13 @@ def apply_action_approval(problem_id, action_type, payload):
             "expected_date": payload["expected_delivery_date"],
             "status": "ORDERED"
         })
-        with open(po_file, "w", encoding="utf-8") as f:
-            json.dump(pos, f, indent=2)
+        save_table_records(DATA_DIR, "purchase_orders", pos)
 
     elif action_type == "SUPPLIER_EXPEDITE_NOTICE":
         for po in pos:
             if po["sku"] == sku and po["supplier"] == from_src and po.get("status") not in ("DELIVERED", "CANCELLED"):
                 po["status"] = "EXPEDITED"
-        with open(po_file, "w", encoding="utf-8") as f:
-            json.dump(pos, f, indent=2)
+        save_table_records(DATA_DIR, "purchase_orders", pos)
 
     # Append audit log
     logs = load_audit()
@@ -668,7 +665,8 @@ def inject_chaos(scenario_type):
 
 def reset_baseline():
     st.session_state.chaos_events = []
-    seed_all_data(DATA_DIR)
+    if os.path.exists(os.path.join(DATA_DIR, "inventory.json")):
+        seed_all_data(DATA_DIR)
     if os.path.exists(AUDIT_LOG_FILE):
         os.remove(AUDIT_LOG_FILE)
     st.success("Benchmark state restored!")
@@ -1442,10 +1440,9 @@ with tab_feed:
 with tab_inv:
     st.subheader("North Karnataka Multi-Echelon Stock Levels")
     
-    with open(os.path.join(DATA_DIR, "inventory.json"), "r", encoding="utf-8") as f:
-        inv_raw = json.load(f)
-    with open(os.path.join(DATA_DIR, "products.json"), "r", encoding="utf-8") as f:
-        prods_raw = json.load(f)
+    datasets = load_validated_datasets(DATA_DIR)
+    inv_raw = datasets["inventory"]
+    prods_raw = datasets["products"]
         
     p_map = {p["sku"]: p for p in prods_raw}
     enriched_inv = []
@@ -1453,7 +1450,7 @@ with tab_inv:
         prod = p_map.get(row["sku"], {})
         enriched_inv.append({
             "SKU": row["sku"],
-            "Product Name": prod.get("name", "Unknown"),
+            "Product Name": prod.get("name") or prod.get("product_name", "Unknown"),
             "Category": prod.get("category", "General"),
             "Machine Model": prod.get("machine_model", "Universal"),
             "Location": row["location"],
@@ -1475,11 +1472,17 @@ with tab_sup:
     st.subheader("Contracted Supplier Friction & Reliability Learning Audit")
     st.caption("Assesses suppliers on price markup, MOQ lock-up, historical delivery slippage, and learned adjusted lead times.")
     
-    with open(os.path.join(DATA_DIR, "suppliers.json"), "r", encoding="utf-8") as f:
-        sup_data = json.load(f)
+    datasets = load_validated_datasets(DATA_DIR)
+    sup_data = datasets["suppliers"]
     
     rel_map = briefing.get("supplier_reliability", {})
-    base_map = {s["sku"]: s["price"] for s in sup_data if s.get("is_primary", False)}
+    base_map = {}
+    for s in sup_data:
+        if s.get("is_primary", False) and s["sku"] not in base_map:
+            base_map[s["sku"]] = float(s["price"])
+    for s in sup_data:
+        if s["sku"] not in base_map:
+            base_map[s["sku"]] = float(s["price"])
     aud_rows = []
     for s in sup_data:
         bp = base_map.get(s["sku"], s["price"])

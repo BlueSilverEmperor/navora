@@ -18,6 +18,9 @@ for p in [os.path.join(_ROOT_DIR, "kaveri_copilot"), _ROOT_DIR]:
     if os.path.exists(p) and p not in sys.path:
         sys.path.insert(0, p)
 
+_BENCHMARK_DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data"))
+os.environ.setdefault("NAVORA_DATA_DIR", _BENCHMARK_DATA_DIR)
+
 from engine.domain_math import (
     calculate_daily_burn_rate,
     calculate_days_of_cover,
@@ -2058,6 +2061,74 @@ def test_briefing_simulation_date_param_overdue():
     data = res.json()
     assert "summary" in data
     assert "problems" in data
+
+
+def test_01_spare_parts_csv_ingestion():
+    """
+    Validates Challenge 01 evaluation dataset ingestion directly from 01_spare_parts:
+    - inventory.csv (1,008 rows)
+    - products.csv (126 rows)
+    - purchase_orders.csv (43 rows)
+    - sales.csv (12,777 rows)
+    - suppliers.csv (205 rows)
+    """
+    from engine.data_loader import load_validated_datasets
+
+    spare_parts_dir = None
+    for cand in [
+        os.path.abspath(os.path.join(_ROOT_DIR, "..", "01_spare_parts")),
+        os.path.abspath(os.path.join(_ROOT_DIR, "01_spare_parts")),
+        os.path.abspath("01_spare_parts"),
+    ]:
+        if os.path.exists(cand) and os.path.exists(os.path.join(cand, "inventory.csv")):
+            spare_parts_dir = cand
+            break
+
+    assert spare_parts_dir is not None, "01_spare_parts directory must exist"
+    datasets = load_validated_datasets(spare_parts_dir)
+
+    assert len(datasets["products"]) == 126, f"Expected 126 products, got {len(datasets['products'])}"
+    assert len(datasets["inventory"]) == 1008, f"Expected 1008 inventory rows, got {len(datasets['inventory'])}"
+    assert len(datasets["purchase_orders"]) == 43, f"Expected 43 POs, got {len(datasets['purchase_orders'])}"
+    assert len(datasets["sales"]) == 12777, f"Expected 12777 sales rows, got {len(datasets['sales'])}"
+    assert len(datasets["suppliers"]) == 205, f"Expected 205 supplier rows, got {len(datasets['suppliers'])}"
+
+    # Ensure field schemas are properly normalized
+    p0 = datasets["products"][0]
+    assert "sku" in p0 and "name" in p0 and "machine_model" in p0 and "category" in p0
+    i0 = datasets["inventory"][0]
+    assert "sku" in i0 and "location" in i0 and isinstance(i0["stock"], int)
+    s0 = datasets["suppliers"][0]
+    assert "supplier" in s0 and "price" in s0 and isinstance(s0["price"], float)
+
+
+def test_01_spare_parts_decision_engine_pipeline():
+    """Validates running the DecisionEngine against 01_spare_parts on simulation date 2026-11-16."""
+    spare_parts_dir = None
+    for cand in [
+        os.path.abspath(os.path.join(_ROOT_DIR, "..", "01_spare_parts")),
+        os.path.abspath(os.path.join(_ROOT_DIR, "01_spare_parts")),
+        os.path.abspath("01_spare_parts"),
+    ]:
+        if os.path.exists(cand) and os.path.exists(os.path.join(cand, "inventory.csv")):
+            spare_parts_dir = cand
+            break
+
+    engine = DecisionEngine(data_dir=spare_parts_dir, current_date="2026-11-16")
+    brief = engine.run_agentic_pipeline()
+
+    assert "summary" in brief
+    assert "problems" in brief
+    assert len(brief["problems"]) > 0
+
+    # Check dynamic network topology
+    inv_df = pd.DataFrame(engine.inventory)
+    topology = extract_network_topology(inv_df)
+    assert len(topology["all_locations"]) == 8
+    assert "Belgaum WH" in topology["warehouses"]
+    assert "Hubli WH" in topology["warehouses"]
+    assert "Bijapur" in topology["stores"]
+
 
 
 
