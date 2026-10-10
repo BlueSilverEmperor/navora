@@ -161,6 +161,7 @@ def reset_benchmark_state():
     PROCESSED_ACTION_HASHES.clear()
     ACTIVE_TRANSFER_RESERVATIONS.clear()
     clear_all_persistence()
+    invalidate_briefing_cache()
     if os.path.exists(os.path.join(DATA_DIR, "inventory.json")):
         seed_all_data(DATA_DIR)
     return {"status": "SUCCESS", "message": "Pristine benchmark state restored."}
@@ -175,6 +176,13 @@ def health_check():
     }
 
 
+_BRIEFING_CACHE: Dict[str, Any] = {}
+
+def invalidate_briefing_cache():
+    global _BRIEFING_CACHE
+    _BRIEFING_CACHE.clear()
+
+
 @app.get("/briefing")
 @app.get("/api/briefing")
 def get_morning_briefing(
@@ -186,6 +194,10 @@ def get_morning_briefing(
     domain metrics, evaluated options, and simulated action drafts.
     """
     sim_date = current_date if current_date is not None else (simulation_date or "2026-11-16")
+    cache_key = f"{DATA_DIR}_{sim_date}_{len(ACTIVE_CHAOS_EVENTS)}"
+    if cache_key in _BRIEFING_CACHE:
+        return _BRIEFING_CACHE[cache_key]
+
     engine = DecisionEngine(
         data_dir=DATA_DIR,
         current_date=sim_date,
@@ -206,6 +218,8 @@ def get_morning_briefing(
             p["stockout_gap_days"] = dm.get("stockout_gap_days", 0.0)
         if "alternatives" not in p:
             p["alternatives"] = p.get("evaluated_options", [])
+
+    _BRIEFING_CACHE[cache_key] = brief
     return brief
 
 
@@ -424,6 +438,7 @@ def approve_action(req: ActionApprovalRequest):
     if action_payload_signature != idempotency_key:
         record_action_processed(action_payload_signature, req.problem_id)
     release_stock_reservation(req.problem_id)
+    invalidate_briefing_cache()
     record_entry = log_audit_trail_entry(
         problem_id=req.problem_id,
         action_type=req.action_type,
@@ -759,6 +774,7 @@ def inject_chaos(req: ChaosInjectionRequest):
     before_brief = before_engine.run_agentic_pipeline()
 
     ACTIVE_CHAOS_EVENTS.append(event_dict)
+    invalidate_briefing_cache()
 
     # Capture plan after chaos injection
     after_engine = DecisionEngine(

@@ -49,7 +49,12 @@ def compute_adaptive_velocity(
 ) -> dict:
     """Calculates trailing sales velocity with defensive zero-division guards."""
     if isinstance(sales_df, list):
-        sales_df = pd.DataFrame(sales_df)
+        # Filter first in Python to avoid high DataFrame construction overhead for large datasets
+        filtered_records = [
+            r for r in sales_df 
+            if (sku is None or r.get("sku") == sku) and (location is None or r.get("location") == location)
+        ]
+        sales_df = pd.DataFrame(filtered_records)
     elif not isinstance(sales_df, pd.DataFrame):
         sales_df = pd.DataFrame(sales_df)
 
@@ -661,7 +666,13 @@ def evaluate_sku_location(
     """
     Computes full domain metrics and problem flags for a single SKU at a specific node.
     """
-    burn_rate = calculate_daily_burn_rate(sales, sku, location, days_observed)
+    # Pre-filter sales once for this (sku, location) to avoid repetitive scans across thousands of records
+    if isinstance(sales, list) and len(sales) > 100:
+        sub_sales = [rec for rec in sales if rec.get("sku") == sku and rec.get("location") == location]
+    else:
+        sub_sales = sales
+
+    burn_rate = calculate_daily_burn_rate(sub_sales, sku, location, days_observed)
     days_cover = calculate_days_of_cover(stock, burn_rate)
     primary_sup = find_primary_supplier(suppliers, sku)
     primary_lead_time = primary_sup.get("lead_time_days", 7) if primary_sup else 7
@@ -690,12 +701,12 @@ def evaluate_sku_location(
     overdue_pos.sort(key=lambda p: p.get("cover_impact_days", 0.0), reverse=True)
 
     # Demand shift evaluation
-    demand_shift = detect_demand_shift(sales, sku, location, current_date)
+    demand_shift = detect_demand_shift(sub_sales, sku, location, current_date)
 
     problem_type = None
     severity = "NONE"
 
-    adaptive_velocity = compute_adaptive_velocity(sales, sku, location, stock, primary_lead_time)
+    adaptive_velocity = compute_adaptive_velocity(sub_sales, sku, location, stock, primary_lead_time)
 
     target_cover = compute_sku_target_cover(
         primary_lead_time_days=primary_lead_time,

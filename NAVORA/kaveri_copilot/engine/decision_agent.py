@@ -7,6 +7,7 @@ and drafts ready-to-approve simulated action payloads across all 5 problem categ
 import json
 import math
 import os
+from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional, Union
 import pandas as pd
@@ -247,9 +248,26 @@ class DecisionEngine:
                 # Use learned adjusted lead time in domain mathematics
                 s["lead_time_days"] = int(rel["adjusted_lead_time_days"])
 
+        self._reindex_sales()
+
+    def _reindex_sales(self):
+        """Indexes sales records by (sku, location) for O(1) subset lookup and resets burn cache."""
+        self.sales_by_sku_loc = defaultdict(list)
+        for s in self.sales:
+            self.sales_by_sku_loc[(s.get("sku"), s.get("location"))].append(s)
+        self._burn_rate_cache = {}
+
+    def get_burn_rate(self, sku: str, location: str, days_observed: int = 30) -> float:
+        """Retrieves cached daily burn rate for (sku, location) without scanning entire dataset."""
+        key = (sku, location, days_observed)
+        if key not in self._burn_rate_cache:
+            subset = self.sales_by_sku_loc.get((sku, location), [])
+            self._burn_rate_cache[key] = calculate_daily_burn_rate(subset, sku, location, days_observed)
+        return self._burn_rate_cache[key]
 
     def apply_in_memory_mutations(self):
         """Applies dynamic chaos events or state overrides."""
+        mutated_sales = False
         for event in self.chaos_events:
             ev_type = event.get("event_type")
             sku = event.get("sku")
@@ -260,13 +278,16 @@ class DecisionEngine:
                 # Multiply recent 7-day sales
                 curr_dt = datetime.strptime(self.current_date, "%Y-%m-%d")
                 cutoff_7 = curr_dt - timedelta(days=6)
-                for rec in self.sales:
-                    if rec.get("sku") == sku and rec.get("location") == loc:
-                        d_str = rec.get("date")
-                        if d_str:
+                for rec in self.sales_by_sku_loc.get((sku, loc), []):
+                    d_str = rec.get("date")
+                    if d_str:
+                        try:
                             rec_dt = datetime.strptime(d_str, "%Y-%m-%d")
                             if cutoff_7 <= rec_dt <= curr_dt:
                                 rec["qty_sold"] = int(round(rec.get("qty_sold", 0) * val))
+                                mutated_sales = True
+                        except Exception:
+                            pass
 
             elif ev_type in ("TRANSFER_BLOCKED", "ROUTE_BLOCKED"):
                 from_loc = event.get("from_location", loc)
@@ -285,6 +306,9 @@ class DecisionEngine:
                             sup["price"] = round(sup.get("price", 0.0) * (1.0 + val), 2)
                         else:  # Flat INR hike
                             sup["price"] = round(sup.get("price", 0.0) + val, 2)
+
+        if mutated_sales:
+            self._reindex_sales()
 
     def is_route_blocked(self, from_loc: str, to_loc: str, sku: Optional[str] = None) -> bool:
         """
@@ -515,7 +539,7 @@ class DecisionEngine:
             gross_stock = inv["stock"]
             reserved = self.active_reservations.get(f"{loc}:{sku}", 0)
             stock = max(0, gross_stock - reserved)
-            burn = calculate_daily_burn_rate(self.sales, sku, loc, days_observed=30)
+            burn = self.get_burn_rate(sku, loc, days_observed=30)
             
             # Dynamic donor buffer: lead time + safety days, accounting for donor's incoming POs
             donor_sup = find_primary_supplier(self.suppliers, sku)
@@ -573,7 +597,7 @@ class DecisionEngine:
                 sku=sku,
                 location=loc,
                 stock=stock,
-                sales=self.sales,
+                sales=self.sales_by_sku_loc.get((sku, loc), []),
                 suppliers=self.suppliers,
                 purchase_orders=self.purchase_orders,
                 current_date=self.current_date
@@ -983,7 +1007,7 @@ class DecisionEngine:
                 starved_locs = []
                 for other_inv in self.inventory:
                     if other_inv["sku"] == sku and other_inv["location"] != loc:
-                        o_burn = calculate_daily_burn_rate(self.sales, sku, other_inv["location"], 30)
+                        o_burn = self.get_burn_rate(sku, other_inv["location"], 30)
                         o_cover = calculate_days_of_cover(other_inv["stock"], o_burn)
                         if o_burn > 0 and o_cover < 15.0:
                             starved_locs.append((other_inv["location"], o_burn, o_cover, other_inv["stock"]))
@@ -1415,7 +1439,7 @@ class DecisionEngine:
             d_sku = inv["sku"]
             d_loc = inv["location"]
             d_stock = inv["stock"]
-            d_burn = calculate_daily_burn_rate(self.sales, d_sku, d_loc, days_observed=30)
+            d_burn = self.get_burn_rate(d_sku, d_loc, days_observed=30)
             sup = find_primary_supplier(self.suppliers, d_sku)
             d_lead = int(sup.get("lead_time_days", 7)) if sup else 7
             safety_cover = compute_dynamic_donor_buffer(d_lead, DEFAULT_DONOR_SAFETY_DAYS)
