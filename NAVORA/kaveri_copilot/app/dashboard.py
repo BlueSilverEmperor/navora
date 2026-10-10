@@ -43,422 +43,458 @@ st.set_page_config(
 )
 
 # ==============================================================================
-# UNIFIED DESIGN SYSTEM: OBSIDIAN & CYBER-AMBER TOKENS
+# SAGE GREEN DESIGN SYSTEM & UNIVERSAL LIGHT/DARK THEME ENGINE
 # ==============================================================================
-st.markdown("""
+if "theme_mode" not in st.session_state:
+    st.session_state.theme_mode = "Dark"  # Default mode
+
+# Sidebar Theme Toggle
+with st.sidebar:
+    st.markdown("### 🎨 Visual Theme")
+    theme_choice = st.radio(
+        "Appearance Mode",
+        ["Dark", "Light"],
+        index=0 if st.session_state.theme_mode == "Dark" else 1,
+        horizontal=True,
+        label_visibility="collapsed",
+        key="app_theme_toggle_radio"
+    )
+    if theme_choice != st.session_state.theme_mode:
+        st.session_state.theme_mode = theme_choice
+        st.rerun()
+
+is_dark = (st.session_state.theme_mode == "Dark")
+
+# Official Sage Design Tokens Matrix
+tokens = {
+    "bg_primary": "#0E120E" if is_dark else "#F4F6F0",
+    "surface": "#171D16" if is_dark else "#FFFFFF",
+    "surface_alt": "#20291F" if is_dark else "#E8EDE0",
+    "border": "#2C3A2A" if is_dark else "#CBD5C0",
+    "sage_primary": "#8FA87B" if is_dark else "#5B7053",
+    "sage_accent": "#B2CF9C" if is_dark else "#7D9D71",
+    "alert_crimson": "#FF5C5C" if is_dark else "#C84B31",
+    "alert_crimson_bg": "#331414" if is_dark else "#FBEBE8",
+    "alert_amber": "#F59E0B" if is_dark else "#D9822B",
+    "alert_amber_bg": "#2E2210" if is_dark else "#FDF6E2",
+    "text_primary": "#F1F5EE" if is_dark else "#1E241B",
+    "text_secondary": "#9DAE97" if is_dark else "#5D6656",
+    "card_shadow": "0 8px 24px rgba(0,0,0,0.35)" if is_dark else "0 4px 12px rgba(91,112,83,0.08)",
+}
+
+st.markdown(f"""
 <style>
     /* Global Base */
-    .stApp, [data-testid="stAppViewContainer"] {
-        background-color: #110E0E !important;
-        color: #F3F4F6 !important;
+    .stApp, [data-testid="stAppViewContainer"] {{
+        background-color: {tokens['bg_primary']} !important;
+        color: {tokens['text_primary']} !important;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
+    }}
 
-    /* Pull Title Banner to Top of Page (Eliminates Streamlit default 6rem top blank gap) */
-    [data-testid="stHeader"] {
-        background-color: transparent !important;
-        height: 2rem !important;
-        min-height: 2rem !important;
+    [data-testid="stHeader"] {{
+        background-color: {tokens['bg_primary']} !important;
+        height: 2.2rem !important;
+        min-height: 2.2rem !important;
         z-index: 99 !important;
-    }
-    .block-container, [data-testid="stAppViewBlockContainer"], div[data-testid="stMainBlockContainer"], .main .block-container {
+    }}
+    .block-container, [data-testid="stAppViewBlockContainer"], div[data-testid="stMainBlockContainer"], .main .block-container {{
         padding-top: 0.6rem !important;
         padding-bottom: 2rem !important;
         padding-left: 2rem !important;
         padding-right: 2rem !important;
         max-width: 100% !important;
-    }
+    }}
     
     /* Sidebar High-Contrast Styling */
-    [data-testid="stSidebar"], [data-testid="stSidebarContent"], [data-testid="stSidebar"] > div {
-        background-color: #171212 !important;
-        border-right: 1px solid #2B1E1E !important;
-        color: #F3F4F6 !important;
-    }
+    [data-testid="stSidebar"], [data-testid="stSidebarContent"], [data-testid="stSidebar"] > div {{
+        background-color: {tokens['surface']} !important;
+        border-right: 1px solid {tokens['border']} !important;
+        color: {tokens['text_primary']} !important;
+    }}
     
     [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, 
     [data-testid="stSidebar"] h3, [data-testid="stSidebar"] h4,
-    [data-testid="stSidebar"] h5, [data-testid="stSidebar"] h6 {
-        color: #FFFFFF !important;
+    [data-testid="stSidebar"] h5, [data-testid="stSidebar"] h6 {{
+        color: {tokens['text_primary']} !important;
         font-weight: 700 !important;
-    }
+    }}
 
     [data-testid="stSidebar"] p,
     [data-testid="stSidebar"] span,
-    [data-testid="stSidebar"] div {
-        color: #E5E7EB !important;
-    }
+    [data-testid="stSidebar"] div {{
+        color: {tokens['text_secondary']} !important;
+    }}
 
     /* Form Labels (e.g. Simulation Date) */
     [data-testid="stSidebar"] label,
     [data-testid="stSidebar"] label p,
     [data-testid="stSidebar"] [data-testid="stWidgetLabel"],
     [data-testid="stSidebar"] [data-testid="stWidgetLabel"] p,
-    [data-testid="stSidebar"] [data-testid="stWidgetLabel"] span {
-        color: #FF8566 !important; /* High-contrast cyber-amber / coral highlight */
+    [data-testid="stSidebar"] [data-testid="stWidgetLabel"] span {{
+        color: {tokens['sage_primary']} !important;
         font-size: 0.88rem !important;
         font-weight: 600 !important;
         letter-spacing: 0.02em !important;
-    }
+    }}
 
     /* Captions and Secondary Text */
     [data-testid="stSidebar"] [data-testid="stCaptionContainer"],
     [data-testid="stSidebar"] [data-testid="stCaptionContainer"] p,
     [data-testid="stSidebar"] .stCaption,
-    [data-testid="stSidebar"] small {
-        color: #D1D5DB !important; /* Crisp, high-contrast light gray */
+    [data-testid="stSidebar"] small {{
+        color: {tokens['text_secondary']} !important;
         font-size: 0.86rem !important;
         line-height: 1.45 !important;
         font-weight: 500 !important;
-    }
+    }}
 
     /* Sidebar Divider Lines */
-    [data-testid="stSidebar"] hr {
-        border-color: #382525 !important;
+    [data-testid="stSidebar"] hr {{
+        border-color: {tokens['border']} !important;
         margin: 1.1rem 0 !important;
-    }
+    }}
 
     /* Sidebar Action Buttons */
-    [data-testid="stSidebar"] .stButton > button {
-        background-color: #221818 !important;
-        border: 1px solid #3E2929 !important;
-        color: #F3F4F6 !important;
+    [data-testid="stSidebar"] .stButton > button {{
+        background-color: {tokens['surface_alt']} !important;
+        border: 1px solid {tokens['border']} !important;
+        color: {tokens['text_primary']} !important;
         font-weight: 600 !important;
         transition: all 0.15s ease !important;
-    }
-    [data-testid="stSidebar"] .stButton > button:hover {
-        background-color: #2F1E1E !important;
-        border-color: #FF5733 !important;
-        color: #FF6B4A !important;
-        box-shadow: 0 0 8px rgba(255, 87, 51, 0.3) !important;
-    }
+    }}
+    [data-testid="stSidebar"] .stButton > button:hover {{
+        background-color: {tokens['surface']} !important;
+        border-color: {tokens['sage_accent']} !important;
+        color: {tokens['sage_accent']} !important;
+    }}
 
     /* Input & Select Elements Uniformity */
-    .stTextInput input, .stNumberInput input {
-        background-color: #1F1717 !important;
-        color: #FFFFFF !important;
-        border: 1px solid #3E2929 !important;
+    .stTextInput input, .stNumberInput input {{
+        background-color: {tokens['surface']} !important;
+        color: {tokens['text_primary']} !important;
+        border: 1px solid {tokens['border']} !important;
         border-radius: 6px !important;
-    }
-    .stTextInput input:focus, .stNumberInput input:focus {
-        border-color: #FF5733 !important;
-        box-shadow: 0 0 6px rgba(255, 87, 51, 0.4) !important;
-    }
+    }}
+    .stTextInput input:focus, .stNumberInput input:focus {{
+        border-color: {tokens['sage_accent']} !important;
+        box-shadow: 0 0 6px {'rgba(178, 207, 156, 0.4)' if is_dark else 'rgba(91, 112, 83, 0.3)'} !important;
+    }}
 
-    /* Selectbox Dropdown Menu Dark Theme */
-    div[data-baseweb="select"] {
-        background-color: #1F1717 !important;
-        border: 1px solid #3E2929 !important;
+    /* Selectbox Dropdown Menu Theme */
+    div[data-baseweb="select"] {{
+        background-color: {tokens['surface']} !important;
+        border: 1px solid {tokens['border']} !important;
         border-radius: 6px !important;
-        color: #FFFFFF !important;
-    }
-    div[data-baseweb="select"] > div {
-        background-color: #1F1717 !important;
-        color: #FFFFFF !important;
+        color: {tokens['text_primary']} !important;
+    }}
+    div[data-baseweb="select"] > div {{
+        background-color: {tokens['surface']} !important;
+        color: {tokens['text_primary']} !important;
         border: none !important;
-    }
-    div[data-baseweb="select"]:focus-within {
-        border-color: #FF5733 !important;
-        box-shadow: 0 0 6px rgba(255, 87, 51, 0.4) !important;
-    }
-    div[data-baseweb="popover"], div[data-baseweb="popover"] > div, ul[role="listbox"], ul[data-testid="stVirtualDropdown"] {
-        background-color: #1A1414 !important;
-        border: 1px solid #3E2929 !important;
-        color: #F3F4F6 !important;
-    }
-    li[role="option"] {
-        background-color: #1A1414 !important;
-        color: #F3F4F6 !important;
-    }
-    li[role="option"]:hover, li[role="option"][aria-selected="true"] {
-        background-color: #2E1F1F !important;
-        color: #FF5733 !important;
-    }
+    }}
+    div[data-baseweb="select"]:focus-within {{
+        border-color: {tokens['sage_accent']} !important;
+    }}
+    div[data-baseweb="popover"], div[data-baseweb="popover"] > div, ul[role="listbox"], ul[data-testid="stVirtualDropdown"] {{
+        background-color: {tokens['surface']} !important;
+        border: 1px solid {tokens['border']} !important;
+        color: {tokens['text_primary']} !important;
+    }}
+    li[role="option"] {{
+        background-color: {tokens['surface']} !important;
+        color: {tokens['text_primary']} !important;
+    }}
+    li[role="option"]:hover, li[role="option"][aria-selected="true"] {{
+        background-color: {tokens['surface_alt']} !important;
+        color: {tokens['sage_accent']} !important;
+    }}
 
-    /* Pixel-Perfect Dark Cyber Table System */
-    .cyber-table-container {
+    /* Pixel-Perfect Sage Table System */
+    .cyber-table-container {{
         width: 100%;
         overflow-x: auto;
-        background-color: #161111;
-        border: 1px solid #2E2222;
+        background-color: {tokens['surface']} !important;
+        border: 1px solid {tokens['border']} !important;
         border-radius: 10px;
         margin: 12px 0 20px 0;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
-    }
-    table.cyber-table {
+        box-shadow: {tokens['card_shadow']};
+    }}
+    table.cyber-table {{
         width: 100%;
         border-collapse: collapse;
         font-size: 0.86rem;
         text-align: left;
-        color: #F3F4F6;
+        color: {tokens['text_primary']} !important;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-    table.cyber-table thead tr {
-        background-color: #1E1717;
-        border-bottom: 2px solid #3E2929;
-    }
-    table.cyber-table th {
+    }}
+    table.cyber-table thead tr {{
+        background-color: {tokens['surface_alt']} !important;
+        border-bottom: 2px solid {tokens['border']} !important;
+    }}
+    table.cyber-table th {{
         padding: 12px 16px;
-        color: #FF8566;
+        color: {tokens['sage_primary']} !important;
         font-weight: 700;
         text-transform: uppercase;
         font-size: 0.76rem;
         letter-spacing: 0.04em;
         white-space: nowrap;
-    }
-    table.cyber-table tbody tr {
-        border-bottom: 1px solid #241A1A;
+    }}
+    table.cyber-table tbody tr {{
+        border-bottom: 1px solid {tokens['border']} !important;
         transition: background-color 0.15s ease;
-    }
-    table.cyber-table tbody tr:hover {
-        background-color: #241818;
-    }
-    table.cyber-table tbody tr:last-child {
+    }}
+    table.cyber-table tbody tr:hover {{
+        background-color: {tokens['surface_alt']} !important;
+    }}
+    table.cyber-table tbody tr:last-child {{
         border-bottom: none;
-    }
-    table.cyber-table td {
+    }}
+    table.cyber-table td {{
         padding: 12px 16px;
-        color: #E5E7EB;
+        color: {tokens['text_primary']} !important;
         vertical-align: middle;
-    }
+    }}
 
-    /* Tab Uniformity */
-    button[data-baseweb="tab"] {
+    /* Navigation Tabs */
+    button[data-baseweb="tab"] {{
         background-color: transparent !important;
-        color: #9CA3AF !important;
+        color: {tokens['text_secondary']} !important;
         font-weight: 600 !important;
         border-bottom: 2px solid transparent !important;
         padding: 10px 18px !important;
-    }
-    button[data-baseweb="tab"][aria-selected="true"] {
-        color: #FF5733 !important;
-        border-bottom: 2px solid #FF5733 !important;
-    }
+    }}
+    button[data-baseweb="tab"][aria-selected="true"] {{
+        color: {tokens['sage_accent']} !important;
+        border-bottom: 2px solid {tokens['sage_accent']} !important;
+    }}
 
     /* Top Executive Banner */
-    .top-banner {
-        background: linear-gradient(135deg, #1C1515 0%, #130E0E 100%);
-        border: 1px solid #302020;
+    .top-banner {{
+        background: {tokens['surface']} !important;
+        border: 1px solid {tokens['border']} !important;
         border-radius: 12px;
-        padding: 20px 28px;
+        padding: 22px 28px;
         margin-top: 0px !important;
         margin-bottom: 20px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
-    }
+        box-shadow: {tokens['card_shadow']};
+    }}
 
     /* KPI Cards */
-    .kpi-box, .kpi-card {
-        background-color: #181212;
-        border: 1px solid #2B1E1E;
+    .kpi-box, .kpi-card {{
+        background-color: {tokens['surface']} !important;
+        border: 1px solid {tokens['border']} !important;
         border-radius: 10px;
         padding: 16px 20px;
         height: 100%;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        box-shadow: {tokens['card_shadow']};
         transition: transform 0.15s ease, border-color 0.15s ease;
-    }
-    .kpi-box:hover, .kpi-card:hover {
-        border-color: #FF5733;
+    }}
+    .kpi-box:hover, .kpi-card:hover {{
+        border-color: {tokens['sage_accent']} !important;
         transform: translateY(-2px);
-    }
-    .kpi-title, .kpi-label {
+    }}
+    .kpi-title, .kpi-label {{
         font-size: 0.78rem;
-        color: #9CA3AF;
+        color: {tokens['text_secondary']};
         text-transform: uppercase;
         font-weight: 600;
         letter-spacing: 0.5px;
-    }
-    .kpi-number, .kpi-val {
+    }}
+    .kpi-number, .kpi-val {{
         font-size: 2.1rem;
         font-weight: 800;
-        color: #FFFFFF;
+        color: {tokens['text_primary']};
         margin: 4px 0;
         line-height: 1.1;
         font-family: 'JetBrains Mono', 'Courier New', monospace;
-    }
-    .kpi-foot-green, .kpi-sub-green { color: #10B981; font-size: 0.8rem; font-weight: 600; }
-    .kpi-foot-red, .kpi-sub-red { color: #EF4444; font-size: 0.8rem; font-weight: 600; }
-    .kpi-sub-amber { color: #FF6B4A; font-size: 0.8rem; font-weight: 600; }
+    }}
+    .kpi-foot-green, .kpi-sub-green {{ color: {tokens['sage_accent']}; font-size: 0.8rem; font-weight: 600; }}
+    .kpi-foot-red, .kpi-sub-red {{ color: {tokens['alert_crimson']}; font-size: 0.8rem; font-weight: 600; }}
+    .kpi-sub-amber {{ color: {tokens['alert_amber']}; font-size: 0.8rem; font-weight: 600; }}
 
     /* Task Incident Feed Cards */
-    .incident-card, .task-card {
-        background-color: #181212;
-        border: 1px solid #2B1E1E;
+    .incident-card, .task-card {{
+        background-color: {tokens['surface']} !important;
+        border: 1px solid {tokens['border']} !important;
         border-radius: 8px;
         padding: 14px 16px;
         margin-bottom: 10px;
         transition: border 0.15s ease, background 0.15s ease;
-    }
-    .incident-card:hover, .task-card:hover {
-        border-color: rgba(255, 87, 51, 0.5);
-    }
-    .incident-card-active, .task-card-active {
-        background-color: #241616 !important;
-        border: 1.5px solid #FF5733 !important;
-        box-shadow: 0 0 10px rgba(255, 87, 51, 0.2);
-    }
+    }}
+    .incident-card:hover, .task-card:hover {{
+        border-color: {tokens['sage_accent']};
+    }}
+    .incident-card-active, .task-card-active {{
+        background-color: {tokens['surface_alt']} !important;
+        border: 1.5px solid {tokens['sage_accent']} !important;
+        box-shadow: 0 0 12px {'rgba(178, 207, 156, 0.25)' if is_dark else 'rgba(125, 157, 113, 0.25)'} !important;
+    }}
     
     /* Monospace Math Block */
-    .math-terminal, .telemetry-card {
-        background-color: #0E0B0B !important;
-        border: 1px solid #2B1D1D !important;
-        border-left: 4px solid #FF5733 !important;
+    .math-terminal, .telemetry-card {{
+        background-color: {tokens['bg_primary']} !important;
+        border: 1px solid {tokens['border']} !important;
+        border-left: 4px solid {tokens['sage_primary']} !important;
         border-radius: 6px !important;
         padding: 14px 18px !important;
         font-family: "Courier New", "Roboto Mono", monospace !important;
         font-size: 0.84rem !important;
-        color: #FFA38A !important;
+        color: {tokens['sage_accent']} !important;
         line-height: 1.6 !important;
         margin-bottom: 18px !important;
-    }
+    }}
 
     /* Badges */
-    .badge-critical {
-        background-color: #381212;
-        color: #EF4444;
+    .badge-critical {{
+        background-color: {tokens['alert_crimson_bg']} !important;
+        color: {tokens['alert_crimson']} !important;
         font-size: 0.72rem;
         font-weight: 700;
         padding: 2px 7px;
         border-radius: 4px;
-        border: 1px solid #7F1D1D;
-    }
-    .badge-tag, .badge-cat {
-        background-color: #1B202A;
-        color: #93C5FD;
+        border: 1px solid {tokens['alert_crimson']};
+    }}
+    .badge-tag, .badge-cat {{
+        background-color: {tokens['surface_alt']} !important;
+        color: {tokens['sage_primary']} !important;
         font-size: 0.72rem;
         font-weight: 600;
         padding: 2px 7px;
         border-radius: 4px;
-        border: 1px solid #1E3A8A;
+        border: 1px solid {tokens['border']};
         margin-left: 4px;
-    }
-    .badge-high {
-        background-color: #3B2A12;
-        color: #F59E0B;
+    }}
+    .badge-high {{
+        background-color: {tokens['alert_amber_bg']} !important;
+        color: {tokens['alert_amber']} !important;
         font-size: 0.72rem;
         font-weight: 700;
         padding: 2px 7px;
         border-radius: 4px;
-        border: 1px solid #78350F;
-    }
-    .badge-medium {
-        background-color: #132B3A;
-        color: #38BDF8;
+        border: 1px solid {tokens['alert_amber']};
+    }}
+    .badge-medium {{
+        background-color: {tokens['surface_alt']} !important;
+        color: {tokens['sage_accent']} !important;
         font-size: 0.72rem;
         font-weight: 700;
         padding: 2px 7px;
         border-radius: 4px;
-        border: 1px solid #0369A1;
-    }
+        border: 1px solid {tokens['border']};
+    }}
 
     /* Diagnostic Cockpit Container */
-    .diag-container {
-        background-color: #181212;
-        border: 1px solid #2B1E1E;
+    .diag-container {{
+        background-color: {tokens['surface']} !important;
+        border: 1px solid {tokens['border']} !important;
         border-radius: 10px;
         padding: 18px 22px;
         margin-bottom: 18px;
-    }
+        box-shadow: {tokens['card_shadow']};
+    }}
 
     /* 6 Core Metrics Cards (Right Column) */
-    .cyber-metric-card {
-        background-color: #161111;
-        border: 1px solid #2B1E1E;
+    .cyber-metric-card {{
+        background-color: {tokens['surface_alt']} !important;
+        border: 1px solid {tokens['border']} !important;
         border-radius: 8px;
         padding: 12px 14px;
         text-align: center;
-    }
-    .cyber-metric-label {
+    }}
+    .cyber-metric-label {{
         font-size: 0.72rem;
-        color: #9CA3AF;
+        color: {tokens['text_secondary']};
         text-transform: uppercase;
         font-weight: 600;
         margin-bottom: 4px;
-    }
-    .cyber-metric-val {
+    }}
+    .cyber-metric-val {{
         font-size: 1.35rem;
         font-weight: 700;
-        color: #FFFFFF;
+        color: {tokens['text_primary']};
         font-family: 'JetBrains Mono', 'Courier New', monospace;
-    }
+    }}
 
     /* Commercial Impact Scorecard Cards */
-    .scorecard-card {
-        background: #161111;
-        border: 1px solid #2B1E1E;
+    .scorecard-card {{
+        background: {tokens['surface']} !important;
+        border: 1px solid {tokens['border']} !important;
         border-radius: 8px;
         padding: 14px 16px;
         text-align: center;
-    }
-    .scorecard-label {
+        box-shadow: {tokens['card_shadow']};
+    }}
+    .scorecard-label {{
         font-size: 0.74rem;
-        color: #9CA3AF;
+        color: {tokens['text_secondary']};
         font-weight: 600;
         text-transform: uppercase;
         margin-bottom: 4px;
-    }
-    .scorecard-val {
+    }}
+    .scorecard-val {{
         font-size: 1.3rem;
         font-weight: 700;
-        color: #FFFFFF;
+        color: {tokens['text_primary']};
         font-family: 'JetBrains Mono', 'Courier New', monospace;
-    }
-    .scorecard-sub {
+    }}
+    .scorecard-sub {{
         font-size: 0.72rem;
-        color: #7E7067;
+        color: {tokens['text_secondary']};
         margin-top: 4px;
-    }
+    }}
 
     /* Simulated Action Box */
-    .action-box {
-        background-color: #131915;
-        border: 1.5px solid #10B981;
+    .action-box {{
+        background-color: {tokens['surface_alt']} !important;
+        border: 1.5px solid {tokens['sage_accent']} !important;
         border-radius: 10px;
         padding: 18px 20px;
         margin-top: 16px;
         margin-bottom: 16px;
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.08);
-    }
-    .badge-action {
-        background-color: #064E3B;
-        color: #34D399;
+        box-shadow: {tokens['card_shadow']};
+    }}
+    .badge-action {{
+        background-color: {tokens['surface']} !important;
+        color: {tokens['sage_accent']} !important;
         padding: 4px 10px;
         border-radius: 4px;
         font-weight: 700;
         font-size: 0.78rem;
-        border: 1px solid #059669;
-    }
+        border: 1px solid {tokens['sage_accent']};
+    }}
 
-    /* Buttons */
-    div.stButton > button {
-        background-color: #241A1A !important;
-        color: #F3F4F6 !important;
-        border: 1px solid #3D2929 !important;
+    /* Form Inputs & Buttons */
+    div.stButton > button {{
+        background-color: {tokens['surface_alt']} !important;
+        color: {tokens['text_primary']} !important;
+        border: 1px solid {tokens['border']} !important;
         border-radius: 6px !important;
         font-weight: 600 !important;
         padding: 8px 16px !important;
         transition: all 0.15s ease !important;
-    }
-    div.stButton > button:hover {
-        border-color: #FF5733 !important;
-        color: #FF5733 !important;
-        box-shadow: 0 0 10px rgba(255, 87, 51, 0.25) !important;
-    }
-    div.stButton > button[kind="primary"] {
-        background: linear-gradient(135deg, #FF5733 0%, #E04322 100%) !important;
+    }}
+    div.stButton > button:hover {{
+        border-color: {tokens['sage_accent']} !important;
+        color: {tokens['sage_accent']} !important;
+    }}
+    div.stButton > button[kind="primary"] {{
+        background: {tokens['sage_primary']} !important;
         color: #FFFFFF !important;
         border: none !important;
         font-weight: 700 !important;
-        box-shadow: 0 4px 14px rgba(255, 87, 51, 0.35) !important;
-    }
-    div.stButton > button[kind="primary"]:hover {
+        box-shadow: 0 4px 14px {'rgba(143, 168, 123, 0.35)' if is_dark else 'rgba(91, 112, 83, 0.25)'} !important;
+    }}
+    div.stButton > button[kind="primary"]:hover {{
         color: #FFFFFF !important;
-        transform: translateY(-1px) !important;
-    }
+        background: {tokens['sage_accent']} !important;
+    }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -608,30 +644,30 @@ if "chaos_events" not in st.session_state:
 # SIDEBAR CONTROLS
 # ---------------------------------------------------------
 with st.sidebar:
-    st.markdown("<h3 style='color: #FFFFFF; margin-top: 0; font-size: 1.25rem; font-weight: 700;'>⚙️ Operating Controls</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h3 style='color: {tokens['text_primary']}; margin-top: 0; font-size: 1.25rem; font-weight: 700;'>⚙️ Operating Controls</h3>", unsafe_allow_html=True)
     sim_date = st.text_input("Simulation Date", value="2026/10/09")
 
-    st.markdown("<hr style='border: none; border-top: 1px solid #382525; margin: 16px 0;'>", unsafe_allow_html=True)
+    st.markdown(f"<hr style='border: none; border-top: 1px solid {tokens['border']}; margin: 16px 0;'>", unsafe_allow_html=True)
     
-    st.markdown("<h4 style='color: #FFFFFF; font-size: 1.05rem; font-weight: 700; margin-bottom: 8px;'>User Persona:</h4>", unsafe_allow_html=True)
-    st.markdown("""
-    <div style="background-color: #201717; border: 1px solid #3B2828; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px;">
-        <div style="font-size: 1.0rem; font-weight: 700; color: #FFFFFF;">👨‍💼 Ramesh Kulkarni</div>
-        <div style="font-size: 0.88rem; color: #FF8566; font-style: italic; margin-top: 2px;">Head of Purchasing</div>
+    st.markdown(f"<h4 style='color: {tokens['text_primary']}; font-size: 1.05rem; font-weight: 700; margin-bottom: 8px;'>User Persona:</h4>", unsafe_allow_html=True)
+    st.markdown(f"""
+    <div style="background-color: {tokens['surface_alt']}; border: 1px solid {tokens['border']}; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px;">
+        <div style="font-size: 1.0rem; font-weight: 700; color: {tokens['text_primary']};">👨‍💼 Ramesh Kulkarni</div>
+        <div style="font-size: 0.88rem; color: {tokens['sage_accent']}; font-style: italic; margin-top: 2px;">Head of Purchasing</div>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("<h4 style='color: #FFFFFF; font-size: 1.05rem; font-weight: 700; margin-bottom: 8px;'>Operations Network:</h4>", unsafe_allow_html=True)
-    st.markdown("""
-    <div style="background-color: #201717; border: 1px solid #3B2828; border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; font-size: 0.9rem; line-height: 1.6;">
-        <div style="color: #FFFFFF; margin-bottom: 8px;"><strong style="color: #FF8566;">🏬 6 Stores:</strong> Gokak, Belgaum, Dharwad, Hubli, Bagalkot, Nippani</div>
-        <div style="color: #FFFFFF;"><strong style="color: #FF8566;">🏭 2 Hubs:</strong> Belgaum Central, Hubli Regional</div>
+    st.markdown(f"<h4 style='color: {tokens['text_primary']}; font-size: 1.05rem; font-weight: 700; margin-bottom: 8px;'>Operations Network:</h4>", unsafe_allow_html=True)
+    st.markdown(f"""
+    <div style="background-color: {tokens['surface_alt']}; border: 1px solid {tokens['border']}; border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; font-size: 0.9rem; line-height: 1.6;">
+        <div style="color: {tokens['text_primary']}; margin-bottom: 8px;"><strong style="color: {tokens['sage_primary']};">🏬 6 Stores:</strong> Gokak, Belgaum, Dharwad, Hubli, Bagalkot, Nippani</div>
+        <div style="color: {tokens['text_primary']};"><strong style="color: {tokens['sage_primary']};">🏭 2 Hubs:</strong> Belgaum Central, Hubli Regional</div>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("<hr style='border: none; border-top: 1px solid #382525; margin: 16px 0;'>", unsafe_allow_html=True)
-    st.markdown("<h4 style='color: #FFFFFF; font-size: 1.05rem; font-weight: 700; margin-bottom: 6px;'>⚡ Chaos Engine</h4>", unsafe_allow_html=True)
-    st.markdown("<p style='color: #F3F4F6; font-size: 0.9rem; font-weight: 500; margin-bottom: 12px;'>Inject shocks to evaluate real-time agent adaptability:</p>", unsafe_allow_html=True)
+    st.markdown(f"<hr style='border: none; border-top: 1px solid {tokens['border']}; margin: 16px 0;'>", unsafe_allow_html=True)
+    st.markdown(f"<h4 style='color: {tokens['text_primary']}; font-size: 1.05rem; font-weight: 700; margin-bottom: 6px;'>⚡ Chaos Engine</h4>", unsafe_allow_html=True)
+    st.markdown(f"<p style='color: {tokens['text_secondary']}; font-size: 0.9rem; font-weight: 500; margin-bottom: 12px;'>Inject shocks to evaluate real-time agent adaptability:</p>", unsafe_allow_html=True)
     
     if st.button("🌪️ 3x Demand Spike (Gokak)", use_container_width=True):
         inject_chaos("DEMAND_SPIKE")
@@ -671,15 +707,15 @@ with open(os.path.join(DATA_DIR, "sales.json"), "r", encoding="utf-8") as f:
 # ---------------------------------------------------------
 # EXECUTIVE HEADER & KPI STRIP
 # ---------------------------------------------------------
-st.markdown("""
+st.markdown(f"""
 <div class="top-banner">
     <div>
-        <h1 style="margin: 0; font-size: 1.85rem; font-weight: 800; color: #FFFFFF;">Kaveri Spares & Hydraulics</h1>
-        <p style="margin: 4px 0 0 0; color: #9CA3AF; font-size: 0.92rem;">
+        <h1 style="margin: 0; font-size: 1.85rem; font-weight: 800; color: {tokens['text_primary']};">Kaveri Spares & Hydraulics</h1>
+        <p style="margin: 4px 0 0 0; color: {tokens['text_secondary']}; font-size: 0.92rem;">
             Autonomous Supply Chain Copilot & Purchasing Colleague for Ramesh Kulkarni
         </p>
     </div>
-    <div style="background-color: #241818; border: 1px solid #3F2929; border-radius: 8px; padding: 6px 14px; font-size: 0.85rem; font-weight: 600; color: #E5E7EB;">
+    <div style="background-color: {tokens['surface_alt']}; border: 1px solid {tokens['border']}; border-radius: 8px; padding: 6px 14px; font-size: 0.85rem; font-weight: 600; color: {tokens['text_secondary']};">
         Cypher 2026 • Challenge 01
     </div>
 </div>
@@ -693,22 +729,22 @@ if st.session_state.chaos_events:
 
     st.error(f"🚨 **CHAOS INJECTION ACTIVE:** System is operating under {len(st.session_state.chaos_events)} live operational shock(s).")
     with st.expander("⚡ **CHAOS PLAN DIFF (Before-Shock vs After-Shock Adaptation)**", expanded=True):
-        st.markdown(f"<div style='font-size: 0.88rem; color: #D1D5DB; margin-bottom: 8px;'><b>Autonomous Adaptations:</b> {plan_diff['total_changed_plans']} of {plan_diff['total_problems']} recommendations shifted dynamically.</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='font-size: 0.88rem; color: {tokens['text_secondary']}; margin-bottom: 8px;'><b>Autonomous Adaptations:</b> {plan_diff['total_changed_plans']} of {plan_diff['total_problems']} recommendations shifted dynamically.</div>", unsafe_allow_html=True)
         for d in plan_diff["diffs"]:
             if d["has_changed"]:
                 bp = d["before_plan"] or {}
                 ap = d["after_plan"] or {}
                 st.markdown(f"""
-                <div style="background-color: #1E1616; border: 1px solid #4B2A2A; border-left: 4px solid #F59E0B; border-radius: 6px; padding: 10px 14px; margin-bottom: 8px;">
-                    <div style="display: flex; justify-content: space-between; font-weight: 700; color: #FFFFFF; font-size: 0.92rem;">
+                <div style="background-color: {tokens['surface_alt']}; border: 1px solid {tokens['border']}; border-left: 4px solid {tokens['alert_amber']}; border-radius: 6px; padding: 10px 14px; margin-bottom: 8px;">
+                    <div style="display: flex; justify-content: space-between; font-weight: 700; color: {tokens['text_primary']}; font-size: 0.92rem;">
                         <span>📍 {d['location']} — {d['sku']} ({d['problem_id']})</span>
-                        <span style="color: #F59E0B; font-size: 0.82rem; font-weight: 700;">PLAN ADAPTATION</span>
+                        <span style="color: {tokens['alert_amber']}; font-size: 0.82rem; font-weight: 700;">PLAN ADAPTATION</span>
                     </div>
                     <div style="display: flex; gap: 20px; font-size: 0.84rem; margin: 6px 0; font-family: monospace; flex-wrap: wrap;">
-                        <span style="color: #9CA3AF;">BEFORE: {bp.get('action_type', 'N/A')} from {bp.get('source', 'N/A')} ({bp.get('qty', 0)}u @ ₹{bp.get('cost_inr', 0):,.0f})</span>
-                        <span style="color: #38BDF8;">➔ AFTER: {ap.get('action_type', 'N/A')} from {ap.get('source', 'N/A')} ({ap.get('qty', 0)}u @ ₹{ap.get('cost_inr', 0):,.0f})</span>
+                        <span style="color: {tokens['text_secondary']};">BEFORE: {bp.get('action_type', 'N/A')} from {bp.get('source', 'N/A')} ({bp.get('qty', 0)}u @ ₹{bp.get('cost_inr', 0):,.0f})</span>
+                        <span style="color: {tokens['sage_accent']};">➔ AFTER: {ap.get('action_type', 'N/A')} from {ap.get('source', 'N/A')} ({ap.get('qty', 0)}u @ ₹{ap.get('cost_inr', 0):,.0f})</span>
                     </div>
-                    <div style="font-size: 0.84rem; color: #E5E7EB;"><b>Reason for Change:</b> {d['change_reason']}</div>
+                    <div style="font-size: 0.84rem; color: {tokens['text_secondary']};"><b>Reason for Change:</b> {d['change_reason']}</div>
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -729,7 +765,7 @@ with k2:
     st.markdown(f"""
     <div class="kpi-box">
         <span class="kpi-title">Critical Stockouts</span>
-        <div class="kpi-number" style="color: #EF4444;">{summary["critical_actions_required"]}</div>
+        <div class="kpi-number" style="color: {tokens['alert_crimson']};">{summary["critical_actions_required"]}</div>
         <span class="kpi-foot-red">↑ Immediate Action Needed</span>
     </div>
     """, unsafe_allow_html=True)
@@ -737,7 +773,7 @@ with k3:
     st.markdown(f"""
     <div class="kpi-box">
         <span class="kpi-title">Top Attention SKU</span>
-        <div class="kpi-number" style="font-size: 1.55rem; line-height: 1.35; color: #FF6B4A;">{summary["top_focus_sku"]}</div>
+        <div class="kpi-number" style="font-size: 1.55rem; line-height: 1.35; color: {tokens['sage_primary']};">{summary["top_focus_sku"]}</div>
         <span class="kpi-foot-green">↑ Hydraulic Filtration</span>
     </div>
     """, unsafe_allow_html=True)
@@ -762,15 +798,15 @@ def load_backtest_headline():
 bt_data = load_backtest_headline()
 if bt_data:
     st.markdown(f"""
-    <div style="background: linear-gradient(90deg, #181212 0%, #201717 100%); border: 1px solid #3F2929; border-left: 4px solid #FF5733; border-radius: 8px; padding: 10px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-        <div style="font-size: 0.88rem; color: #E5E7EB;">
-            <strong style="color: #FF8566;">📈 60-Day Historical Backtest:</strong> Replayed {bt_data['days_simulated']} days across 8 network facilities.
+    <div style="background: {tokens['surface_alt']}; border: 1px solid {tokens['border']}; border-left: 4px solid {tokens['sage_primary']}; border-radius: 8px; padding: 10px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div style="font-size: 0.88rem; color: {tokens['text_primary']};">
+            <strong style="color: {tokens['sage_primary']};">📈 60-Day Historical Backtest:</strong> Replayed {bt_data['days_simulated']} days across 8 network facilities.
         </div>
         <div style="display: flex; gap: 18px; font-family: monospace; font-size: 0.86rem; flex-wrap: wrap;">
-            <span>Stockouts Prevented: <strong style="color: #10B981;">+{bt_data['stockouts_prevented']}</strong></span>
-            <span>Lost Units Averted: <strong style="color: #38BDF8;">+{bt_data['lost_units_averted']}</strong></span>
-            <span>Capital Saved: <strong style="color: #F59E0B;">₹{bt_data['rs_saved']:,.0f}</strong></span>
-            <span>Net ROI: <strong style="color: #A78BFA;">+{bt_data['roi_percent']}%</strong></span>
+            <span>Stockouts Prevented: <strong style="color: {tokens['sage_accent']};">+{bt_data['stockouts_prevented']}</strong></span>
+            <span>Lost Units Averted: <strong style="color: {tokens['sage_primary']};">+{bt_data['lost_units_averted']}</strong></span>
+            <span>Capital Saved: <strong style="color: {tokens['alert_amber']};">₹{bt_data['rs_saved']:,.0f}</strong></span>
+            <span>Net ROI: <strong style="color: {tokens['sage_accent']};">+{bt_data['roi_percent']}%</strong></span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -793,19 +829,27 @@ tab_feed, tab_inv, tab_sup, tab_audit = st.tabs([
 # ==============================================================================
 # 3. PLOTLY THEME UNIFICATION FUNCTION
 # ==============================================================================
-def format_cyber_plotly_figure(fig: go.Figure) -> go.Figure:
-    """Enforces dark cyber-amber theme across Plotly trajectory curves."""
+def format_cyber_plotly_figure(fig: go.Figure, is_dark_mode: bool = None) -> go.Figure:
+    """Enforces Sage Green dual-mode theme across Plotly trajectory curves."""
+    if is_dark_mode is None:
+        is_dark_mode = (st.session_state.get("theme_mode", "Dark") == "Dark")
+        
+    bg_color = "#121711" if is_dark_mode else "#F4F6F0"
+    paper_color = "#171D16" if is_dark_mode else "#FFFFFF"
+    text_color = "#9DAE97" if is_dark_mode else "#5D6656"
+    grid_color = "#2C3A2A" if is_dark_mode else "#CBD5C0"
+    
     fig.update_layout(
-        plot_bgcolor='#140F0F',
-        paper_bgcolor='#140F0F',
-        font=dict(color='#9CA3AF', family='-apple-system, BlinkMacSystemFont, Segoe UI, Roboto'),
-        xaxis=dict(gridcolor='#251A1A', zerolinecolor='#3E2929', linecolor='#3E2929'),
-        yaxis=dict(gridcolor='#251A1A', zerolinecolor='#3E2929', linecolor='#3E2929'),
+        plot_bgcolor=bg_color,
+        paper_bgcolor=paper_color,
+        font=dict(color=text_color, family='-apple-system, BlinkMacSystemFont, Segoe UI, Roboto'),
+        xaxis=dict(gridcolor=grid_color, zerolinecolor=grid_color, linecolor=grid_color),
+        yaxis=dict(gridcolor=grid_color, zerolinecolor=grid_color, linecolor=grid_color),
         legend=dict(
-            bgcolor='rgba(26, 20, 20, 0.85)',
-            bordercolor='#3E2929',
+            bgcolor=paper_color,
+            bordercolor=grid_color,
             borderwidth=1,
-            font=dict(color='#D1D5DB', size=10),
+            font=dict(color=text_color, size=10),
             orientation='h',
             yanchor='top',
             y=-0.22,
@@ -817,32 +861,127 @@ def format_cyber_plotly_figure(fig: go.Figure) -> go.Figure:
     return fig
 
 
-def render_cyber_table(df: pd.DataFrame):
-    """Renders a pixel-perfect dark obsidian and cyber-amber HTML table, eliminating Glide Data Grid canvas white-flash glitches."""
+def render_sage_trajectory_chart(projections: dict, title: str, is_dark_mode: bool = None) -> go.Figure:
+    """Adaptive 14-day forward visual trajectory graph adhering to Sage Design Tokens."""
+    if is_dark_mode is None:
+        is_dark_mode = (st.session_state.get("theme_mode", "Dark") == "Dark")
+        
+    days = projections["days"]
+    bg_color = "#121711" if is_dark_mode else "#F4F6F0"
+    paper_color = "#171D16" if is_dark_mode else "#FFFFFF"
+    text_color = "#9DAE97" if is_dark_mode else "#5D6656"
+    grid_color = "#2C3A2A" if is_dark_mode else "#CBD5C0"
+    line_sage = "#B2CF9C" if is_dark_mode else "#5B7053"
+    fill_sage = "rgba(178, 207, 156, 0.12)" if is_dark_mode else "rgba(91, 112, 83, 0.12)"
+    alert_red = "#FF5C5C" if is_dark_mode else "#C84B31"
+    alert_amber = "#F59E0B" if is_dark_mode else "#D9822B"
+
+    fig = go.Figure()
+
+    # Monte Carlo fan chart if present
+    fan = projections.get("fan_chart", {}).get("transfer") or projections.get("probabilistic", {}).get("transfer")
+    if fan and "p10" in fan and "p90" in fan:
+        fig.add_trace(go.Scatter(
+            x=days + days[::-1],
+            y=fan["p90"] + fan["p10"][::-1],
+            fill="toself",
+            fillcolor=fill_sage,
+            line=dict(color="rgba(255,255,255,0)"),
+            hoverinfo="skip",
+            showlegend=True,
+            name="80% Projection Range"
+        ))
+
+    # Option 1: Network Transfer
+    fig.add_trace(go.Scatter(
+        x=days, y=projections["transfer"],
+        mode="lines+markers",
+        name="Opt 1: Inter-Store Transfer (Day 1)",
+        line=dict(color=line_sage, width=3.5),
+        marker=dict(size=7, color=line_sage)
+    ))
+
+    # Option 2: Expedited Vendor PO
+    fig.add_trace(go.Scatter(
+        x=days, y=projections["expedited"],
+        mode="lines+markers",
+        name="Opt 2: Expedited PO (Day 3)",
+        line=dict(color=alert_amber, width=2.5, dash="dash"),
+        marker=dict(size=6, color=alert_amber)
+    ))
+
+    # Option 3: Status Quo
+    fig.add_trace(go.Scatter(
+        x=days, y=projections["status_quo"],
+        mode="lines+markers",
+        name="Opt 3: Status Quo Baseline",
+        line=dict(color=alert_red, width=2.5, dash="dot"),
+        marker=dict(size=6, color=alert_red)
+    ))
+
+    # Stockout Hazard Area / Line
+    fig.add_hline(
+        y=0,
+        line_dash="dash",
+        line_color=alert_red,
+        line_width=1.5,
+        annotation_text="⚠️ Stockout Hazard Line (Zero Stock)",
+        annotation_position="top right",
+        annotation_font=dict(color=alert_red, size=10)
+    )
+
+    fig.update_layout(
+        title=dict(
+            text=title,
+            font=dict(size=13, color="#F1F5EE" if is_dark_mode else "#1E241B"),
+            x=0.01,
+            y=0.98,
+            xanchor="left",
+            yanchor="top"
+        ),
+        xaxis=dict(title="Days Ahead", dtick=1, gridcolor=grid_color, zerolinecolor=grid_color),
+        yaxis=dict(title="Projected Stock (Units)", gridcolor=grid_color, zerolinecolor=grid_color),
+        hovermode="x unified",
+        height=340
+    )
+    fig = format_cyber_plotly_figure(fig, is_dark_mode=is_dark_mode)
+    return fig
+
+
+def render_cyber_table(df: pd.DataFrame, is_dark_mode: bool = None):
+    """Renders a pixel-perfect Sage HTML table adapting to active theme."""
+    if is_dark_mode is None:
+        is_dark_mode = (st.session_state.get("theme_mode", "Dark") == "Dark")
+
     if df.empty:
         st.info("No records to display.")
         return
     headers = "".join(f"<th>{col}</th>" for col in df.columns)
+    
+    txt_col = "#F1F5EE" if is_dark_mode else "#1E241B"
+    badge_green_bg = "#20291F" if is_dark_mode else "#E8EDE0"
+    badge_green_txt = "#8FA87B" if is_dark_mode else "#5B7053"
+    badge_green_border = "#2C3A2A" if is_dark_mode else "#CBD5C0"
     
     rows_html = []
     for _, row in df.iterrows():
         cells = []
         for col in df.columns:
             val = str(row[col])
-            if "HIGH (Locked Capital)" in val or val == "CRITICAL" or "REJECTED" in val:
+            if "HIGH (Locked Capital)" in val or val == "CRITICAL" or "REJECTED" in val or "INFEASIBLE" in val:
                 cells.append(f'<td><span class="badge-critical" style="padding: 3px 8px;">{val}</span></td>')
             elif "MEDIUM" in val or val == "HIGH":
                 cells.append(f'<td><span class="badge-high" style="padding: 3px 8px;">{val}</span></td>')
             elif "LOW" in val or "FEASIBLE" in val or "APPROVED" in val:
-                cells.append(f'<td><span style="background-color: #0F2417; color: #10B981; border: 1px solid #059669; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700;">{val}</span></td>')
+                cells.append(f'<td><span style="background-color: {badge_green_bg}; color: {badge_green_txt}; border: 1px solid {badge_green_border}; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700;">{val}</span></td>')
             elif "Primary" in val:
-                cells.append(f'<td><span style="background-color: #1B202A; color: #93C5FD; border: 1px solid #1E3A8A; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 600;">{val}</span></td>')
+                cells.append(f'<td><span class="badge-tag" style="padding: 3px 8px;">{val}</span></td>')
             elif col in ["Current Stock", "MOQ (Units)", "qty", "Lead Time (Days)", "Delivery Time"]:
-                cells.append(f'<td style="font-family: \'JetBrains Mono\', monospace; font-weight: 600; color: #FFFFFF;">{val}</td>')
+                cells.append(f'<td style="font-family: \'JetBrains Mono\', monospace; font-weight: 600; color: {txt_col};">{val}</td>')
             elif col in ["Contract Price", "Total Cash Outlay", "cost_inr"]:
-                cells.append(f'<td style="font-family: \'JetBrains Mono\', monospace; font-weight: 600; color: #10B981;">{val}</td>')
+                cells.append(f'<td style="font-family: \'JetBrains Mono\', monospace; font-weight: 600; color: {badge_green_txt};">{val}</td>')
             else:
-                cells.append(f"<td>{val}</td>")
+                cells.append(f'<td style="color: {txt_col};">{val}</td>')
         rows_html.append(f"<tr>{''.join(cells)}</tr>")
     
     table_html = f"""
@@ -870,7 +1009,7 @@ def render_cyber_detail_cockpit(p, approved_problem_ids, raw_inventory, raw_sale
 
     sev = p.get("severity", "MEDIUM")
     badge_cls = "badge-critical" if sev == "CRITICAL" else ("badge-high" if sev == "HIGH" else "badge-medium")
-    sev_color = "#EF4444" if sev == "CRITICAL" else ("#F59E0B" if sev == "HIGH" else "#38BDF8")
+    sev_color = tokens['alert_crimson'] if sev == "CRITICAL" else (tokens['alert_amber'] if sev == "HIGH" else tokens['sage_accent'])
     status_banner = "✅ ALREADY EXECUTED" if is_handled else "⚡ AWAITING RAMESH KULKARNI APPROVAL"
 
     # 1. Headline Container
@@ -880,16 +1019,16 @@ def render_cyber_detail_cockpit(p, approved_problem_ids, raw_inventory, raw_sale
             <div>
                 <span class="{badge_cls}">[{sev}]</span>
                 <span class="badge-cat">{cat_code}</span>
-                <span style="font-weight: 700; font-size: 1.15rem; color: #FFFFFF; margin-left: 8px;">{p['sku_name']} ({p['sku']})</span>
-                <span style="color: #9CA3AF; margin-left: 8px;">📍 <b>{p['location']}</b></span>
+                <span style="font-weight: 700; font-size: 1.15rem; color: {tokens['text_primary']}; margin-left: 8px;">{p['sku_name']} ({p['sku']})</span>
+                <span style="color: {tokens['text_secondary']}; margin-left: 8px;">📍 <b>{p['location']}</b></span>
             </div>
             <div>
-                <span style="font-size: 0.8rem; font-weight: 700; color: {'#10B981' if is_handled else '#F59E0B'};">
+                <span style="font-size: 0.8rem; font-weight: 700; color: {tokens['sage_accent'] if is_handled else tokens['alert_amber']};">
                     {status_banner}
                 </span>
             </div>
         </div>
-        <p style="color: #D1D5DB; margin: 6px 0 0 0; font-size: 0.95rem;">
+        <p style="color: {tokens['text_secondary']}; margin: 6px 0 0 0; font-size: 0.95rem;">
             <b>Diagnosis:</b> {p['diagnosis']}
         </p>
     </div>
@@ -903,9 +1042,9 @@ def render_cyber_detail_cockpit(p, approved_problem_ids, raw_inventory, raw_sale
     trend_factor = ad.get("trend_factor", 1.0)
     trend_label = ad.get("trend_label", "STABLE")
 
-    trend_color = "#EF4444" if trend_label == "ACCELERATING" else ("#F59E0B" if trend_label == "DECELERATING" else "#10B981")
-    cover_color = "#EF4444" if m['days_of_cover'] <= 3.0 else ("#F59E0B" if m['days_of_cover'] <= 7.0 else "#10B981")
-    gap_color = "#EF4444" if m['stockout_gap_days'] > 0 else "#10B981"
+    trend_color = tokens['alert_crimson'] if trend_label == "ACCELERATING" else (tokens['alert_amber'] if trend_label == "DECELERATING" else tokens['sage_accent'])
+    cover_color = tokens['alert_crimson'] if m['days_of_cover'] <= 3.0 else (tokens['alert_amber'] if m['days_of_cover'] <= 7.0 else tokens['sage_accent'])
+    gap_color = tokens['alert_crimson'] if m['stockout_gap_days'] > 0 else tokens['sage_accent']
 
     vc1, vc2, vc3, vc4, vc5, vc6 = st.columns(6)
     with vc1:
@@ -928,11 +1067,11 @@ def render_cyber_detail_cockpit(p, approved_problem_ids, raw_inventory, raw_sale
         me = p["math_explainability"]
         st.markdown(f"""
 <div class="math-terminal">
-    <div style="color: #FF8566; font-weight: 700; font-size: 0.92rem; margin-bottom: 8px; letter-spacing: 0.02em;">📐 DETERMINISTIC DOMAIN MATH &amp; TELEMETRY AUDIT:</div>
-    <div style="margin-bottom: 4px;">• <b>Velocity:</b> <span style="color: #38BDF8; font-weight: 600;">{me.get('formula_velocity', '')}</span></div>
-    <div style="margin-bottom: 4px;">• <b>Days of Cover:</b> <span style="color: #FACC15; font-weight: 600;">{me.get('formula_cover', '')}</span></div>
-    <div style="margin-bottom: 4px;">• <b>Deficit Gap:</b> <span style="color: #EF4444; font-weight: 700;">{me.get('formula_gap', '')}</span></div>
-    <div>• <b>Commercial Risk Exposure:</b> Lead Time T = <span style="color: #38BDF8; font-weight: 600;">{me.get('T', 7)}d</span> | Margin = <span style="color: #10B981; font-weight: 600;">₹{me.get('unit_margin_inr', 0):,.2f}/unit</span> | Potential Lost Revenue = <span style="color: #EF4444; font-weight: 700;">₹{me.get('projected_lost_revenue_inr', 0):,.2f}</span></div>
+    <div style="color: {tokens['sage_primary']}; font-weight: 700; font-size: 0.92rem; margin-bottom: 8px; letter-spacing: 0.02em;">📐 DETERMINISTIC DOMAIN MATH &amp; TELEMETRY AUDIT:</div>
+    <div style="margin-bottom: 4px;">• <b>Velocity:</b> <span style="color: {tokens['sage_accent']}; font-weight: 600;">{me.get('formula_velocity', '')}</span></div>
+    <div style="margin-bottom: 4px;">• <b>Days of Cover:</b> <span style="color: {tokens['alert_amber']}; font-weight: 600;">{me.get('formula_cover', '')}</span></div>
+    <div style="margin-bottom: 4px;">• <b>Deficit Gap:</b> <span style="color: {tokens['alert_crimson']}; font-weight: 700;">{me.get('formula_gap', '')}</span></div>
+    <div>• <b>Commercial Risk Exposure:</b> Lead Time T = <span style="color: {tokens['sage_primary']}; font-weight: 600;">{me.get('T', 7)}d</span> | Margin = <span style="color: {tokens['sage_accent']}; font-weight: 600;">₹{me.get('unit_margin_inr', 0):,.2f}/unit</span> | Potential Lost Revenue = <span style="color: {tokens['alert_crimson']}; font-weight: 700;">₹{me.get('projected_lost_revenue_inr', 0):,.2f}</span></div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -950,7 +1089,7 @@ def render_cyber_detail_cockpit(p, approved_problem_ids, raw_inventory, raw_sale
         st.markdown(f"""
         <div class="scorecard-card">
             <div class="scorecard-label">Net Direct Cost</div>
-            <div class="scorecard-val" style="color: #10B981;">{net_cost_str}</div>
+            <div class="scorecard-val" style="color: {tokens['sage_accent']};">{net_cost_str}</div>
             <div class="scorecard-sub">Incremental Decision Outlay</div>
         </div>
         """, unsafe_allow_html=True)
@@ -958,7 +1097,7 @@ def render_cyber_detail_cockpit(p, approved_problem_ids, raw_inventory, raw_sale
         st.markdown(f"""
         <div class="scorecard-card">
             <div class="scorecard-label">Lost Units Averted</div>
-            <div class="scorecard-val" style="color: #38BDF8;">{lost_units_str}</div>
+            <div class="scorecard-val" style="color: {tokens['sage_primary']};">{lost_units_str}</div>
             <div class="scorecard-sub">Protected vs Inaction Deficit</div>
         </div>
         """, unsafe_allow_html=True)
@@ -966,7 +1105,7 @@ def render_cyber_detail_cockpit(p, approved_problem_ids, raw_inventory, raw_sale
         st.markdown(f"""
         <div class="scorecard-card">
             <div class="scorecard-label">Working Capital Outflow</div>
-            <div class="scorecard-val" style="color: #10B981;">{wc_outflow_str}</div>
+            <div class="scorecard-val" style="color: {tokens['sage_accent']};">{wc_outflow_str}</div>
             <div class="scorecard-sub">New Capital Committed</div>
         </div>
         """, unsafe_allow_html=True)
@@ -975,14 +1114,14 @@ def render_cyber_detail_cockpit(p, approved_problem_ids, raw_inventory, raw_sale
         st.markdown(f"""
         <div class="scorecard-card">
             <div class="scorecard-label">Downtime Risk</div>
-            <div class="scorecard-val" style="color: {'#10B981' if is_safe_dt else '#EF4444'};">{dt_risk_str}</div>
+            <div class="scorecard-val" style="color: {tokens['sage_accent'] if is_safe_dt else tokens['alert_crimson']};">{dt_risk_str}</div>
             <div class="scorecard-sub">Deficit Runway Remaining</div>
         </div>
         """, unsafe_allow_html=True)
 
     st.markdown("<div style='margin-bottom: 14px;'></div>", unsafe_allow_html=True)
 
-    # 5. Interactive Dark Cyber Plotly Forward Trajectory Graph
+    # 5. Interactive Sage Plotly Forward Trajectory Graph
     fp = p.get("forward_projections")
     if fp and "days" in fp:
         st.markdown("##### 📈 14-Day Forward Visual Inventory Trajectories")
@@ -994,80 +1133,17 @@ def render_cyber_detail_cockpit(p, approved_problem_ids, raw_inventory, raw_sale
         ex_risk = prob_data.get("expedited", 0.0)
         
         st.markdown(f"""
-        <div style="background-color: #1A1313; border: 1px solid #382525; border-radius: 6px; padding: 6px 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 0.84rem; flex-wrap: wrap; gap: 8px;">
-            <div style="color: #E5E7EB;"><strong style="color: #FF8566;">🎲 Monte Carlo Risk (500 seeded runs):</strong> Stockout Probability by Day 14</div>
+        <div style="background-color: {tokens['surface_alt']}; border: 1px solid {tokens['border']}; border-radius: 6px; padding: 6px 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 0.84rem; flex-wrap: wrap; gap: 8px;">
+            <div style="color: {tokens['text_primary']};"><strong style="color: {tokens['sage_primary']};">🎲 Monte Carlo Risk (500 seeded runs):</strong> Stockout Probability by Day 14</div>
             <div style="display: flex; gap: 14px; font-family: monospace;">
-                <span>Status Quo: <strong style="color: {'#EF4444' if sq_risk > 0.5 else '#F59E0B'};">{sq_risk * 100:.1f}%</strong></span>
-                <span>Expedited PO: <strong style="color: {'#F59E0B' if ex_risk > 0.2 else '#10B981'};">{ex_risk * 100:.1f}%</strong></span>
-                <span>Inter-Store Transfer: <strong style="color: #10B981;">{tr_risk * 100:.1f}%</strong></span>
+                <span>Status Quo: <strong style="color: {tokens['alert_crimson'] if sq_risk > 0.5 else tokens['alert_amber']};">{sq_risk * 100:.1f}%</strong></span>
+                <span>Expedited PO: <strong style="color: {tokens['alert_amber'] if ex_risk > 0.2 else tokens['sage_accent']};">{ex_risk * 100:.1f}%</strong></span>
+                <span>Inter-Store Transfer: <strong style="color: {tokens['sage_accent']};">{tr_risk * 100:.1f}%</strong></span>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-        fig = go.Figure()
-        
-        # Monte Carlo Fan Chart: Transfer 80% Confidence Band (p10 to p90)
-        fan = fp.get("fan_chart", {}).get("transfer") or fp.get("probabilistic", {}).get("transfer")
-        if fan and "p10" in fan and "p90" in fan:
-            fig.add_trace(go.Scatter(
-                x=fp["days"] + fp["days"][::-1],
-                y=fan["p90"] + fan["p10"][::-1],
-                fill="toself",
-                fillcolor="rgba(56, 189, 248, 0.12)",
-                line=dict(color="rgba(255,255,255,0)"),
-                hoverinfo="skip",
-                showlegend=True,
-                name="80% Projection Range"
-            ))
-
-        fig.add_trace(go.Scatter(
-            x=fp["days"],
-            y=fp["status_quo"],
-            mode="lines+markers",
-            name="Opt 3: Status Quo Baseline",
-            line=dict(color="#EF4444", width=2.5, dash="dot"),
-            marker=dict(size=6, color="#EF4444")
-        ))
-        fig.add_trace(go.Scatter(
-            x=fp["days"],
-            y=fp["expedited"],
-            mode="lines+markers",
-            name="Opt 2: Expedited PO (Day 3)",
-            line=dict(color="#F59E0B", width=2.5, dash="dash"),
-            marker=dict(size=6, color="#F59E0B")
-        ))
-        fig.add_trace(go.Scatter(
-            x=fp["days"],
-            y=fp["transfer"],
-            mode="lines+markers",
-            name="Opt 1: Inter-Store Transfer (Day 1)",
-            line=dict(color="#38BDF8", width=3.5),
-            marker=dict(size=7, color="#38BDF8")
-        ))
-        fig.add_hline(
-            y=0,
-            line_dash="dash",
-            line_color="#EF4444",
-            line_width=1.5,
-            annotation_text="⚠️ Stockout Hazard Line (Zero Stock)",
-            annotation_position="top right",
-            annotation_font_color="#EF4444"
-        )
-        fig.update_layout(
-            title=dict(
-                text=f"Projected Inventory Levels: {p['sku_name']} @ {p['location']}",
-                font=dict(size=13, color="#F3F4F6"),
-                x=0.01,
-                y=0.98,
-                xanchor="left",
-                yanchor="top"
-            ),
-            xaxis=dict(title="Days Ahead", dtick=1),
-            yaxis=dict(title="Projected Stock (Units)"),
-            hovermode="x unified",
-            height=340
-        )
-        fig = format_cyber_plotly_figure(fig)
+        fig = render_sage_trajectory_chart(fp, f"Projected Inventory Levels: {p['sku_name']} @ {p['location']}", is_dark_mode=is_dark)
         st.plotly_chart(fig, use_container_width=True)
 
     # 6. Feasible Mitigation Pathways Table ($N >= 2$)
@@ -1081,7 +1157,7 @@ def render_cyber_detail_cockpit(p, approved_problem_ids, raw_inventory, raw_sale
             "Summary": opt.get("trade_off_summary", opt.get("pros_cons", ""))
         })
     st.markdown(r"##### ⚖️ Feasible Mitigation Pathways ($N \ge 2$)")
-    render_cyber_table(pd.DataFrame(opt_data))
+    render_cyber_table(pd.DataFrame(opt_data), is_dark_mode=is_dark)
     st.markdown(f"**🎯 AI Agent Recommendation Rationale:** {p['decision_rationale']}")
 
     # 7. Action Draft Execution Box
@@ -1093,15 +1169,15 @@ def render_cyber_detail_cockpit(p, approved_problem_ids, raw_inventory, raw_sale
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
             <div>
                 <span class="badge-action">Simulated Action: {act['action_type']}</span>
-                <span style="margin-left: 0.5rem; font-weight: 700; font-size: 0.95rem; color: #34D399;">
+                <span style="margin-left: 0.5rem; font-weight: 700; font-size: 0.95rem; color: {tokens['sage_accent']};">
                     Quantity: {pay['qty']} units • Total Estimated Cost: ₹{pay['total_estimated_cost_inr']:,.2f}
                 </span>
             </div>
-            <div style="font-size: 0.85rem; color: #10B981; font-weight: 600;">
+            <div style="font-size: 0.85rem; color: {tokens['sage_primary']}; font-weight: 600;">
                 Expected Arrival: {pay['expected_delivery_date']}
             </div>
         </div>
-        <div style="font-size: 0.9rem; color: #D1D5DB;">
+        <div style="font-size: 0.9rem; color: {tokens['text_secondary']};">
             <b>Route:</b> {pay['from_location_or_supplier']} ➔ <b>{pay['to_location']}</b> &nbsp;|&nbsp; 
             <b>Urgency:</b> {pay['urgency']} &nbsp;|&nbsp; 
             <b>Human Gate:</b> Simulated Draft (Mandatory Ramesh Kulkarni Approval Required)
@@ -1155,8 +1231,8 @@ def render_cyber_detail_cockpit(p, approved_problem_ids, raw_inventory, raw_sale
                     y=ov_proj["transfer"],
                     mode="lines+markers",
                     name=f"Counter-Proposal ({override_qty}u)",
-                    line=dict(color="#10B981", width=3),
-                    marker=dict(size=6)
+                    line=dict(color=tokens['sage_accent'], width=3),
+                    marker=dict(size=6, color=tokens['sage_accent'])
                 ))
                 if fp and "transfer" in fp:
                     fig_ov.add_trace(go.Scatter(
@@ -1164,14 +1240,21 @@ def render_cyber_detail_cockpit(p, approved_problem_ids, raw_inventory, raw_sale
                         y=fp["transfer"],
                         mode="lines+markers",
                         name=f"AI Draft Baseline ({pay['qty']}u)",
-                        line=dict(color="#9CA3AF", width=2, dash="dash"),
-                        marker=dict(size=5)
+                        line=dict(color=tokens['text_secondary'], width=2, dash="dash"),
+                        marker=dict(size=5, color=tokens['text_secondary'])
                     ))
-                fig_ov.add_hline(y=0, line_dash="dash", line_color="#EF4444", annotation_text="Hazard Line", annotation_position="top right")
+                fig_ov.add_hline(
+                    y=0,
+                    line_dash="dash",
+                    line_color=tokens['alert_crimson'],
+                    annotation_text="Hazard Line",
+                    annotation_position="top right",
+                    annotation_font=dict(color=tokens['alert_crimson'], size=10)
+                )
                 fig_ov.update_layout(
                     title=dict(
                         text=f"Dynamic Recalibration: Ramesh ({override_qty}u) vs AI Draft ({pay['qty']}u)",
-                        font=dict(size=12, color="#F3F4F6"),
+                        font=dict(size=12, color=tokens['text_primary']),
                         x=0.01,
                         y=0.98,
                         xanchor="left",
@@ -1265,15 +1348,15 @@ with tab_feed:
                             <span class="{badge_style}">{sev}</span>
                             <span class="badge-tag">{prob.get('category_code', '')}</span>
                         </div>
-                        <span style="font-size: 0.72rem; color: #F59E0B; font-weight: 600;">⚡ ACTION REQUIRED</span>
+                        <span style="font-size: 0.72rem; color: {tokens['alert_amber']}; font-weight: 600;">⚡ ACTION REQUIRED</span>
                     </div>
-                    <div style="font-weight: 700; font-size: 1.0rem; color: #FFFFFF; margin-bottom: 2px;">
+                    <div style="font-weight: 700; font-size: 1.0rem; color: {tokens['text_primary']}; margin-bottom: 2px;">
                         {prob.get('location', '')} — {prob.get('sku', '')}
                     </div>
-                    <div style="font-size: 0.8rem; color: #9CA3AF;">
-                        Stock: <b style="color: #FFF;">{stock_v}</b> | 
-                        Cover: <b style="color: #FFF;">{cover_v:.1f}d</b> | 
-                        Gap: <b style="color: #EF4444;">{gap_v:.1f}d</b>
+                    <div style="font-size: 0.8rem; color: {tokens['text_secondary']};">
+                        Stock: <b style="color: {tokens['text_primary']};">{stock_v}</b> | 
+                        Cover: <b style="color: {tokens['text_primary']};">{cover_v:.1f}d</b> | 
+                        Gap: <b style="color: {tokens['alert_crimson']};">{gap_v:.1f}d</b>
                     </div>
                 </div>
                 """,
