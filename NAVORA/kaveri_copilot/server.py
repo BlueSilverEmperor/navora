@@ -23,7 +23,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from engine.decision_agent import DecisionEngine
-from engine.domain_math import validate_and_recalculate_transfer, evaluate_supplier_friction
+from engine.domain_math import validate_and_recalculate_transfer, evaluate_supplier_friction, compute_plan_diff
 from engine.mock_data_gen import seed_all_data
 from engine.persistence import (
     log_audit_trail,
@@ -33,6 +33,8 @@ from engine.persistence import (
     create_stock_reservation,
     release_stock_reservation,
     get_active_stock_reservations,
+    record_rejection_memory,
+    get_all_rejection_memories,
     clear_all_persistence
 )
 
@@ -139,6 +141,7 @@ def get_dashboard_ui():
 
 
 @app.post("/reset-data")
+@app.post("/api/reset-data")
 def reset_benchmark_state():
     """Resets data to pristine benchmark state and clears active chaos events and persistence."""
     ACTIVE_CHAOS_EVENTS.clear()
@@ -157,6 +160,7 @@ def health_check():
 
 
 @app.get("/briefing")
+@app.get("/api/briefing")
 def get_morning_briefing(current_date: str = "2026-10-09"):
     """
     Runs the 6-step agentic pipeline and returns prioritized problems,
@@ -169,11 +173,70 @@ def get_morning_briefing(current_date: str = "2026-10-09"):
         active_reservations=get_active_stock_reservations()
     )
     brief = engine.run_agentic_pipeline()
+    for p in brief.get("problems", []):
+        dm = p.get("domain_metrics", {})
+        vel = p.get("adaptive_velocity", {})
+        if "current_stock" not in p:
+            p["current_stock"] = dm.get("current_stock", 0)
+        if "v_predicted" not in p:
+            p["v_predicted"] = dm.get("daily_burn_rate", vel.get("v_recent", 1.0))
+        if "days_of_cover" not in p:
+            p["days_of_cover"] = dm.get("days_of_cover", 0.0)
+        if "stockout_gap_days" not in p:
+            p["stockout_gap_days"] = dm.get("stockout_gap_days", 0.0)
+        if "alternatives" not in p:
+            p["alternatives"] = p.get("evaluated_options", [])
     return brief
+
+
+@app.get("/api/backtest")
+def get_backtest_metrics(days: int = 60):
+    """
+    Replays historical sales across the multi-echelon network and returns
+    stockouts prevented, lost units averted, and Rs. saved vs baseline.
+    """
+    from scripts.backtest import run_backtest
+    return run_backtest(data_dir=DATA_DIR, days=days)
+
+
+@app.get("/api/optimizer/transfers")
+def get_global_network_transfers(current_date: str = "2026-10-09"):
+    """
+    Solves all lateral inventory transfers jointly across the network using
+    PuLP Integer Linear Programming with greedy comparison and fallback.
+    """
+    engine = DecisionEngine(
+        data_dir=DATA_DIR,
+        current_date=current_date,
+        chaos_events=ACTIVE_CHAOS_EVENTS,
+        active_reservations=get_active_stock_reservations()
+    )
+    brief = engine.run_agentic_pipeline()
+    return brief.get("network_transfer_plan", {})
+
+
+@app.get("/api/suppliers/reliability")
+def get_supplier_reliability_audit(current_date: str = "2026-10-09"):
+    """
+    Computes actual vs promised delivery slippage per supplier and returns
+    learned adjusted lead times and reliability statuses.
+    """
+    engine = DecisionEngine(
+        data_dir=DATA_DIR,
+        current_date=current_date,
+        chaos_events=ACTIVE_CHAOS_EVENTS,
+        active_reservations=get_active_stock_reservations()
+    )
+    brief = engine.run_agentic_pipeline()
+    return brief.get("supplier_reliability", {})
+
+
+
 
 
 
 @app.post("/action/approve")
+@app.post("/api/action/approve")
 def approve_action(req: ActionApprovalRequest):
     """
     Human-in-the-loop signoff gate.
@@ -188,7 +251,7 @@ def approve_action(req: ActionApprovalRequest):
         to_loc = payload_dict.get("to_location", "")
         exp_date = payload_dict.get("expected_delivery_date", "")
     else:
-        payload_dict = req.payload.dict() if hasattr(req.payload, "dict") else req.payload.model_dump()
+        payload_dict = req.payload.model_dump() if hasattr(req.payload, "model_dump") else req.payload.dict()
         sku = req.payload.sku
         qty = int(req.payload.qty)
         from_loc = req.payload.from_location or req.payload.from_location_or_supplier or ""
@@ -201,7 +264,12 @@ def approve_action(req: ActionApprovalRequest):
     ).hexdigest()
 
     idempotency_key = req.client_request_id or action_payload_signature
-    if is_action_already_processed(idempotency_key):
+    if (
+        is_action_already_processed(idempotency_key)
+        or is_action_already_processed(action_payload_signature)
+        or idempotency_key in PROCESSED_ACTION_HASHES
+        or action_payload_signature in PROCESSED_ACTION_HASHES
+    ):
         raise HTTPException(
             status_code=409,
             detail="Duplicate action detected: this proposal has already been approved and executed."
@@ -337,7 +405,11 @@ def approve_action(req: ActionApprovalRequest):
         }
 
     # 4. Mark Idempotency Signature & Release Reservation & Record Audit Log
+    PROCESSED_ACTION_HASHES.add(idempotency_key)
+    PROCESSED_ACTION_HASHES.add(action_payload_signature)
     record_action_processed(idempotency_key, req.problem_id)
+    if action_payload_signature != idempotency_key:
+        record_action_processed(action_payload_signature, req.problem_id)
     release_stock_reservation(req.problem_id)
     record_entry = log_audit_trail_entry(
         problem_id=req.problem_id,
@@ -359,8 +431,9 @@ def approve_action(req: ActionApprovalRequest):
 
 
 @app.post("/action/reject")
+@app.post("/api/action/reject")
 def reject_action(req: ActionRejectRequest):
-    """Logs rejection of a proposed action and frees any held stock reservations."""
+    """Logs rejection of a proposed action, frees held stock reservations, and stores rejection memory."""
     release_stock_reservation(req.problem_id)
     audit_entry = log_audit_trail_entry(
         problem_id=req.problem_id,
@@ -370,13 +443,34 @@ def reject_action(req: ActionRejectRequest):
         approved_by=req.rejected_by,
         notes=req.reason
     )
+
+    # Resolve incident metadata to record rejection memory
+    engine = DecisionEngine(data_dir=DATA_DIR)
+    brief = engine.run_agentic_pipeline()
+    prob = next((p for p in brief.get("problems", []) if p["problem_id"] == req.problem_id), None)
+    sku = prob.get("sku") if prob else None
+    loc = prob.get("location") if prob else None
+    src = prob.get("simulated_action", {}).get("payload", {}).get("from_location_or_supplier") if prob else None
+    act_type = prob.get("simulated_action", {}).get("action_type") if prob else None
+
+    mem = record_rejection_memory(
+        problem_id=req.problem_id,
+        sku=sku,
+        location=loc,
+        rejected_source=src,
+        action_type=act_type,
+        rejection_reason=req.reason
+    )
+
     return {
         "status": "REJECTED",
-        "message": f"Problem {req.problem_id} marked as rejected by {req.rejected_by}."
+        "message": f"Problem {req.problem_id} marked as rejected by {req.rejected_by}.",
+        "rejection_memory": mem
     }
 
 
 @app.post("/action/dismiss")
+@app.post("/api/action/dismiss")
 def dismiss_action(req: ActionRejectRequest):
     """Dismisses an incident and releases any associated reservations."""
     release_stock_reservation(req.problem_id)
@@ -395,6 +489,7 @@ def dismiss_action(req: ActionRejectRequest):
 
 
 @app.get("/inventory")
+@app.get("/api/inventory")
 def get_inventory():
     """Returns current multi-echelon stock levels joined with product metadata."""
     inventory_path = os.path.join(DATA_DIR, "inventory.json")
@@ -423,6 +518,7 @@ def get_inventory():
 
 
 @app.get("/audit-log")
+@app.get("/api/audit-log")
 def get_audit_log():
     """Returns historical log of human decisions."""
     return load_audit_log()
@@ -484,6 +580,8 @@ def get_runtime_state(current_date: str = "2026-10-09") -> Dict[str, Any]:
 
 
 @app.post("/action/recalculate-override")
+@app.post("/api/action/recalculate-override")
+@app.post("/api/recalculate-override")
 def recalculate_override(req: RecalculateOverrideRequest):
     """
     Invokes calculate_donor_transfer_safety and returns revised cover days and 14-day projections without mutating state.
@@ -566,6 +664,7 @@ def recalculate_override(req: RecalculateOverrideRequest):
         "override_qty": req.override_qty,
         "donor_stock_remaining": donor_remaining,
         "donor_revised_cover_days": donor_revised_cover,
+        "remaining_cover_days": donor_revised_cover,
         "target_new_stock": target_new,
         "target_revised_cover_days": target_revised_cover,
         "revised_cost_inr": 250.0,
@@ -621,6 +720,7 @@ def override_recalculate(req: OverrideRecalculateRequest):
 
 
 @app.post("/chaos/inject")
+@app.post("/api/chaos/inject")
 def inject_chaos(req: ChaosInjectionRequest):
     """
     Directly injects operational anomalies (Demand Surges, Route Closures, Supplier Delays)
@@ -655,20 +755,32 @@ def inject_chaos(req: ChaosInjectionRequest):
         if req.value is not None:
             event_dict["multiplier_or_days"] = req.value
 
+    # Capture plan before chaos injection
+    before_engine = DecisionEngine(
+        data_dir=DATA_DIR,
+        chaos_events=list(ACTIVE_CHAOS_EVENTS)
+    )
+    before_brief = before_engine.run_agentic_pipeline()
+
     ACTIVE_CHAOS_EVENTS.append(event_dict)
 
-    engine = DecisionEngine(
+    # Capture plan after chaos injection
+    after_engine = DecisionEngine(
         data_dir=DATA_DIR,
-        chaos_events=ACTIVE_CHAOS_EVENTS
+        chaos_events=list(ACTIVE_CHAOS_EVENTS)
     )
-    new_brief = engine.run_agentic_pipeline()
+    after_brief = after_engine.run_agentic_pipeline()
+
+    # Compute structured before vs after plan diff with reasons
+    plan_diff = compute_plan_diff(before_brief, after_brief, event_dict)
 
     return {
         "status": "INJECTED",
         "scenario": req.scenario or event_dict.get("event_type"),
         "event": event_dict,
         "active_events_count": len(ACTIVE_CHAOS_EVENTS),
-        "updated_briefing": new_brief
+        "plan_diff": plan_diff,
+        "updated_briefing": after_brief
     }
 
 

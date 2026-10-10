@@ -173,6 +173,19 @@ def get_morning_briefing(current_date: str = "2026-10-09"):
         active_reservations=get_active_stock_reservations()
     )
     brief = engine.run_agentic_pipeline()
+    for p in brief.get("problems", []):
+        dm = p.get("domain_metrics", {})
+        vel = p.get("adaptive_velocity", {})
+        if "current_stock" not in p:
+            p["current_stock"] = dm.get("current_stock", 0)
+        if "v_predicted" not in p:
+            p["v_predicted"] = dm.get("daily_burn_rate", vel.get("v_recent", 1.0))
+        if "days_of_cover" not in p:
+            p["days_of_cover"] = dm.get("days_of_cover", 0.0)
+        if "stockout_gap_days" not in p:
+            p["stockout_gap_days"] = dm.get("stockout_gap_days", 0.0)
+        if "alternatives" not in p:
+            p["alternatives"] = p.get("evaluated_options", [])
     return brief
 
 
@@ -251,7 +264,12 @@ def approve_action(req: ActionApprovalRequest):
     ).hexdigest()
 
     idempotency_key = req.client_request_id or action_payload_signature
-    if is_action_already_processed(idempotency_key):
+    if (
+        is_action_already_processed(idempotency_key)
+        or is_action_already_processed(action_payload_signature)
+        or idempotency_key in PROCESSED_ACTION_HASHES
+        or action_payload_signature in PROCESSED_ACTION_HASHES
+    ):
         raise HTTPException(
             status_code=409,
             detail="Duplicate action detected: this proposal has already been approved and executed."
@@ -387,7 +405,11 @@ def approve_action(req: ActionApprovalRequest):
         }
 
     # 4. Mark Idempotency Signature & Release Reservation & Record Audit Log
+    PROCESSED_ACTION_HASHES.add(idempotency_key)
+    PROCESSED_ACTION_HASHES.add(action_payload_signature)
     record_action_processed(idempotency_key, req.problem_id)
+    if action_payload_signature != idempotency_key:
+        record_action_processed(action_payload_signature, req.problem_id)
     release_stock_reservation(req.problem_id)
     record_entry = log_audit_trail_entry(
         problem_id=req.problem_id,
@@ -642,6 +664,7 @@ def recalculate_override(req: RecalculateOverrideRequest):
         "override_qty": req.override_qty,
         "donor_stock_remaining": donor_remaining,
         "donor_revised_cover_days": donor_revised_cover,
+        "remaining_cover_days": donor_revised_cover,
         "target_new_stock": target_new,
         "target_revised_cover_days": target_revised_cover,
         "revised_cost_inr": 250.0,

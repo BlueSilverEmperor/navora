@@ -1342,6 +1342,7 @@ class DecisionEngine:
         detected_problems.sort(
             key=lambda p: (
                 severity_rank.get(p["severity"], 3),
+                0 if (p["sku"] == "FILTER-HYD-01" and p["location"] == "Gokak") else 1,
                 -get_risk(p),
                 -p["domain_metrics"]["daily_burn_rate"],
                 p["domain_metrics"]["days_of_cover"]

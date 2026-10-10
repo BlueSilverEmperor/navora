@@ -3,97 +3,73 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NAVORA Operations Engine — Autonomous Procurement & Multi-Echelon Rebalancing</title>
+  <title>Kaveri Spares & Hydraulics — Supply Chain Copilot (NAVORA Engine)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     /* =========================================================================
-       PIXEL-PERFECT TERRACOTTA & WARM CREAM DARK/LIGHT DESIGN SYSTEM
+       DUAL DESIGN PALETTE SPECIFICATION (CSS VARIABLES)
        ========================================================================= */
     :root, [data-theme="dark"] {
-      --bg: #181412;
-      --surface: #241E1B;
-      --surface-muted: #322B27;
-      --surface-card: rgba(36, 30, 27, 0.94);
-      --border: #3B312C;
-      --border-subtle: #3B312C;
-      --border-focus: rgba(224, 122, 95, 0.5);
-      
-      --text-main: #FAF6F0;
-      --text-sub: #B0A298;
-      --text-dim: #7E7067;
-      
-      --primary: #E07A5F;
-      --primary-hover: #EA8E75;
-      --primary-glow: rgba(224, 122, 95, 0.25);
-      
-      /* Status Colors */
-      --danger: #FF1744;
-      --danger-bg: rgba(255, 23, 68, 0.14);
-      --danger-border: rgba(255, 23, 68, 0.55);
-      --danger-glow: 0 0 20px rgba(255, 23, 68, 0.45);
-      
-      --warning: #F59E0B;
-      --warning-bg: rgba(245, 158, 11, 0.12);
-      --warning-border: rgba(245, 158, 11, 0.3);
-      
-      --success: #34D399;
-      --success-bg: rgba(52, 211, 153, 0.12);
-      --success-border: rgba(52, 211, 153, 0.35);
-      
-      --cyan: #38BDF8;
-      --cyan-bg: rgba(56, 189, 248, 0.12);
-      --cyan-border: rgba(56, 189, 248, 0.35);
+      --bg-primary: #0E120E;
+      --bg-sidebar: #0B0E0B;
+      --surface: #171D16;
+      --surface-alt: #20291F;
+      --surface-input: #121711;
+      --border: #2C3A2A;
+      --border-accent: #3E533B;
+      --sage-primary: #8FA87B;
+      --sage-accent: #B2CF9C;
+      --alert-crimson: #FF5C5C;
+      --alert-crimson-bg: #331414;
+      --alert-crimson-border: #5C2222;
+      --alert-amber: #F59E0B;
+      --alert-amber-bg: #2E2210;
+      --alert-amber-border: #4D3915;
+      --text-primary: #F1F5EE;
+      --text-secondary: #9DAE97;
+      --text-muted: #677562;
+      --terminal-bg: #0B0F0B;
 
-      --shadow-outer: 0 16px 40px rgba(0, 0, 0, 0.65);
-      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
-      --code-bg: #14100E;
-      --code-text: #E07A5F;
-      --overlay-bg: rgba(0, 0, 0, 0.78);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.45);
+      --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.6);
+      --shadow-dropdown: 0 16px 36px rgba(0, 0, 0, 0.75);
+      --glow-accent: 0 0 20px rgba(178, 207, 156, 0.25);
+      --glow-crimson: 0 0 20px rgba(255, 92, 92, 0.35);
+      --sidebar-width: 290px;
     }
 
     [data-theme="light"] {
-      --bg: #FAF6F0;
+      --bg-primary: #F4F6F0;
+      --bg-sidebar: #EAEFE5;
       --surface: #FFFFFF;
-      --surface-muted: #F0EAE1;
-      --surface-card: rgba(255, 255, 255, 0.96);
-      --border: #E2D7CB;
-      --border-subtle: #E2D7CB;
-      --border-focus: rgba(200, 90, 50, 0.45);
-      
-      --text-main: #2C221E;
-      --text-sub: #6B5E57;
-      --text-dim: #94867F;
-      
-      --primary: #C85A32;
-      --primary-hover: #B04B26;
-      --primary-glow: rgba(200, 90, 50, 0.18);
-      
-      --danger: #FF0033;
-      --danger-bg: rgba(255, 0, 51, 0.08);
-      --danger-border: rgba(255, 0, 51, 0.4);
-      --danger-glow: 0 0 16px rgba(255, 0, 51, 0.3);
-      
-      --warning: #C27803;
-      --warning-bg: rgba(194, 120, 3, 0.09);
-      --warning-border: rgba(194, 120, 3, 0.3);
-      
-      --success: #257D51;
-      --success-bg: rgba(37, 125, 81, 0.09);
-      --success-border: rgba(37, 125, 81, 0.28);
-      
-      --cyan: #0284C7;
-      --cyan-bg: rgba(2, 132, 199, 0.08);
-      --cyan-border: rgba(2, 132, 199, 0.3);
+      --surface-alt: #E8EDE0;
+      --surface-input: #F8FAF6;
+      --border: #CBD5C0;
+      --border-accent: #9FB191;
+      --sage-primary: #5B7053;
+      --sage-accent: #7D9D71;
+      --alert-crimson: #C84B31;
+      --alert-crimson-bg: #FBECE8;
+      --alert-crimson-border: #E8B4A8;
+      --alert-amber: #D9822B;
+      --alert-amber-bg: #FDF4E7;
+      --alert-amber-border: #F3CFA0;
+      --text-primary: #1E241B;
+      --text-secondary: #5D6656;
+      --text-muted: #7E8777;
+      --terminal-bg: #1B2418;
 
-      --shadow-outer: 0 16px 40px rgba(44, 34, 30, 0.08);
-      --shadow-sm: 0 2px 8px rgba(44, 34, 30, 0.04);
-      --code-bg: #ECE4DA;
-      --code-text: #2C221E;
-      --overlay-bg: rgba(44, 34, 30, 0.45);
+      --shadow-sm: 0 2px 8px rgba(30, 36, 27, 0.05);
+      --shadow-card: 0 6px 20px rgba(91, 112, 83, 0.08);
+      --shadow-dropdown: 0 12px 28px rgba(91, 112, 83, 0.15);
+      --glow-accent: 0 0 16px rgba(91, 112, 83, 0.2);
+      --glow-crimson: 0 0 16px rgba(200, 75, 49, 0.25);
+      --sidebar-width: 290px;
     }
 
+    /* Base Reset & Typography */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -101,2215 +77,3230 @@
     }
 
     body {
-      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-      background-color: var(--bg);
-      color: var(--text-main);
-      min-height: 100vh;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 14px;
       line-height: 1.5;
-      padding: 24px;
-      transition: background-color 0.3s ease, color 0.3s ease;
-      background-image: 
-        radial-gradient(circle at 18% 12%, rgba(224, 122, 95, 0.05) 0%, transparent 45%),
-        radial-gradient(circle at 82% 88%, rgba(224, 122, 95, 0.03) 0%, transparent 45%);
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    /* Top Navigation Header */
-    header {
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+      height: 100vh;
       display: flex;
-      justify-content: space-between;
+    }
+
+    /* Layout Shell */
+    #appLayout {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* =========================================================================
+       COLLAPSIBLE SIDEBAR ARCHITECTURE (290px expanded -> 0px collapsed)
+       ========================================================================= */
+    #sidebar {
+      width: var(--sidebar-width);
+      min-width: var(--sidebar-width);
+      max-width: var(--sidebar-width);
+      height: 100vh;
+      background-color: var(--bg-sidebar);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                  min-width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                  max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                  transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 100;
+      position: relative;
+      user-select: none;
+    }
+
+    #sidebar.collapsed {
+      width: 0px !important;
+      min-width: 0px !important;
+      max-width: 0px !important;
+      border-right: none;
+      transform: translateX(-100%);
+    }
+
+    .sidebar-inner {
+      width: 290px;
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 16px 14px;
+      gap: 16px;
+    }
+
+    .sidebar-inner::-webkit-scrollbar {
+      width: 4px;
+    }
+    .sidebar-inner::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    /* Sticky toggle button anchored at the edge */
+    #sidebarToggleBtn {
+      position: fixed;
+      top: 14px;
+      left: 275px;
+      z-index: 101;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border-accent);
+      color: var(--text-primary);
+      display: flex;
       align-items: center;
-      padding: 16px 24px;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s, transform 0.2s;
+    }
+    #sidebarToggleBtn:hover {
+      background: var(--surface-alt);
+      color: var(--sage-accent);
+      transform: scale(1.08);
+    }
+    #sidebar.collapsed ~ #sidebarToggleBtn,
+    body.sidebar-is-collapsed #sidebarToggleBtn {
+      left: 14px !important;
+    }
+
+    /* Brand Header in Sidebar */
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .brand-logo-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--sage-primary), var(--sage-accent));
+      color: #0E120E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: -0.5px;
+      flex-shrink: 0;
+      box-shadow: var(--glow-accent);
+    }
+    .brand-meta h2 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.3px;
+      line-height: 1.2;
+    }
+    .brand-meta span {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    /* Sidebar Section */
+    .sidebar-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .sidebar-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Theme Radio Switcher */
+    .theme-radio-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      background: var(--surface-input);
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .theme-radio-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 7px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
+      background: transparent;
+      border: none;
+    }
+    .theme-radio-btn.active {
+      background: var(--surface);
+      color: var(--text-primary);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      border: 1px solid var(--border-accent);
+    }
+    [data-theme="light"] .theme-radio-btn.active {
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+
+    /* Operating Controls: Simulation Date */
+    .sim-date-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      margin-bottom: 16px;
-      box-shadow: var(--shadow-sm);
-      backdrop-filter: blur(14px);
-      transition: all 0.3s ease;
-      flex-wrap: wrap;
-      gap: 12px;
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .sim-date-input {
+      background: var(--surface-input);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-primary);
+      padding: 6px 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.2s;
+    }
+    .sim-date-input:focus {
+      border-color: var(--sage-accent);
+    }
+    .sim-recalc-btn {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .sim-recalc-btn:hover {
+      background: var(--sage-primary);
+      color: #0E120E;
+      border-color: var(--sage-primary);
     }
 
-    .brand {
+    /* User Persona Card */
+    .persona-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .persona-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .persona-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--surface-alt);
+      border: 1px solid var(--sage-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--sage-accent);
+      flex-shrink: 0;
+    }
+    .persona-info h4 {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+    .persona-info p {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+    .persona-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(143, 168, 123, 0.15);
+      color: var(--sage-accent);
+      border: 1px solid var(--border-accent);
+      width: fit-content;
+    }
+
+    /* Network Card */
+    .network-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .network-stat-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+    .network-stat-row strong {
+      color: var(--text-primary);
+    }
+    .network-tag-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 2px;
+    }
+    .network-chip {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--surface-alt);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .network-chip:hover {
+      border-color: var(--sage-accent);
+      color: var(--text-primary);
+    }
+    .network-chip.hub {
+      border-color: var(--border-accent);
+      color: var(--sage-accent);
+      font-weight: 600;
+    }
+
+    /* Chaos Engine Controls */
+    .chaos-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .chaos-btn-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .chaos-action-btn {
+      background: var(--surface-input);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 7px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+    }
+    .chaos-action-btn:hover {
+      background: var(--surface-alt);
+      border-color: var(--border-accent);
+      transform: translateX(2px);
+    }
+    .chaos-action-btn.active-shock {
+      border-color: var(--alert-crimson);
+      background: var(--alert-crimson-bg);
+      color: var(--alert-crimson);
+    }
+    .chaos-reset-btn {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 4px;
+      transition: all 0.2s;
+    }
+    .chaos-reset-btn:hover {
+      background: var(--surface-input);
+      color: var(--text-primary);
+      border-color: var(--border-accent);
+    }
+    .chaos-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .chaos-status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--sage-primary);
+    }
+    .chaos-status-dot.active {
+      background: var(--alert-crimson);
+      box-shadow: 0 0 8px var(--alert-crimson);
+    }
+
+    /* =========================================================================
+       MAIN WORKSPACE & HEADER
+       ========================================================================= */
+    #mainCanvas {
+      flex: 1;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--bg-primary);
+    }
+
+    .top-header {
+      height: 56px;
+      min-height: 56px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      padding-left: 56px;
+      z-index: 90;
+    }
+
+    .top-header-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .top-header-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.2px;
+    }
+    .top-header-badge {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(143, 168, 123, 0.15);
+      color: var(--sage-accent);
+      border: 1px solid var(--border-accent);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .top-header-meta {
       display: flex;
       align-items: center;
       gap: 14px;
     }
-
-    .brand-logo {
-      width: 44px;
-      height: 44px;
-      background: linear-gradient(135deg, var(--primary) 0%, #A2482F 100%);
-      border-radius: 12px;
-      display: grid;
-      place-items: center;
-      font-weight: 800;
-      color: #FFFFFF;
-      font-size: 22px;
-      box-shadow: 0 4px 14px var(--primary-glow);
-    }
-
-    .brand-title {
-      font-size: 19px;
-      font-weight: 800;
-      letter-spacing: -0.015em;
-      color: var(--text-main);
-    }
-
-    .brand-sub {
-      font-size: 12px;
-      color: var(--text-sub);
-    }
-
-    .header-actions {
+    .conn-status-pill {
       display: flex;
       align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: var(--surface-input);
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+    }
+    .conn-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #34D399;
+      box-shadow: 0 0 8px rgba(52, 211, 153, 0.6);
+    }
+    .header-inspect-btn {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .header-inspect-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--border-accent);
     }
 
-    .theme-toggle-btn {
-      display: inline-flex;
+    /* Multi-View Navigation Tabs */
+    .nav-tabs-bar {
+      display: flex;
+      background: var(--bg-primary);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      gap: 8px;
+      user-select: none;
+    }
+    .nav-tab-btn {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 12px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
       align-items: center;
       gap: 8px;
-      background: var(--surface-muted);
-      color: var(--text-main);
-      border: 1px solid var(--border);
-      padding: 8px 14px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 600;
       transition: all 0.2s ease;
     }
-
-    .theme-toggle-btn:hover {
-      background: var(--surface);
-      border-color: var(--primary);
+    .nav-tab-btn:hover {
+      color: var(--text-primary);
+    }
+    .nav-tab-btn.active {
+      color: var(--sage-accent);
+      border-bottom-color: var(--sage-primary);
+    }
+    .nav-tab-counter {
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 1px 6px;
+      border-radius: 10px;
+      background: var(--surface-alt);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .nav-tab-btn.active .nav-tab-counter {
+      background: rgba(143, 168, 123, 0.15);
+      color: var(--sage-accent);
+      border-color: var(--border-accent);
     }
 
-    .status-badge {
-      display: inline-flex;
+    /* Scrollable Canvas Body */
+    .view-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: none;
+    }
+    .view-container.active-view {
+      display: block;
+    }
+
+    .view-container::-webkit-scrollbar {
+      width: 6px;
+    }
+    .view-container::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    /* =========================================================================
+       TAB 1: ACTION FEED, FILTERS & ACCORDION
+       ========================================================================= */
+    .feed-header-kpi-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .kpi-stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      box-shadow: var(--shadow-sm);
+    }
+    .kpi-stat-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+    .kpi-stat-val {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+      line-height: 1.1;
+    }
+    .kpi-stat-sub {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    /* Live Feed Filter Bar with Severity Dropdown */
+    .feed-filter-bar {
+      background: var(--surface);
+      border: 1px solid var(--border-accent);
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .filter-row-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .filter-dropdowns-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .filter-field-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .filter-field-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+    .severity-dropdown-menu, .facility-dropdown-menu {
+      background: var(--surface-input);
+      border: 1.5px solid var(--border-accent);
+      border-radius: 8px;
+      padding: 7px 14px;
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 700;
+      outline: none;
+      cursor: pointer;
+      min-width: 180px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    .severity-dropdown-menu:hover, .facility-dropdown-menu:hover {
+      border-color: var(--sage-accent);
+    }
+    .severity-dropdown-menu:focus, .facility-dropdown-menu:focus {
+      border-color: var(--sage-accent);
+      box-shadow: 0 0 12px rgba(178, 207, 156, 0.25);
+    }
+    .feed-search-wrap {
+      display: flex;
+      align-items: center;
+      flex: 1;
+      max-width: 320px;
+      min-width: 220px;
+    }
+    .feed-search-input {
+      width: 100%;
+      background: var(--surface-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 12px;
+      color: var(--text-primary);
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .feed-search-input:focus {
+      border-color: var(--border-accent);
+    }
+    .filter-row-bottom {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+    .filter-pills-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-right: 4px;
+    }
+    .filter-pills-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .filter-pill-btn {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+    .filter-pill-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--border-accent);
+    }
+    .filter-pill-btn.active {
+      background: var(--sage-primary);
+      color: #0E120E;
+      border-color: var(--sage-accent);
+      box-shadow: 0 0 10px rgba(143, 168, 123, 0.3);
+    }
+
+    /* Accordion Cards */
+    .accordion-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .incident-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.25s, box-shadow 0.25s, transform 0.2s;
+      box-shadow: var(--shadow-sm);
+      width: 100%;
+    }
+    .incident-card:hover {
+      border-color: var(--border-accent);
+    }
+    .incident-card.expanded {
+      border-color: var(--border-accent);
+      box-shadow: var(--shadow-card);
+    }
+    .incident-card.is-critical {
+      border-left: 4px solid var(--alert-crimson);
+    }
+    .incident-card.is-warning {
+      border-left: 4px solid var(--alert-amber);
+    }
+
+    /* Collapsed Banner (Pic 1 Style) */
+    .incident-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s;
+      gap: 16px;
+    }
+    .incident-banner:hover {
+      background: var(--surface-alt);
+    }
+
+    .banner-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .pill-severity {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .pill-critical {
+      background: var(--alert-crimson-bg);
+      color: var(--alert-crimson);
+      border: 1px solid var(--alert-crimson-border);
+      box-shadow: 0 0 10px rgba(255, 92, 92, 0.15);
+    }
+    .pill-warning {
+      background: var(--alert-amber-bg);
+      color: var(--alert-amber);
+      border: 1px solid var(--alert-amber-border);
+    }
+    .pill-category {
+      background: var(--surface-input);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .banner-headline {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.2px;
+    }
+
+    .banner-telemetry-strip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface-input);
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .telemetry-item strong {
+      color: var(--text-primary);
+    }
+    .telemetry-item.alert-danger strong {
+      color: var(--alert-crimson);
+    }
+
+    .banner-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+    .action-required-tag {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--alert-amber);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .active-task-indicator {
+      display: flex;
       align-items: center;
       gap: 6px;
-      padding: 7px 14px;
-      border-radius: 20px;
       font-size: 12px;
       font-weight: 600;
-      background: var(--success-bg);
-      color: var(--success);
-      border: 1px solid var(--success-border);
-      box-shadow: 0 0 12px rgba(52, 211, 153, 0.18);
+      color: var(--text-secondary);
     }
-
-    .status-dot {
+    .task-dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background-color: currentColor;
-      animation: pulse 2s infinite;
+      background: var(--sage-accent);
+      box-shadow: 0 0 8px var(--sage-accent);
+    }
+    .chevron-icon {
+      font-size: 12px;
+      color: var(--text-muted);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .incident-card.expanded .chevron-icon {
+      transform: rotate(180deg);
+      color: var(--sage-accent);
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.85); }
+    /* =========================================================================
+       EXPANDED SUB-CANVAS (PIC 2 & DEEP-DIVE COCKPIT)
+       ========================================================================= */
+    .subcanvas-content {
+      display: none;
+      padding: 0 20px 24px 20px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      animation: fadeIn 0.3s ease;
+    }
+    .incident-card.expanded .subcanvas-content {
+      display: block;
     }
 
-    /* Command & Chaos Control Bar */
-    .command-bar {
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .diagnostic-banner {
+      margin-top: 18px;
+      background: var(--alert-crimson-bg);
+      border: 1px solid var(--alert-crimson-border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .diagnostic-icon {
+      font-size: 18px;
+      line-height: 1;
+      color: var(--alert-crimson);
+      margin-top: 2px;
+    }
+    .diagnostic-text {
+      font-size: 13px;
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+    .diagnostic-text strong {
+      color: var(--alert-crimson);
+      font-weight: 700;
+    }
+
+    .telemetry-6grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .telem-card {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .telem-card-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .telem-card-value {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .telem-card-sub {
+      font-size: 10px;
+      color: var(--text-secondary);
+    }
+    .telem-card.crimson-glow {
+      border-color: var(--alert-crimson-border);
+      background: var(--alert-crimson-bg);
+    }
+    .telem-card.crimson-glow .telem-card-value {
+      color: var(--alert-crimson);
+    }
+    .telem-card.amber-glow {
+      border-color: var(--alert-amber-border);
+      background: var(--alert-amber-bg);
+    }
+    .telem-card.amber-glow .telem-card-value {
+      color: var(--alert-amber);
+    }
+
+    .domain-math-terminal {
+      margin-top: 16px;
+      background: var(--terminal-bg);
+      border: 1px solid var(--border-accent);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-primary);
+      position: relative;
+    }
+    .terminal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--sage-accent);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    .terminal-copy-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .terminal-copy-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--sage-accent);
+    }
+    .terminal-lines {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      line-height: 1.6;
+    }
+    .term-line-formula {
+      color: var(--sage-accent);
+    }
+    .term-line-risk {
+      color: var(--alert-crimson);
+      font-weight: 700;
+    }
+
+    .chart-container-wrap {
+      margin-top: 20px;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
       gap: 12px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 14px 20px;
-      margin-bottom: 16px;
-    }
-
-    .incident-selector-wrap {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      width: 100%;
-    }
-
-    .incident-select-label {
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--primary);
-      white-space: nowrap;
-    }
-
-    .incident-dropdown {
-      flex: 1;
-      min-width: 0;
-      background: var(--surface-muted);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 12px;
-      color: var(--text-main);
-      font-family: inherit;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      outline: none;
-      transition: all 0.2s ease;
-    }
-
-    .incident-dropdown:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 12px var(--primary-glow);
-    }
-
-    .chaos-toolbar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      padding-top: 10px;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
-    }
-
-    .chaos-btn {
-      background: var(--surface-muted);
-      border: 1px solid var(--border);
-      color: var(--text-main);
-      border-radius: 8px;
-      padding: 7px 12px;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s ease;
-    }
-
-    .chaos-btn:hover {
-      background: var(--surface);
-      border-color: var(--primary);
-      color: var(--primary);
-    }
-
-    .chaos-btn.active-chaos {
-      background: var(--warning-bg);
-      border-color: var(--warning);
-      color: var(--warning);
-    }
-
-    .chaos-badge {
-      font-size: 10px;
-      padding: 2px 6px;
-      background: var(--primary);
-      color: #fff;
-      border-radius: 10px;
-      font-weight: 800;
-    }
-
-    /* Sub-Header Simulation Tabs Row */
-    .controls-panel {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .btn-tab {
-      background: var(--surface-muted);
-      color: var(--text-sub);
-      border: 1px solid var(--border);
-      padding: 12px 16px;
-      border-radius: 12px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-      text-align: center;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .btn-tab:hover {
-      background: var(--surface);
-      color: var(--text-main);
-      border-color: var(--border-focus);
-    }
-
-    .btn-tab.active {
-      background: var(--primary);
-      color: #FFFFFF;
-      border-color: var(--primary);
-      box-shadow: 0 4px 16px var(--primary-glow);
-    }
-
-    /* Main Dashboard Elevated Glassmorphic Card */
-    .feed-card {
-      background: var(--surface-card);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 28px;
-      box-shadow: var(--shadow-outer);
       position: relative;
-      overflow: hidden;
-      backdrop-filter: blur(16px);
-      transition: all 0.3s ease;
     }
-
-    /* Summary Headline Section */
-    .summary-header {
-      margin-bottom: 24px;
+    .chart-title-strip {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      gap: 16px;
-      flex-wrap: wrap;
+      align-items: center;
     }
-
-    .summary-title {
-      font-size: 22px;
-      font-weight: 800;
-      letter-spacing: -0.015em;
-      color: var(--text-main);
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-
-    .summary-sub {
+    .chart-title {
       font-size: 13px;
-      color: var(--text-sub);
-      font-weight: 500;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .chart-subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .svg-chart-box {
+      width: 100%;
+      height: 240px;
+      position: relative;
+      user-select: none;
+    }
+    .svg-chart-box svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .chart-interactive-tooltip {
+      position: absolute;
+      display: none;
+      pointer-events: none;
+      background: var(--surface);
+      border: 1px solid var(--border-accent);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-primary);
+      box-shadow: var(--shadow-dropdown);
+      z-index: 50;
       line-height: 1.5;
     }
 
-    .category-tag-wrap {
+    .chart-legend-strip {
       display: flex;
-      gap: 8px;
+      flex-wrap: wrap;
       align-items: center;
-    }
-
-    .badge-severity {
+      justify-content: center;
+      gap: 18px;
+      padding-top: 6px;
+      border-top: 1px solid var(--border);
       font-size: 11px;
-      font-weight: 800;
-      padding: 5px 12px;
-      border-radius: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      color: var(--text-secondary);
     }
-
-    .badge-critical {
-      background: var(--danger-bg);
-      color: var(--danger);
-      border: 1px solid var(--danger-border);
-      box-shadow: 0 0 10px rgba(255, 23, 68, 0.2);
-    }
-
-    .badge-high {
-      background: var(--warning-bg);
-      color: var(--warning);
-      border: 1px solid var(--warning-border);
-    }
-
-    .badge-medium {
-      background: var(--cyan-bg);
-      color: var(--cyan);
-      border: 1px solid var(--cyan-border);
-    }
-
-    .badge-cat {
-      background: var(--surface-muted);
-      border: 1px solid var(--border);
-      color: var(--text-main);
-      font-size: 11px;
-      font-weight: 700;
-      padding: 5px 12px;
-      border-radius: 6px;
-    }
-
-    /* 4 Key Metric Cards Row */
-    .metric-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    .metric-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 18px;
+    .legend-item {
       display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      position: relative;
-      overflow: hidden;
-      transition: all 0.25s ease;
-      min-height: 140px;
-    }
-
-    .metric-card:hover {
-      border-color: var(--primary);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px var(--primary-glow);
-    }
-
-    .metric-top {
-      display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
-    }
-
-    .metric-label {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--text-sub);
-    }
-
-    .check-icon-circle {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      border: 1px solid var(--border);
-      display: grid;
-      place-items: center;
-      color: var(--text-sub);
-      font-size: 10px;
-    }
-
-    .metric-card:hover .check-icon-circle {
-      border-color: var(--primary);
-      color: var(--primary);
-    }
-
-    .metric-value {
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--text-main);
-      font-family: 'JetBrains Mono', monospace;
-      letter-spacing: -0.03em;
-      margin-bottom: 4px;
-    }
-
-    .metric-sub {
-      font-size: 11px;
-      color: var(--text-dim);
-      margin-bottom: 8px;
-    }
-
-    .metric-svg-wrap {
-      width: 100%;
-      height: 34px;
-      margin-top: auto;
-      display: flex;
-      align-items: flex-end;
-    }
-
-    .metric-svg-wrap svg {
-      width: 100%;
-      height: 100%;
-    }
-
-    /* Math Transparency Box (Mandate Rule 2 & Rule 11) */
-    .math-proof-box {
-      background: var(--code-bg);
-      border: 1px solid var(--border);
-      border-left: 4px solid var(--primary);
-      border-radius: 12px;
-      padding: 18px 22px;
-      margin-bottom: 24px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      position: relative;
-    }
-
-    .math-proof-title {
-      font-size: 11px;
-      font-weight: 800;
-      color: var(--primary);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .math-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px 24px;
-      color: var(--text-main);
-      line-height: 1.6;
-    }
-
-    .math-item {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .math-formula-tag {
-      color: var(--text-sub);
-      font-size: 11px;
-    }
-
-    .math-formula-value {
-      color: #FAF6F0;
+      gap: 6px;
       font-weight: 600;
     }
-
-    /* Commercial Impact Scorecard Row */
-    .scorecard-title {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-sub);
-      margin-bottom: 12px;
+    .legend-line-sage {
+      width: 18px;
+      height: 3px;
+      background: var(--sage-primary);
+      border-radius: 2px;
+    }
+    .legend-line-amber {
+      width: 18px;
+      height: 0;
+      border-top: 2px dashed var(--alert-amber);
+    }
+    .legend-line-crimson {
+      width: 18px;
+      height: 0;
+      border-top: 2px dotted var(--alert-crimson);
+    }
+    .legend-line-hazard {
+      width: 18px;
+      height: 0;
+      border-top: 2px dashed #FF1744;
+    }
+    .legend-range-fill {
+      width: 16px;
+      height: 10px;
+      background: rgba(143, 168, 123, 0.15);
+      border: 1px solid var(--border-accent);
+      border-radius: 2px;
     }
 
     .scorecard-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
-      margin-bottom: 24px;
-    }
-
-    .score-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .score-label {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text-sub);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .score-val {
-      font-size: 20px;
-      font-weight: 800;
-      font-family: 'JetBrains Mono', monospace;
-      color: var(--text-main);
-    }
-
-    .score-sub {
-      font-size: 11px;
-      color: var(--text-dim);
-    }
-
-    /* Forward Trajectory Interactive Curve Section */
-    .trajectory-panel {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 22px;
-      margin-bottom: 24px;
-    }
-
-    .trajectory-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .trajectory-title {
-      font-size: 13px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .trajectory-legend {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .legend-color {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-    }
-
-    .svg-trajectory-wrap {
-      width: 100%;
-      height: 220px;
-      background: var(--code-bg);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-      position: relative;
-    }
-
-    .svg-trajectory-wrap svg {
-      width: 100%;
-      height: 100%;
-    }
-
-    /* Mitigation Strategies & Flowchart Section */
-    .section-divider-title {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-sub);
-      margin-bottom: 12px;
-    }
-
-    .mitigation-flow-grid {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    /* Left Side: Strategy Cards */
-    .strategy-list {
-      display: flex;
-      flex-direction: column;
       gap: 12px;
+      margin-top: 16px;
     }
-
-    .strategy-item {
-      background: var(--surface);
+    .scorecard-kpi {
+      background: var(--surface-alt);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      gap: 14px;
-    }
-
-    .strategy-item:hover {
-      background: var(--surface-muted);
-      border-color: var(--primary);
-    }
-
-    .strategy-item.active-item {
-      border-color: var(--primary);
-      background: rgba(224, 122, 95, 0.09);
-      box-shadow: 0 0 16px var(--primary-glow);
-    }
-
-    .strategy-name {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text-main);
-    }
-
-    .strategy-meta {
-      font-size: 11px;
-      color: var(--text-sub);
-      margin-top: 3px;
-    }
-
-    .badge-status {
-      font-size: 11px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 6px;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-
-    .badge-primary-opt {
-      background: rgba(224, 122, 95, 0.16);
-      color: var(--primary);
-      border: 1px solid var(--primary);
-    }
-
-    .badge-spot-opt {
-      background: var(--surface-muted);
-      color: var(--text-sub);
-      border: 1px solid var(--border);
-    }
-
-    /* Right Side: Flowchart */
-    .flowchart-panel {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 22px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .flow-nodes-wrapper {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      position: relative;
-    }
-
-    .flow-node-box {
-      background: var(--surface-muted);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text-main);
-      text-align: center;
-      min-width: 90px;
-      z-index: 2;
-      transition: all 0.25s ease;
-    }
-
-    .flow-node-box.active-node {
-      background: rgba(224, 122, 95, 0.14);
-      border-color: var(--primary);
-      color: var(--primary);
-      box-shadow: 0 0 16px var(--primary-glow);
-    }
-
-    .flow-connector-svg {
-      flex: 1;
-      height: 28px;
-      margin: 0 4px;
-    }
-
-    /* Draft Action Box */
-    .draft-container {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 22px;
-      margin-bottom: 22px;
-      position: relative;
-    }
-
-    .draft-badge {
-      position: absolute;
-      top: -10px;
-      left: 18px;
-      background: var(--primary);
-      color: #FFFFFF;
-      font-size: 10px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      padding: 3px 12px;
-      border-radius: 4px;
-      box-shadow: 0 2px 8px var(--primary-glow);
-    }
-
-    .draft-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-top: 6px;
-    }
-
-    .draft-field {
+      border-radius: 8px;
+      padding: 12px 14px;
       display: flex;
       flex-direction: column;
       gap: 4px;
     }
-
-    .draft-label {
+    .scorecard-label {
       font-size: 11px;
-      color: var(--text-sub);
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
-      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
     }
-
-    .draft-value {
-      font-size: 13px;
-      color: var(--text-main);
-      font-weight: 700;
+    .scorecard-value {
+      font-size: 18px;
+      font-weight: 800;
       font-family: 'JetBrains Mono', monospace;
+      color: var(--text-primary);
+    }
+    .scorecard-sub {
+      font-size: 10px;
+      color: var(--text-secondary);
     }
 
-    .delta-highlight {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--warning-bg);
-      border: 1px solid var(--warning-border);
-      padding: 2px 8px;
-      border-radius: 4px;
-      color: var(--warning);
-      font-weight: 700;
-    }
-
-    .delta-old {
-      text-decoration: line-through;
-      color: var(--text-dim);
-      font-weight: 500;
-    }
-
-    /* Donor Safety Buffer Alert Banner */
-    .safety-banner {
-      display: none;
-      padding: 12px 18px;
-      border-radius: 10px;
-      margin-bottom: 16px;
-      font-size: 12px;
-      font-weight: 700;
-      align-items: center;
-      gap: 10px;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .safety-banner.safe {
-      display: flex;
-      background: var(--success-bg);
-      border: 1px solid var(--success-border);
-      color: var(--success);
-    }
-
-    .safety-banner.danger {
-      display: flex;
-      background: var(--danger-bg);
-      border: 1.5px solid var(--danger-border);
-      color: var(--danger);
-      box-shadow: var(--danger-glow);
-    }
-
-    /* Conversational Override Drawer */
-    .override-drawer {
-      display: none;
-      background: var(--surface);
-      border: 1px solid var(--warning-border);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 22px;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .override-drawer.visible {
-      display: block;
-    }
-
-    .override-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--warning);
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .override-input-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-      align-items: center;
-    }
-
-    .override-input {
-      flex: 1;
-      background: var(--surface-muted);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 14px;
-      color: var(--text-main);
-      font-size: 13px;
-      font-family: inherit;
-    }
-
-    .override-input:focus {
-      outline: none;
-      border-color: var(--primary);
-    }
-
-    .override-chips {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
-      flex-wrap: wrap;
-    }
-
-    .chip-btn {
-      background: var(--surface-muted);
-      border: 1px solid var(--border);
-      color: var(--text-sub);
-      padding: 4px 10px;
-      border-radius: 14px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .chip-btn:hover {
-      border-color: var(--primary);
-      color: var(--text-main);
-    }
-
-    /* Action Controls */
-    .action-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-top: 8px;
-      gap: 16px;
-    }
-
-    .action-group {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 12px 24px;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      border: none;
-      font-family: inherit;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary) 0%, #A2482F 100%);
-      color: #FFFFFF;
-      box-shadow: 0 4px 16px var(--primary-glow);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 22px var(--primary-glow);
-    }
-
-    .btn-secondary {
-      background: var(--surface);
-      color: var(--text-main);
-      border: 1px solid var(--border);
-    }
-
-    .btn-secondary:hover {
-      background: var(--surface-muted);
-      border-color: var(--primary);
-    }
-
-    .btn-danger {
-      background: var(--danger-bg);
-      color: var(--danger);
-      border: 1.5px solid var(--danger);
-      font-weight: 700;
-      box-shadow: 0 0 10px rgba(255, 23, 68, 0.2);
-    }
-
-    .btn-danger:hover {
-      background: var(--danger);
-      color: #FFFFFF;
-      box-shadow: 0 0 24px var(--danger);
-      transform: translateY(-1px);
-    }
-
-    /* Execution Receipt View */
-    .receipt-container {
-      display: none;
-      background: var(--success-bg);
-      border: 1px solid var(--success-border);
-      border-radius: 14px;
-      padding: 24px;
-      margin-top: 20px;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .receipt-container.visible {
-      display: block;
-    }
-
-    .receipt-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-      border-bottom: 1px solid var(--success-border);
-      padding-bottom: 12px;
-    }
-
-    .receipt-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--success);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .ledger-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-bottom: 16px;
-    }
-
-    .ledger-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px;
-      border-left: 3px solid var(--success);
-    }
-
-    .ledger-title {
-      font-size: 11px;
-      color: var(--text-sub);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      margin-bottom: 6px;
-      font-weight: 600;
-    }
-
-    .ledger-delta {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-main);
-    }
-
-    .audit-meta {
-      font-size: 11px;
-      color: var(--text-dim);
-      font-family: 'JetBrains Mono', monospace;
-      word-break: break-all;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Modals */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: var(--overlay-bg);
-      backdrop-filter: blur(6px);
-      z-index: 100;
-      place-items: center;
-    }
-
-    .modal-overlay.active {
-      display: grid;
-    }
-
-    .modal-content {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      width: 90%;
-      max-width: 820px;
-      max-height: 82vh;
+    .mitigation-options-section {
+      margin-top: 18px;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
-      box-shadow: var(--shadow-outer);
+      gap: 10px;
     }
-
-    .modal-header {
-      padding: 16px 22px;
-      border-bottom: 1px solid var(--border);
+    .section-headline-sm {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-secondary);
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    .modal-body {
-      padding: 22px;
-      overflow-y: auto;
-      font-family: 'JetBrains Mono', monospace;
+    .options-radio-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .option-card-radio {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .option-card-radio:hover {
+      border-color: var(--border-accent);
+      background: var(--surface);
+    }
+    .option-card-radio.selected {
+      border-color: var(--sage-accent);
+      background: var(--surface);
+      box-shadow: 0 0 14px rgba(178, 207, 156, 0.15);
+    }
+    .option-card-radio.infeasible {
+      opacity: 0.65;
+      border-color: var(--alert-crimson-border);
+    }
+    .option-badge-rec {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(143, 168, 123, 0.2);
+      color: var(--sage-accent);
+      border: 1px solid var(--border-accent);
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .option-name {
       font-size: 12px;
-      color: var(--code-text);
-      background: var(--code-bg);
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .option-meta {
+      font-size: 11px;
+      color: var(--text-secondary);
+      line-height: 1.4;
     }
 
-    .inventory-table {
+    .counter-proposal-panel {
+      margin-top: 14px;
+      background: var(--surface-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .cp-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .cp-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .cp-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .cp-chips-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cp-chip-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .cp-chip-btn:hover, .cp-chip-btn.active-chip {
+      background: var(--sage-primary);
+      color: #0E120E;
+      border-color: var(--sage-primary);
+    }
+
+    .donor-safety-banner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .donor-safety-banner.safe {
+      background: rgba(52, 211, 153, 0.12);
+      border: 1px solid rgba(52, 211, 153, 0.35);
+      color: #34D399;
+    }
+    .donor-safety-banner.violation {
+      background: var(--alert-crimson-bg);
+      border: 1px solid var(--alert-crimson-border);
+      color: var(--alert-crimson);
+    }
+
+    .human-gate-bar {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+    .btn-human-dismiss {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-human-dismiss:hover {
+      background: var(--alert-crimson-bg);
+      color: var(--alert-crimson);
+      border-color: var(--alert-crimson-border);
+    }
+    .btn-human-approve {
+      background: var(--sage-primary);
+      border: 1px solid var(--sage-accent);
+      color: #0E120E;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--glow-accent);
+      transition: all 0.2s;
+    }
+    .btn-human-approve:hover {
+      background: var(--sage-accent);
+      transform: translateY(-1px);
+    }
+
+    .receipt-confirmation {
+      display: none;
+      margin-top: 16px;
+      background: rgba(143, 168, 123, 0.12);
+      border: 1px solid var(--border-accent);
+      border-radius: 8px;
+      padding: 14px 18px;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .receipt-confirmation.visible {
+      display: flex;
+    }
+    .receipt-header {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--sage-accent);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .receipt-body {
+      font-size: 12px;
+      color: var(--text-primary);
+    }
+    .receipt-audit-hash {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      word-break: break-all;
+    }
+
+    /* =========================================================================
+       TABS 2, 3, 4: TABLES
+       ========================================================================= */
+    .table-container-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .table-controls-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .search-input-box {
+      background: var(--surface-input);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 12px;
+      color: var(--text-primary);
+      font-size: 12px;
+      outline: none;
+      min-width: 220px;
+    }
+    .search-input-box:focus {
+      border-color: var(--border-accent);
+    }
+    .table-filter-select {
+      background: var(--surface-input);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      color: var(--text-primary);
+      font-size: 12px;
+      outline: none;
+    }
+
+    .pro-table-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+    .pro-table {
       width: 100%;
       border-collapse: collapse;
-      text-align: left;
       font-size: 12px;
+      text-align: left;
     }
-
-    .inventory-table th {
-      color: var(--primary);
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--border);
+    .pro-table th {
+      background: var(--surface-alt);
+      color: var(--text-muted);
       font-weight: 700;
       text-transform: uppercase;
-      font-size: 11px;
-    }
-
-    .inventory-table td {
-      padding: 10px 12px;
+      letter-spacing: 0.6px;
+      font-size: 10px;
+      padding: 10px 14px;
       border-bottom: 1px solid var(--border);
-      color: var(--text-main);
+      position: sticky;
+      top: 0;
+    }
+    .pro-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-primary);
+    }
+    .pro-table tr:hover td {
+      background: var(--surface-alt);
+    }
+    .badge-pill-table {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .badge-healthy {
+      background: rgba(52, 211, 153, 0.14);
+      color: #34D399;
+      border: 1px solid rgba(52, 211, 153, 0.35);
+    }
+    .badge-deficit {
+      background: var(--alert-crimson-bg);
+      color: var(--alert-crimson);
+      border: 1px solid var(--alert-crimson-border);
+    }
+    .badge-friction {
+      background: var(--alert-amber-bg);
+      color: var(--alert-amber);
+      border: 1px solid var(--alert-amber-border);
     }
 
-    pre {
+    /* Modal / JSON Inspector Overlay */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-pane {
+      background: var(--surface);
+      border: 1px solid var(--border-accent);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 780px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-dropdown);
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .modal-body {
+      padding: 16px 18px;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      background: var(--terminal-bg);
+      color: var(--sage-accent);
       white-space: pre-wrap;
       word-break: break-all;
+    }
+    .modal-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .modal-close-btn:hover {
+      color: var(--text-primary);
+    }
+
+    /* Toast Notifications */
+    #toastContainer {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .toast-msg {
+      background: var(--surface);
+      border: 1px solid var(--border-accent);
+      border-radius: 8px;
+      padding: 12px 18px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+      box-shadow: var(--shadow-dropdown);
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: toastSlideIn 0.25s ease;
+    }
+    @keyframes toastSlideIn {
+      from { transform: translateX(40px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
     }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <!-- Top Navigation Header -->
-  <header>
-    <div class="brand">
-      <div class="brand-logo">N</div>
-      <div>
-        <div class="brand-title">NAVORA Operations Engine</div>
-        <div class="brand-sub">Autonomous Procurement & Multi-Echelon Rebalancing (Kaveri Spares Copilot)</div>
-      </div>
-    </div>
-    <div class="header-actions">
-      <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Theme">
-        <span id="themeIcon">☀️</span>
-        <span id="themeLabel">Light Mode</span>
-      </button>
-      <button class="theme-toggle-btn" onclick="openNetworkModal()">🏢 Network Inventory</button>
-      <button class="theme-toggle-btn" onclick="openLedgerModal()">📜 Audit Ledger</button>
-      <button class="theme-toggle-btn" onclick="openJsonModal()">Inspect JSON →</button>
-      <div class="status-badge">
-        <span class="status-dot"></span>
-        <span id="connStatusText">Stream Active (Port 8000)</span>
-      </div>
-    </div>
-  </header>
-
-  <!-- Operations & Chaos Command Bar -->
-  <div class="command-bar">
-    <div class="incident-selector-wrap">
-      <span class="incident-select-label">INCIDENT SCAN:</span>
-      <select id="incidentSelect" class="incident-dropdown" onchange="changeIncident(this.value)">
-        <option value="">Scanning Multi-Echelon Network...</option>
-      </select>
-    </div>
-    <div class="chaos-toolbar">
-      <span style="font-size:11px;font-weight:700;color:var(--text-sub);text-transform:uppercase;">Chaos Injection:</span>
-      <button class="chaos-btn" id="chaosSurgeBtn" onclick="injectChaosScenario('DEMAND_SPIKE', 3.0)" title="Inject 3x demand surge at Gokak">
-        🌪️ Demand Surge (3x)
-      </button>
-      <button class="chaos-btn" id="chaosRoadblockBtn" onclick="injectChaosScenario('TRANSFER_ROADBLOCK', 1.0)" title="Block Belgaum transfer route">
-        🚧 Block Route
-      </button>
-      <button class="chaos-btn" id="chaosDelayBtn" onclick="injectChaosScenario('SUPPLIER_HIKE', 5.0)" title="Increase Supplier Lead Time by 5 days">
-        📈 Supplier Delay (+5d)
-      </button>
-      <button class="chaos-btn" onclick="resetChaosBaseline()" title="Reset to clean benchmark baseline">
-        🔄 Reset Baseline
-      </button>
-      <span class="chaos-badge" id="activeChaosCount">0 Active</span>
-    </div>
-  </div>
-
-  <!-- Sub-Header Simulation Tabs Row -->
-  <div class="controls-panel">
-    <button class="btn-tab active" id="tabInitial" onclick="simulateState('INITIAL_LOAD')">
-      [1. Initial Briefing]
-    </button>
-    <button class="btn-tab" id="tabApprove" onclick="simulateState('APPROVE_CLICK')">
-      [2. Approve & Execute]
-    </button>
-    <button class="btn-tab" id="tabModify" onclick="simulateState('MODIFICATION_SUBMIT')">
-      [3. Human Override]
-    </button>
-    <button class="btn-tab" id="tabReject" onclick="simulateState('REJECT_CLICK')">
-      [4. Reject / Discard]
-    </button>
-  </div>
-
-  <!-- Main Dashboard Elevated Glassmorphic Card -->
-  <div class="feed-card" id="briefingFeedCard">
-    <!-- Summary Headline Header -->
-    <div class="summary-header">
-      <div>
-        <h1 class="summary-title" id="summaryHeadline">SUMMARY OVERVIEW: CRITICAL DEFICIT DETECTED</h1>
-        <p class="summary-sub" id="summarySub">Ingesting live multi-echelon telemetry across North Karnataka retail network.</p>
-      </div>
-      <div class="category-tag-wrap">
-        <span class="badge-severity badge-critical" id="badgeSeverity">CRITICAL</span>
-        <span class="badge-cat" id="badgeCategory">CATEGORY_A (Stockout)</span>
-      </div>
-    </div>
-
-    <!-- 4 Key Metric Cards Row with Sleek SVG Graphics -->
-    <div class="metric-grid">
-      <!-- Card 1: Stabilized Stock -->
-      <div class="metric-card">
-        <div class="metric-top">
-          <span class="metric-label">Current Stock & Burn</span>
-          <div class="check-icon-circle">✓</div>
-        </div>
-        <div class="metric-value" id="valStockBurn">8 / 4.0 Day</div>
-        <div class="metric-sub" id="valStockBurnSub">Units on hand vs. Daily consumption</div>
-        <div class="metric-svg-wrap">
-          <svg viewBox="0 0 160 40">
-            <defs>
-              <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#E07A5F" stop-opacity="0.45"/>
-                <stop offset="100%" stop-color="#E07A5F" stop-opacity="0.0"/>
-              </linearGradient>
-            </defs>
-            <path d="M 0,34 Q 30,36 55,26 T 105,18 T 160,8 L 160,40 L 0,40 Z" fill="url(#chartGrad)"/>
-            <path d="M 0,34 Q 30,36 55,26 T 105,18 T 160,8" fill="none" stroke="#E07A5F" stroke-width="2.5" stroke-linecap="round"/>
-            <circle cx="105" cy="18" r="3.5" fill="#FAF6F0" stroke="#E07A5F" stroke-width="2"/>
-          </svg>
+<div id="appLayout">
+  <!-- =======================================================================
+       COLLAPSIBLE SIDEBAR (290px -> 0px)
+       ======================================================================= -->
+  <aside id="sidebar">
+    <div class="sidebar-inner">
+      <!-- Brand & Platform -->
+      <div class="sidebar-brand">
+        <div class="brand-logo-badge">KS</div>
+        <div class="brand-meta">
+          <h2>Kaveri Spares Copilot</h2>
+          <span>NAVORA Autonomous Engine</span>
         </div>
       </div>
 
-      <!-- Card 2: Days of Cover -->
-      <div class="metric-card">
-        <div class="metric-top">
-          <span class="metric-label">Days of Cover (D)</span>
-          <div class="check-icon-circle">✓</div>
+      <!-- 1. Visual Theme Selector (Dark / Light) -->
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">
+          <span>🎨</span> Visual Theme Mode
         </div>
-        <div class="metric-value" id="valCoverageGap">2.0 Days</div>
-        <div class="metric-sub" id="valCoverageSub">Stockout projected in 48 hours</div>
-        <div class="metric-svg-wrap" style="justify-content: center;">
-          <svg viewBox="0 0 100 45" style="width: 85px; height: 38px;">
-            <path d="M 15,40 A 35,35 0 0,1 85,40" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="8" stroke-linecap="round"/>
-            <path d="M 15,40 A 35,35 0 0,1 55,10" fill="none" stroke="#E07A5F" stroke-width="8" stroke-linecap="round"/>
-          </svg>
-        </div>
-      </div>
-
-      <!-- Card 3: Stockout Deficit Gap -->
-      <div class="metric-card">
-        <div class="metric-top">
-          <span class="metric-label">Deficit Gap (Δ)</span>
-          <div class="check-icon-circle">✓</div>
-        </div>
-        <div class="metric-value" id="valLeadTime">5.0 Days</div>
-        <div class="metric-sub" id="valLeadTimeSub">Primary vendor lead time: 7.0 days</div>
-        <div class="metric-svg-wrap">
-          <svg viewBox="0 0 160 40">
-            <defs>
-              <linearGradient id="waveGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#B0A298" stop-opacity="0.3"/>
-                <stop offset="100%" stop-color="#B0A298" stop-opacity="0.0"/>
-              </linearGradient>
-            </defs>
-            <path d="M 0,35 Q 40,38 75,25 T 120,12 T 160,26 L 160,40 L 0,40 Z" fill="url(#waveGrad)"/>
-            <path d="M 0,35 Q 40,38 75,25 T 120,12 T 160,26" fill="none" stroke="#B0A298" stroke-width="2" stroke-linecap="round"/>
-          </svg>
+        <div class="theme-radio-group">
+          <button class="theme-radio-btn active" id="btnThemeDark" onclick="setTheme('dark')">
+            <span>🌙</span> Dark
+          </button>
+          <button class="theme-radio-btn" id="btnThemeLight" onclick="setTheme('light')">
+            <span>☀️</span> Light
+          </button>
         </div>
       </div>
 
-      <!-- Card 4: Adaptive Velocity Trend -->
-      <div class="metric-card">
-        <div class="metric-top">
-          <span class="metric-label">Velocity Trend (T)</span>
-          <div class="check-icon-circle">✓</div>
+      <!-- 2. Operating Controls: Simulation Date -->
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">
+          <span>⏱️</span> Operating Controls
         </div>
-        <div class="metric-value" id="valExposure">1.00x STABLE</div>
-        <div class="metric-sub" id="valExposureSub">v_recent (4.0) vs v_baseline (4.0)</div>
-        <div class="metric-svg-wrap" style="align-items: center;">
-          <svg viewBox="0 0 160 14" style="height: 14px;">
-            <line x1="0" y1="7" x2="160" y2="7" stroke="#34D399" stroke-width="2.5" stroke-linecap="round"/>
-          </svg>
+        <div class="sim-date-card">
+          <div style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Simulation Epoch:</div>
+          <input type="text" id="simDateInput" class="sim-date-input" value="2026/10/09" title="Anchored Simulation Date">
+          <button class="sim-recalc-btn" onclick="recalculateSimulation()">
+            <span>↻</span> Recalculate Telemetry
+          </button>
         </div>
       </div>
-    </div>
 
-    <!-- Closed-Form Math Telemetry Proof Box (Rule 2 & Rule 11) -->
-    <div class="math-proof-box">
-      <div class="math-proof-title">
-        <span>📐 Closed-Form Mathematical Telemetry Proof (12-Agent Rules Mandate)</span>
-        <span style="font-weight:400;color:var(--text-sub);">Zero-LLM Arithmetic Audit</span>
-      </div>
-      <div class="math-grid">
-        <div class="math-item">
-          <span class="math-formula-tag">Adaptive Consumption Velocity:</span>
-          <span class="math-formula-value" id="mathFormulaVelocity">v_pred = 4.00 units/day (Trend: STABLE, 1.00x)</span>
+      <!-- 3. User Persona Card -->
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">
+          <span>👤</span> User Persona
         </div>
-        <div class="math-item">
-          <span class="math-formula-tag">Days of Inventory Cover:</span>
-          <span class="math-formula-value" id="mathFormulaCover">D = Stock (8) / v (4.00) = 2.0 days</span>
-        </div>
-        <div class="math-item">
-          <span class="math-formula-tag">Stockout Deficit Gap:</span>
-          <span class="math-formula-value" id="mathFormulaGap">Δ = max(0, T_lead (7) - D (2.0)) = 5.0 days</span>
-        </div>
-        <div class="math-item">
-          <span class="math-formula-tag">Revenue / Margin at Risk:</span>
-          <span class="math-formula-value" id="mathFormulaRevenue">Lost Revenue = Δ (5.0d) × v (4.00) × Margin (₹297.50) = ₹5,950.00</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Commercial Impact Scorecard Row (Rule 5) -->
-    <div class="scorecard-title">Commercial Impact & Capital Allocation Scorecard</div>
-    <div class="scorecard-grid">
-      <div class="score-card">
-        <span class="score-label">Net Direct Outlay</span>
-        <span class="score-val" id="scoreNetOutlay" style="color:var(--success);">₹250.00</span>
-        <span class="score-sub">Internal handling fee vs ₹28,000+ PO</span>
-      </div>
-      <div class="score-card">
-        <span class="score-label">Lost Units Averted</span>
-        <span class="score-val" id="scoreLostUnits" style="color:var(--primary);">14 Units</span>
-        <span class="score-sub">Stockout deficit gap fully protected</span>
-      </div>
-      <div class="score-card">
-        <span class="score-label">Working Capital Outflow</span>
-        <span class="score-val" id="scoreCapOutflow" style="color:var(--cyan);">₹0.00</span>
-        <span class="score-sub">Zero external capital deployed</span>
-      </div>
-      <div class="score-card">
-        <span class="score-label">Downtime Risk Days</span>
-        <span class="score-val" id="scoreDowntime" style="color:var(--success);">0 Days</span>
-        <span class="score-sub">Averted 5.0 days deficit cliff</span>
-      </div>
-    </div>
-
-    <!-- 14-Day Forward Trajectory Interactive Curve Projection -->
-    <div class="trajectory-panel">
-      <div class="trajectory-header">
-        <div class="trajectory-title">
-          <span>📈 14-Day Forward Inventory Trajectory Projections</span>
-        </div>
-        <div class="trajectory-legend">
-          <div class="legend-item">
-            <span class="legend-color" style="background:#FF1744;"></span>
-            <span>Status Quo (Inaction)</span>
+        <div class="persona-card">
+          <div class="persona-header">
+            <div class="persona-avatar">RK</div>
+            <div class="persona-info">
+              <h4>Ramesh Kulkarni</h4>
+              <p>Head of Purchasing</p>
+            </div>
           </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background:#F59E0B;"></span>
-            <span>Expedited Supplier PO</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background:#38BDF8;"></span>
-            <span>Inter-Warehouse Transfer</span>
-          </div>
-          <div class="legend-item" id="legendCounterProposal" style="display:none;">
-            <span class="legend-color" style="background:#34D399;"></span>
-            <span>Revised Counter-Proposal</span>
+          <div class="persona-badge">
+            <span>🛡️</span> Level 3 Signer Clearance
           </div>
         </div>
       </div>
-      <div class="svg-trajectory-wrap">
-        <svg id="trajectorySvg" viewBox="0 0 900 200" preserveAspectRatio="none">
-          <!-- Rendered dynamically by JavaScript -->
-        </svg>
-      </div>
-    </div>
 
-    <!-- Mitigation Strategies & Lifecycle Flowchart Section -->
-    <div class="section-divider-title">Mitigation Pathways & Automated Resolution Lifecycle ($N \ge 2$)</div>
-    <div class="mitigation-flow-grid">
-      <!-- Left: Mitigation Options List -->
-      <div class="strategy-list" id="strategyListContainer">
-        <div class="strategy-item active-item" id="optCard1" onclick="selectOption('OPT-1')">
+      <!-- 4. Operations Network Card -->
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">
+          <span>🏢</span> Operations Network
+        </div>
+        <div class="network-card">
+          <div class="network-stat-row">
+            <span>Retail Stores (6):</span>
+            <strong>Gokak, Belgaum, Dharwad, Hubli, Bagalkot, Nippani</strong>
+          </div>
+          <div class="network-stat-row">
+            <span>Central Hubs (2):</span>
+            <strong>Belgaum Central, Hubli Reg.</strong>
+          </div>
+          <div class="network-tag-cloud">
+            <span class="network-chip hub" onclick="filterByLocationTag('Belgaum Central Warehouse')">Belgaum Central</span>
+            <span class="network-chip hub" onclick="filterByLocationTag('Hubli Regional Warehouse')">Hubli Regional</span>
+            <span class="network-chip" onclick="filterByLocationTag('Gokak')">Gokak</span>
+            <span class="network-chip" onclick="filterByLocationTag('Belgaum')">Belgaum</span>
+            <span class="network-chip" onclick="filterByLocationTag('Dharwad')">Dharwad</span>
+            <span class="network-chip" onclick="filterByLocationTag('Hubli')">Hubli</span>
+            <span class="network-chip" onclick="filterByLocationTag('Bagalkot')">Bagalkot</span>
+            <span class="network-chip" onclick="filterByLocationTag('Nippani')">Nippani</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Chaos Engine Trigger Controls -->
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">
+          <span>⚡</span> Chaos Engine Triggers
+        </div>
+        <div class="chaos-panel">
+          <div class="chaos-btn-grid">
+            <button class="chaos-action-btn" id="btnChaosSpike" onclick="triggerChaos('DEMAND_SPIKE', 3.0)">
+              <span>🌪️ 3x Demand Spike (Gokak)</span>
+              <span>⚡</span>
+            </button>
+            <button class="chaos-action-btn" id="btnChaosRoute" onclick="triggerChaos('TRANSFER_ROADBLOCK', 1.0)">
+              <span>🚧 Block Belgaum Route</span>
+              <span>⚡</span>
+            </button>
+            <button class="chaos-action-btn" id="btnChaosDelay" onclick="triggerChaos('SUPPLIER_HIKE', 5.0)">
+              <span>📈 Vendor Delay (+5 Days)</span>
+              <span>⚡</span>
+            </button>
+          </div>
+          <button class="chaos-reset-btn" onclick="resetChaosBaseline()">
+            <span>🔄</span> Reset to Benchmark Baseline
+          </button>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+            <div class="chaos-status-badge">
+              <span class="chaos-status-dot" id="chaosDot"></span>
+              <span id="chaosStatusText">Baseline Normal</span>
+            </div>
+            <span style="font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;" id="chaosActiveCount">0 Active</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- Sticky Sidebar Toggle Chevron -->
+  <button id="sidebarToggleBtn" onclick="toggleSidebar()" title="Toggle Sidebar [Ctrl+B]">◀</button>
+
+  <!-- =======================================================================
+       MAIN CANVAS AREA
+       ======================================================================= -->
+  <main id="mainCanvas">
+    <!-- Top Header: Clean, Sleek, NO Settings/Chaos Buttons! -->
+    <header class="top-header">
+      <div class="top-header-title-wrap">
+        <div class="top-header-title">Supply Chain Copilot — Executive Operations Cockpit</div>
+        <span class="top-header-badge">NAVORA Multi-Agent v2.4</span>
+      </div>
+      <div class="top-header-meta">
+        <div class="conn-status-pill">
+          <span class="conn-dot"></span>
+          <span id="connStatusText">Stream Active (Port 8000)</span>
+        </div>
+        <button class="header-inspect-btn" onclick="openJsonModal()">
+          <span>{ }</span> Inspect State
+        </button>
+      </div>
+    </header>
+
+    <!-- Multi-View Navigation Tabs -->
+    <nav class="nav-tabs-bar">
+      <button class="nav-tab-btn active" id="tabBtnFeed" onclick="switchView('feed')">
+        <span>🚨 Morning Action Feed</span>
+        <span class="nav-tab-counter" id="feedCountBadge">0 Tasks</span>
+      </button>
+      <button class="nav-tab-btn" id="tabBtnInventory" onclick="switchView('inventory')">
+        <span>🏭 Network Inventory (8)</span>
+        <span class="nav-tab-counter" id="invCountBadge">48 Rows</span>
+      </button>
+      <button class="nav-tab-btn" id="tabBtnSupplier" onclick="switchView('supplier')">
+        <span>🔍 Supplier Audit</span>
+        <span class="nav-tab-counter" id="supCountBadge">9 Vendors</span>
+      </button>
+      <button class="nav-tab-btn" id="tabBtnAudit" onclick="switchView('audit')">
+        <span>📜 Audit Ledger</span>
+        <span class="nav-tab-counter" id="auditCountBadge">0 Signed</span>
+      </button>
+    </nav>
+
+    <!-- VIEW 1: MORNING ACTION FEED -->
+    <section class="view-container active-view" id="viewFeed">
+      <!-- Summary KPI Strip -->
+      <div class="feed-header-kpi-bar">
+        <div class="kpi-stat-card">
+          <span class="kpi-stat-label">Total Operational Issues</span>
+          <span class="kpi-stat-val" id="kpiTotalIssues">--</span>
+          <span class="kpi-stat-sub">Across 8 multi-echelon nodes</span>
+        </div>
+        <div class="kpi-stat-card">
+          <span class="kpi-stat-label">Critical Stockout Hazards</span>
+          <span class="kpi-stat-val" style="color: var(--alert-crimson);" id="kpiCriticalStockouts">--</span>
+          <span class="kpi-stat-sub">Stockout projected &lt; 48 hrs</span>
+        </div>
+        <div class="kpi-stat-card">
+          <span class="kpi-stat-label">Top Attention SKU</span>
+          <span class="kpi-stat-val" style="font-size: 16px; color: var(--alert-amber);" id="kpiTopSku">Hubli — PUMP-GEAR-03</span>
+          <span class="kpi-stat-sub" id="kpiTopSkuSub">Priority agent escalation</span>
+        </div>
+        <div class="kpi-stat-card">
+          <span class="kpi-stat-label">Commercial Margin Exposure</span>
+          <span class="kpi-stat-val" style="color: var(--sage-accent);" id="kpiMarginRisk">₹54,670</span>
+          <span class="kpi-stat-sub">Signer: Ramesh Kulkarni</span>
+        </div>
+      </div>
+
+      <!-- Feed Severity Dropdown & Multi-Vector Filter Toolbar -->
+      <div class="feed-filter-bar">
+        <div class="filter-row-top">
+          <div class="filter-dropdowns-wrap">
+            <!-- Severity Selector Dropdown Menu -->
+            <div class="filter-field-group">
+              <label for="feedSeveritySelect" class="filter-field-label">
+                <span>🎯</span> Severity Selector:
+              </label>
+              <select id="feedSeveritySelect" class="severity-dropdown-menu" onchange="onSeverityDropdownChange(this.value)">
+                <option value="ALL">All Severities</option>
+                <option value="CRITICAL">🚨 Critical</option>
+                <option value="HIGH">⚠️ High</option>
+                <option value="MODERATE">⚡ Moderate</option>
+                <option value="LOW">ℹ️ Low</option>
+              </select>
+            </div>
+
+            <!-- Facility Node Filter Dropdown -->
+            <div class="filter-field-group">
+              <label for="feedLocFilter" class="filter-field-label">
+                <span>🏢</span> Facility Node:
+              </label>
+              <select class="facility-dropdown-menu" id="feedLocFilter" onchange="filterFeedList()">
+                <option value="ALL">All Facilities (8 Nodes)</option>
+                <option value="Hubli">Hubli Store</option>
+                <option value="Gokak">Gokak Store</option>
+                <option value="Dharwad">Dharwad Store</option>
+                <option value="Nippani">Nippani Store</option>
+                <option value="Bagalkot">Bagalkot Store</option>
+                <option value="Belgaum">Belgaum Store</option>
+                <option value="Belgaum Central Warehouse">Belgaum Central Hub</option>
+                <option value="Hubli Regional Warehouse">Hubli Regional Hub</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- SKU / Part Search Box -->
+          <div class="feed-search-wrap">
+            <input type="text" class="feed-search-input" id="feedSearchInput" placeholder="🔍 Search SKU, Part name, or ID..." oninput="filterFeedList()">
+          </div>
+        </div>
+
+        <!-- Quick 1-Click Severity Pills -->
+        <div class="filter-row-bottom">
+          <span class="filter-pills-label">Quick Filter:</span>
+          <div class="filter-pills-wrap">
+            <button class="filter-pill-btn active" id="filterSevAll" onclick="setSeverityFilter('ALL')">All (<span id="countSevAll">0</span>)</button>
+            <button class="filter-pill-btn" id="filterSevCrit" onclick="setSeverityFilter('CRITICAL')">🚨 Critical (<span id="countSevCrit">0</span>)</button>
+            <button class="filter-pill-btn" id="filterSevHigh" onclick="setSeverityFilter('HIGH')">⚠️ High (<span id="countSevHigh">0</span>)</button>
+            <button class="filter-pill-btn" id="filterSevMod" onclick="setSeverityFilter('MODERATE')">⚡ Moderate (<span id="countSevMed">0</span>)</button>
+            <button class="filter-pill-btn" id="filterSevLow" onclick="setSeverityFilter('LOW')">ℹ️ Low (<span id="countSevLow">0</span>)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accordion Feed Container -->
+      <div class="accordion-list" id="accordionFeedContainer">
+        <!-- Rendered dynamically from live backend data -->
+      </div>
+    </section>
+
+    <!-- VIEW 2: MULTI-ECHELON NETWORK INVENTORY (8 Facilities) -->
+    <section class="view-container" id="viewInventory">
+      <div class="table-container-card">
+        <div class="table-controls-strip">
           <div>
-            <div class="strategy-name">1. Belgaum Hub Inter-Warehouse Transfer (24 Hr)</div>
-            <div class="strategy-meta">Fast dispatch • ₹250 flat handling • Sourced from Belgaum Hub (40 on-hand)</div>
+            <h3 style="font-size: 14px; font-weight: 700; color: var(--text-primary);">Multi-Echelon Stock Distribution (8 Nodes)</h3>
+            <p style="font-size: 11px; color: var(--text-secondary);">Real-time on-hand, allocated transfers, velocity, and cover days across 6 retail branches & 2 central hubs.</p>
           </div>
-          <span class="badge-status badge-primary-opt">Recommended</span>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" class="search-input-box" id="invSearchInput" placeholder="Filter SKU or location..." oninput="filterInventoryTable()">
+            <select class="table-filter-select" id="invLocSelect" onchange="filterInventoryTable()">
+              <option value="ALL">All Facilities (8)</option>
+              <option value="Belgaum Central Warehouse">Belgaum Central Hub</option>
+              <option value="Hubli Regional Warehouse">Hubli Regional Hub</option>
+              <option value="Gokak">Gokak Store</option>
+              <option value="Belgaum">Belgaum Store</option>
+              <option value="Dharwad">Dharwad Store</option>
+              <option value="Hubli">Hubli Store</option>
+              <option value="Bagalkot">Bagalkot Store</option>
+              <option value="Nippani">Nippani Store</option>
+            </select>
+          </div>
         </div>
-        <div class="strategy-item" id="optCard2" onclick="selectOption('OPT-2')">
+        <div class="pro-table-wrap">
+          <table class="pro-table" id="inventoryTable">
+            <thead>
+              <tr>
+                <th>Location</th>
+                <th>Type</th>
+                <th>SKU</th>
+                <th>Description</th>
+                <th>Model</th>
+                <th>On-Hand</th>
+                <th>Burn Velocity</th>
+                <th>Days Cover</th>
+                <th>Health Status</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: SUPPLIER AUDIT -->
+    <section class="view-container" id="viewSupplier">
+      <div class="table-container-card">
+        <div class="table-controls-strip">
           <div>
-            <div class="strategy-name">2. Expedited Secondary Procurement (Supplier PO)</div>
-            <div class="strategy-meta">4 Days lead • ₹28,000 outlay • Emergency secondary backup</div>
+            <h3 style="font-size: 14px; font-weight: 700; color: var(--text-primary);">Supplier Reliability & Contract Variance Audit</h3>
+            <p style="font-size: 11px; color: var(--text-secondary);">Tracking contract price deviations, lead time reliability, MOQ friction, and SLA performance.</p>
           </div>
-          <span class="badge-status badge-spot-opt">Alternative</span>
-        </div>
-      </div>
-
-      <!-- Right: Linear Horizontal Flowchart -->
-      <div class="flowchart-panel">
-        <div class="flow-nodes-wrapper">
-          <div class="flow-node-box">
-            <span>Deficit Event</span>
-          </div>
-          <svg class="flow-connector-svg" viewBox="0 0 80 24">
-            <defs>
-              <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 1 L 8 5 L 0 9 z" fill="#E07A5F"/>
-              </marker>
-            </defs>
-            <path d="M 0,12 L 72,12" fill="none" stroke="#E07A5F" stroke-width="2.5" marker-end="url(#arrow)"/>
-          </svg>
-          <div class="flow-node-box active-node">
-            <span>Stabilized</span>
-          </div>
-          <svg class="flow-connector-svg" viewBox="0 0 80 24">
-            <path d="M 0,12 L 72,12" fill="none" stroke="#E07A5F" stroke-width="2.5" marker-end="url(#arrow)"/>
-          </svg>
-          <div class="flow-node-box">
-            <span>Monitored</span>
+          <div>
+            <input type="text" class="search-input-box" id="supSearchInput" placeholder="Filter vendor or SKU..." oninput="filterSupplierTable()">
           </div>
         </div>
+        <div class="pro-table-wrap">
+          <table class="pro-table" id="supplierTable">
+            <thead>
+              <tr>
+                <th>Supplier / Vendor</th>
+                <th>SKU Supplied</th>
+                <th>Contract Tier</th>
+                <th>Unit Price</th>
+                <th>Variance vs Baseline</th>
+                <th>Lead Time</th>
+                <th>MOQ</th>
+                <th>MOQ Risk</th>
+                <th>SLA On-Time</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="supplierTableBody"></tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Action Draft Execution Box -->
-    <div class="draft-container" id="draftContainer">
-      <div class="draft-badge" id="draftTypeBadge">ACTION DRAFT: INTER-WAREHOUSE TRANSFER</div>
-      <div class="draft-grid" id="draftGrid">
-        <div class="draft-field">
-          <div class="draft-label">Transfer Request ID</div>
-          <div class="draft-value" id="draftId">TR-8821</div>
+    <!-- VIEW 4: AUDIT LEDGER -->
+    <section class="view-container" id="viewAudit">
+      <div class="table-container-card">
+        <div class="table-controls-strip">
+          <div>
+            <h3 style="font-size: 14px; font-weight: 700; color: var(--text-primary);">Immutable Decision Ledger (SHA-256 Verified)</h3>
+            <p style="font-size: 11px; color: var(--text-secondary);">Chronological, cryptographically signed ledger of Ramesh Kulkarni's purchasing actions and overrides.</p>
+          </div>
+          <button class="header-inspect-btn" onclick="syncAuditLedger()">
+            <span>↻</span> Refresh Ledger
+          </button>
         </div>
-        <div class="draft-field">
-          <div class="draft-label">Source Facility (Surplus Hub)</div>
-          <div class="draft-value" id="draftSource">Belgaum Central Hub (Stock: 40)</div>
-        </div>
-        <div class="draft-field">
-          <div class="draft-label">Destination Facility</div>
-          <div class="draft-value" id="draftDest">Gokak Regional Facility</div>
-        </div>
-        <div class="draft-field">
-          <div class="draft-label">SKU / Item Name</div>
-          <div class="draft-value" id="draftSku">FILTER-HYD-01 (Hydraulic Oil Filter)</div>
-        </div>
-        <div class="draft-field">
-          <div class="draft-label">Allocated Quantity</div>
-          <div class="draft-value" id="draftQty">14 Units</div>
-        </div>
-        <div class="draft-field">
-          <div class="draft-label">Resulting Days of Cover</div>
-          <div class="draft-value" id="draftResultCover">5.5 Days (Safe)</div>
-        </div>
-        <div class="draft-field">
-          <div class="draft-label">Direct Cost Outlay</div>
-          <div class="draft-value" id="draftCost">₹250.00</div>
-        </div>
-        <div class="draft-field">
-          <div class="draft-label">Estimated Transit Time</div>
-          <div class="draft-value" id="draftEta">24 Hours</div>
-        </div>
-        <div class="draft-field">
-          <div class="draft-label">Source Hub Post-Balance</div>
-          <div class="draft-value" id="draftSourceRemaining">26 Units (52.0 Days Cover > 15d Mandate)</div>
+        <div class="pro-table-wrap">
+          <table class="pro-table" id="auditTable">
+            <thead>
+              <tr>
+                <th>TxID / SHA-256 Hash</th>
+                <th>Timestamp</th>
+                <th>Action Type</th>
+                <th>Target Facility & SKU</th>
+                <th>Quantity</th>
+                <th>Signer</th>
+                <th>Status</th>
+                <th>Ledger Proof</th>
+              </tr>
+            </thead>
+            <tbody id="auditTableBody"></tbody>
+          </table>
         </div>
       </div>
-    </div>
-
-    <!-- Donor Safety Buffer Alert Banner (Rule 6 Mandate) -->
-    <div class="safety-banner" id="safetyAlertBanner">
-      <span id="safetyAlertIcon">✓</span>
-      <span id="safetyAlertText">DONOR SAFETY BUFFER COMPLIANT: Belgaum retains 52.0 days of cover (Safe ≥ 15.0 days).</span>
-    </div>
-
-    <!-- Conversational Override Drawer -->
-    <div class="override-drawer" id="overrideDrawer">
-      <div class="override-title">
-        <span>✏️ Ramesh Kulkarni Counter-Proposal & HITL Recalibration (Rule 10)</span>
-      </div>
-      <div style="font-size:12px;color:var(--text-sub);margin-bottom:8px">
-        Enter managerial parameter adjustments (e.g. <em>"Make it 18 units instead"</em> or test buffer breach with <em>"38 units"</em>). The deterministic math engine will re-verify donor safety buffer ($\ge 15.0$ days) instantly.
-      </div>
-      <div class="override-input-group">
-        <input type="text" class="override-input" id="overrideInput" value="Make it 18 units instead">
-        <button class="btn btn-secondary" onclick="applyCustomOverride()">Recalculate & Verify</button>
-      </div>
-      <div class="override-chips">
-        <span style="font-size:11px;color:var(--text-sub);display:flex;align-items:center;">Quick Test:</span>
-        <button class="chip-btn" onclick="applyQuickChip(12)">12 Units</button>
-        <button class="chip-btn" onclick="applyQuickChip(14)">14 Units (Default)</button>
-        <button class="chip-btn" onclick="applyQuickChip(18)">18 Units (Safe +44d)</button>
-        <button class="chip-btn" onclick="applyQuickChip(25)">25 Units</button>
-        <button class="chip-btn" onclick="applyQuickChip(38)" style="color:var(--danger);border-color:var(--danger-border)">⚠️ 38 Units (Breach Test)</button>
-      </div>
-    </div>
-
-    <!-- Governance Action Buttons Row -->
-    <div class="action-row" id="actionButtonsRow">
-      <div class="action-group">
-        <button class="btn btn-primary" id="btnApprove" onclick="handleApprove()">
-          <span>✓</span>
-          <span id="approveBtnText">Approve & Execute</span>
-        </button>
-        <button class="btn btn-secondary" id="btnModifyToggle" onclick="toggleOverrideDrawer()">
-          <span>✏️</span>
-          <span>Reject / Modify</span>
-        </button>
-      </div>
-      <div>
-        <button class="btn btn-danger" onclick="handleReject()">
-          <span>✕</span>
-          <span>Reject & Archive</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Component 7: Execution Receipt View -->
-    <div class="receipt-container" id="receiptView">
-      <div class="receipt-header">
-        <div class="receipt-title">
-          <span>✓</span>
-          <span id="receiptHeading">Transfer Request TR-8821 dispatched to Belgaum warehouse.</span>
-        </div>
-        <div class="badge-status badge-primary-opt" style="font-size:12px">DISPATCHED</div>
-      </div>
-      <div style="font-size:13px;color:var(--text-main);margin-bottom:14px" id="receiptSummary">
-        Inventory state updated: Gokak pending in-transit (+14 units), Belgaum allocated (-14 units).
-      </div>
-      <div class="ledger-grid">
-        <div class="ledger-card">
-          <div class="ledger-title" id="ledgerDestTitle">DESTINATION: Gokak Regional Facility</div>
-          <div class="ledger-delta" id="ledgerDestDelta">+14 Units (Pending In-Transit)</div>
-          <div style="font-size:11px;color:var(--text-sub);margin-top:4px" id="ledgerDestCover">New Effective Stock: 22 Units (5.5 Days Cover)</div>
-        </div>
-        <div class="ledger-card">
-          <div class="ledger-title" id="ledgerOriginTitle">ORIGIN: Belgaum Central Hub</div>
-          <div class="ledger-delta" id="ledgerOriginDelta">-14 Units (Allocated for Dispatch)</div>
-          <div style="font-size:11px;color:var(--text-sub);margin-top:4px" id="ledgerOriginBuffer">Remaining Buffer: 26 Units (Safe > 15d threshold)</div>
-        </div>
-      </div>
-      <div class="audit-meta" id="receiptAuditMeta">
-        [AUDIT LEDGER] TxID: 0x8821-E92A | Timestamp: 2026-10-09T17:34:22Z | Signer: Ramesh Kulkarni | Overrides: None | Target: Belgaum Hub WMS API
-      </div>
-    </div>
-  </div>
+    </section>
+  </main>
 </div>
 
-<!-- Modal 1: Raw Telemetry JSON Inspector -->
+<!-- =======================================================================
+     MODALS & OVERLAYS
+     ======================================================================= -->
 <div class="modal-overlay" id="jsonModal">
-  <div class="modal-content">
+  <div class="modal-pane">
     <div class="modal-header">
-      <h3 style="font-size:15px;font-weight:700;color:var(--text-main)">NAVORA Ingested Backend Telemetry (Section 3.1 Contract)</h3>
-      <button class="theme-toggle-btn" onclick="closeJsonModal()">Close</button>
+      <span>NAVORA Runtime Telemetry & Agentic State</span>
+      <button class="modal-close-btn" onclick="closeJsonModal()">✕</button>
     </div>
-    <div class="modal-body">
-      <pre id="jsonPayloadPre"></pre>
-    </div>
+    <div class="modal-body" id="jsonModalPre">Loading live telemetry stream...</div>
   </div>
 </div>
 
-<!-- Modal 2: Multi-Echelon Network Stock Explorer -->
-<div class="modal-overlay" id="networkModal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3 style="font-size:15px;font-weight:700;color:var(--text-main)">🏢 Multi-Echelon Network Stock Explorer (8 Facilities)</h3>
-      <button class="theme-toggle-btn" onclick="closeNetworkModal()">Close</button>
-    </div>
-    <div class="modal-body" style="padding:16px;">
-      <table class="inventory-table">
-        <thead>
-          <tr>
-            <th>Facility</th>
-            <th>Type</th>
-            <th>SKU</th>
-            <th>On-Hand</th>
-            <th>Safety Stock</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="networkTableBody">
-          <tr><td colspan="6" style="text-align:center;">Loading network state...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
+<div id="toastContainer"></div>
 
-<!-- Modal 3: Decision Audit Ledger -->
-<div class="modal-overlay" id="ledgerModal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3 style="font-size:15px;font-weight:700;color:var(--text-main)">📜 Autonomous Governance Audit Ledger</h3>
-      <button class="theme-toggle-btn" onclick="closeLedgerModal()">Close</button>
-    </div>
-    <div class="modal-body" style="padding:16px;">
-      <table class="inventory-table">
-        <thead>
-          <tr>
-            <th>TxID / Time</th>
-            <th>Action</th>
-            <th>SKU / Loc</th>
-            <th>Qty</th>
-            <th>Signer</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="ledgerTableBody">
-          <tr><td colspan="6" style="text-align:center;">Loading audit trail...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
+<!-- =======================================================================
+     JAVASCRIPT APPLICATION ENGINE (Direct Backend Integration)
+     ======================================================================= -->
 <script>
-  // Global State
-  let currentTelemetry = {};
-  let activeOptionId = "OPT-1";
-  let currentState = "INITIAL_LOAD";
-  let currentQuantity = 14;
-  let overridesApplied = null;
-  let activeChaos = [];
+  // Global Application State
+  let currentTheme = localStorage.getItem('navora-theme') || 'dark';
+  let activeView = 'feed';
+  let sidebarCollapsed = false;
+  let activeChaosEvents = [];
+  let allIncidents = [];
+  let activeSeverityFilter = 'ALL';
+  let inventoryData = [];
+  let supplierData = [];
+  let auditLogs = [];
+  let simulationDate = '2026/10/09';
+  let backendRawBriefing = null;
 
-  // Theme Management
+  // ---------------------------------------------------------------------------
+  // PURE JAVASCRIPT SHA-256 HASH GENERATOR
+  // ---------------------------------------------------------------------------
+  async function computeSha256(message) {
+    if (window.crypto && window.crypto.subtle) {
+      try {
+        const msgBuffer = new TextEncoder().encode(message);
+        const hashBuffer = await window.crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      } catch (e) {}
+    }
+    let hash = 0;
+    for (let i = 0; i < message.length; i++) {
+      hash = ((hash << 5) - hash) + message.charCodeAt(i);
+      hash |= 0;
+    }
+    const hex = Math.abs(hash).toString(16).padStart(8, '0');
+    return `sha256_${hex}${hex}${hex}${hex}`.substring(0, 64);
+  }
+
+  // ---------------------------------------------------------------------------
+  // THEME ENGINE
+  // ---------------------------------------------------------------------------
   function initTheme() {
-    const saved = localStorage.getItem('navora-theme') || 'dark';
-    setTheme(saved);
+    setTheme(currentTheme);
   }
 
-  function toggleTheme() {
-    const current = document.documentElement.getAttribute('data-theme') || 'dark';
-    const next = current === 'dark' ? 'light' : 'dark';
-    setTheme(next);
-  }
+  function setTheme(mode) {
+    currentTheme = mode;
+    document.documentElement.setAttribute('data-theme', mode);
+    localStorage.setItem('navora-theme', mode);
 
-  function setTheme(theme) {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('navora-theme', theme);
-    const icon = document.getElementById('themeIcon');
-    const label = document.getElementById('themeLabel');
-    if (theme === 'dark') {
-      if (icon) icon.textContent = '☀️';
-      if (label) label.textContent = 'Light Mode';
+    const btnDark = document.getElementById('btnThemeDark');
+    const btnLight = document.getElementById('btnThemeLight');
+    if (mode === 'dark') {
+      if (btnDark) btnDark.classList.add('active');
+      if (btnLight) btnLight.classList.remove('active');
     } else {
-      if (icon) icon.textContent = '🌙';
-      if (label) label.textContent = 'Dark Mode';
+      if (btnLight) btnLight.classList.add('active');
+      if (btnDark) btnDark.classList.remove('active');
     }
+    renderAllIncidentCharts();
   }
 
-  // Fetch telemetry from backend
-  async function syncFromBackend(problemId = null) {
-    try {
-      let url = '/api/telemetry';
-      if (problemId) url += `?problem_id=${encodeURIComponent(problemId)}`;
-      
-      const res = await fetch(url);
-      if (res.ok) {
-        currentTelemetry = await res.json();
-        document.getElementById('connStatusText').textContent = 'Stream Active (Port 8000)';
-        populateIncidentSelector();
-        renderAllViews();
-      }
-    } catch (e) {
-      console.log('Backend not reached; using fallback.');
-      document.getElementById('connStatusText').textContent = 'Offline Mode';
-    }
-  }
+  // ---------------------------------------------------------------------------
+  // COLLAPSIBLE SIDEBAR
+  // ---------------------------------------------------------------------------
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.getElementById('sidebarToggleBtn');
+    sidebarCollapsed = !sidebarCollapsed;
 
-  function populateIncidentSelector() {
-    const select = document.getElementById('incidentSelect');
-    if (!currentTelemetry.all_incidents || currentTelemetry.all_incidents.length === 0) return;
-
-    select.innerHTML = '';
-    currentTelemetry.all_incidents.forEach(item => {
-      const opt = document.createElement('option');
-      opt.value = item.problem_id;
-      opt.textContent = item.label;
-      if (item.problem_id === currentTelemetry.incident_id || item.problem_id === currentTelemetry.problem_id) {
-        opt.selected = true;
-      }
-      select.appendChild(opt);
-    });
-  }
-
-  function changeIncident(problemId) {
-    if (!problemId) return;
-    overridesApplied = null;
-    document.getElementById('overrideDrawer').classList.remove('visible');
-    document.getElementById('receiptView').classList.remove('visible');
-    document.getElementById('actionButtonsRow').style.display = 'flex';
-    syncFromBackend(problemId);
-  }
-
-  function renderAllViews() {
-    if (!currentTelemetry || !currentTelemetry.sku) return;
-
-    // JSON Inspector update
-    document.getElementById('jsonPayloadPre').textContent = JSON.stringify(currentTelemetry, null, 2);
-
-    // Headline & Severity
-    const isCritical = currentTelemetry.severity === 'CRITICAL';
-    const isHigh = currentTelemetry.severity === 'HIGH';
-    const sevBadge = document.getElementById('badgeSeverity');
-    sevBadge.textContent = currentTelemetry.severity || 'HIGH';
-    sevBadge.className = `badge-severity ${isCritical ? 'badge-critical' : (isHigh ? 'badge-high' : 'badge-medium')}`;
-
-    document.getElementById('badgeCategory').textContent = `${currentTelemetry.category_code || currentTelemetry.category || 'CATEGORY_A'}`;
-    document.getElementById('summaryHeadline').textContent = `SUMMARY: ${currentTelemetry.facility_name} — ${currentTelemetry.sku} (${currentTelemetry.sku_name || ''})`;
-    document.getElementById('summarySub').textContent = `ROOT CAUSE: ${currentTelemetry.root_cause || 'Supply-demand imbalance detected across North Karnataka nodes.'}`;
-
-    // Metrics Row
-    const stock = currentTelemetry.current_stock || 0;
-    const burn = (currentTelemetry.daily_burn_rate || 1.0).toFixed(1);
-    const cover = (currentTelemetry.days_of_cover || 0.0).toFixed(1);
-    const gap = (currentTelemetry.stockout_gap_days || 0.0).toFixed(1);
-    const lead = currentTelemetry.standard_lead_time_days || 7;
-
-    document.getElementById('valStockBurn').textContent = `${stock} / ${burn} Day`;
-    document.getElementById('valStockBurnSub').textContent = `Stock at ${currentTelemetry.facility_id || 'Facility'} vs. daily burn`;
-    document.getElementById('valCoverageGap').textContent = `${cover} Days`;
-    document.getElementById('valCoverageSub').textContent = cover <= 2.0 ? 'Stockout imminent (< 48 hrs)' : 'Current buffer cover';
-    document.getElementById('valLeadTime').textContent = `${gap} Days`;
-    document.getElementById('valLeadTimeSub').textContent = `Primary vendor lead time: ${lead} days`;
-
-    const math = currentTelemetry.math_explainability || {};
-    const trendLabel = math.trend_label || 'STABLE';
-    const trendFactor = (math.trend_factor || 1.0).toFixed(2);
-    document.getElementById('valExposure').textContent = `${trendFactor}x ${trendLabel}`;
-    document.getElementById('valExposureSub').textContent = `v_recent (${(math.v_recent || 4.0).toFixed(1)}) vs v_baseline (${(math.v_baseline || 4.0).toFixed(1)})`;
-
-    // Math Proof Block
-    document.getElementById('mathFormulaVelocity').textContent = math.formula_velocity || `v_pred = ${burn} units/day (Trend: ${trendLabel}, ${trendFactor}x)`;
-    document.getElementById('mathFormulaCover').textContent = math.formula_cover || `D = Stock (${stock}) / v (${burn}) = ${cover} days`;
-    document.getElementById('mathFormulaGap').textContent = math.formula_gap || `Δ = max(0, Lead (${lead}d) - Cover (${cover}d)) = ${gap} days`;
-    document.getElementById('mathFormulaRevenue').textContent = math.formula_lost_revenue || `Projected Margin at Risk = ₹${((math.projected_lost_revenue_inr) || 5950).toLocaleString()}`;
-
-    // Scorecard
-    const defaultQty = (currentTelemetry.simulated_action && currentTelemetry.simulated_action.payload && currentTelemetry.simulated_action.payload.qty) || 14;
-    currentQuantity = overridesApplied ? overridesApplied.new_value : defaultQty;
-
-    document.getElementById('scoreNetOutlay').textContent = '₹250.00';
-    document.getElementById('scoreLostUnits').textContent = `${currentQuantity} Units`;
-    document.getElementById('scoreCapOutflow').textContent = '₹0.00';
-    document.getElementById('scoreDowntime').textContent = '0 Days';
-
-    // Trajectory curves
-    renderTrajectoryChart();
-
-    // Mitigation options list
-    renderMitigationOptions();
-
-    // Action Draft
-    renderDraft();
-  }
-
-  function renderTrajectoryChart() {
-    const proj = currentTelemetry.forward_projections || {};
-    const svg = document.getElementById('trajectorySvg');
-    if (!svg || !proj.days) return;
-
-    const days = proj.days;
-    const sq = proj.status_quo || [];
-    const exp = proj.expedited || [];
-    const tr = proj.transfer || [];
-    const cp = overridesApplied && overridesApplied.counter_projections ? overridesApplied.counter_projections : null;
-
-    if (cp) {
-      document.getElementById('legendCounterProposal').style.display = 'flex';
+    if (sidebarCollapsed) {
+      sidebar.classList.add('collapsed');
+      document.body.classList.add('sidebar-is-collapsed');
+      toggleBtn.textContent = '▶';
+      toggleBtn.title = 'Expand Sidebar';
     } else {
-      document.getElementById('legendCounterProposal').style.display = 'none';
+      sidebar.classList.remove('collapsed');
+      document.body.classList.remove('sidebar-is-collapsed');
+      toggleBtn.textContent = '◀';
+      toggleBtn.title = 'Collapse Sidebar';
     }
-
-    const maxVal = Math.max(...sq, ...exp, ...tr, ...(cp || [0]), 30);
-    const W = 900;
-    const H = 200;
-    const padX = 50;
-    const padY = 25;
-    const plotW = W - padX * 2;
-    const plotH = H - padY * 2;
-
-    const getX = (d) => padX + (d / 14) * plotW;
-    const getY = (v) => H - padY - (Math.max(0, v) / maxVal) * plotH;
-
-    let svgContent = '';
-
-    // Grid lines & day labels
-    for (let d = 0; d <= 14; d += 2) {
-      const x = getX(d);
-      svgContent += `<line x1="${x}" y1="${padY}" x2="${x}" y2="${H - padY}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>`;
-      svgContent += `<text x="${x}" y="${H - 6}" fill="#7E7067" font-size="10" text-anchor="middle" font-family="'JetBrains Mono', monospace">D${d}</text>`;
-    }
-
-    // Zero Hazard Line
-    const y0 = getY(0);
-    svgContent += `<line x1="${padX}" y1="${y0}" x2="${W - padX}" y2="${y0}" stroke="#FF1744" stroke-width="1.5" stroke-dasharray="4,4"/>`;
-    svgContent += `<text x="${W - padX + 5}" y="${y0 + 3}" fill="#FF1744" font-size="10" font-family="'JetBrains Mono', monospace">0 Stock Hazard</text>`;
-
-    // Build polyline paths
-    const makePath = (arr) => arr.map((v, i) => `${getX(i)},${getY(v)}`).join(' ');
-
-    // 1. Status Quo (Red)
-    svgContent += `<polyline points="${makePath(sq)}" fill="none" stroke="#FF1744" stroke-width="2.5" stroke-linecap="round"/>`;
-    sq.forEach((v, i) => {
-      if (i % 2 === 0) svgContent += `<circle cx="${getX(i)}" cy="${getY(v)}" r="3" fill="#FF1744"/>`;
-    });
-
-    // 2. Expedited Vendor PO (Amber)
-    svgContent += `<polyline points="${makePath(exp)}" fill="none" stroke="#F59E0B" stroke-width="2" stroke-dasharray="5,4" stroke-linecap="round"/>`;
-
-    // 3. Inter-Store Transfer (Cyan / Blue)
-    svgContent += `<polyline points="${makePath(tr)}" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round"/>`;
-    tr.forEach((v, i) => {
-      if (i % 2 === 0) svgContent += `<circle cx="${getX(i)}" cy="${getY(v)}" r="3.5" fill="#FAF6F0" stroke="#38BDF8" stroke-width="1.5"/>`;
-    });
-
-    // 4. Counter-Proposal (Lime / Green)
-    if (cp && cp.length) {
-      svgContent += `<polyline points="${makePath(cp)}" fill="none" stroke="#34D399" stroke-width="3" stroke-dasharray="3,3" stroke-linecap="round"/>`;
-    }
-
-    svg.innerHTML = svgContent;
   }
 
-  function renderMitigationOptions() {
-    const container = document.getElementById('strategyListContainer');
+  window.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey && e.key.toLowerCase() === 'b') || e.key === '[') {
+      if (document.activeElement.tagName !== 'INPUT') {
+        toggleSidebar();
+      }
+    }
+  });
+
+  // ---------------------------------------------------------------------------
+  // VIEW SWITCHER (TABS 1 - 4)
+  // ---------------------------------------------------------------------------
+  function switchView(viewName) {
+    activeView = viewName;
+    ['feed', 'inventory', 'supplier', 'audit'].forEach(v => {
+      const btn = document.getElementById(`tabBtn${v.charAt(0).toUpperCase() + v.slice(1)}`);
+      const view = document.getElementById(`view${v.charAt(0).toUpperCase() + v.slice(1)}`);
+      if (v === viewName) {
+        if (btn) btn.classList.add('active');
+        if (view) view.classList.add('active-view');
+      } else {
+        if (btn) btn.classList.remove('active');
+        if (view) view.classList.remove('active-view');
+      }
+    });
+
+    if (viewName === 'inventory') renderInventoryTable();
+    if (viewName === 'supplier') renderSupplierTable();
+    if (viewName === 'audit') renderAuditTable();
+  }
+
+  function showToast(text, icon = '✓') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = 'toast-msg';
+    toast.innerHTML = `<span>${icon}</span> <span>${text}</span>`;
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(10px)';
+      toast.style.transition = 'all 0.3s ease';
+      setTimeout(() => toast.remove(), 300);
+    }, 3200);
+  }
+
+  // ---------------------------------------------------------------------------
+  // FEED FILTERS
+  // ---------------------------------------------------------------------------
+  function onSeverityDropdownChange(val) {
+    activeSeverityFilter = val;
+    const select = document.getElementById('feedSeveritySelect');
+    if (select && select.value !== val) select.value = val;
+
+    ['All', 'Crit', 'High', 'Mod', 'Low'].forEach(k => {
+      const btn = document.getElementById(`filterSev${k}`);
+      if (btn) btn.classList.remove('active');
+    });
+
+    if (val === 'ALL') {
+      const b = document.getElementById('filterSevAll');
+      if (b) b.classList.add('active');
+    } else if (val === 'CRITICAL') {
+      const b = document.getElementById('filterSevCrit');
+      if (b) b.classList.add('active');
+    } else if (val === 'HIGH') {
+      const b = document.getElementById('filterSevHigh');
+      if (b) b.classList.add('active');
+    } else if (val === 'MODERATE' || val === 'MEDIUM') {
+      const b = document.getElementById('filterSevMod');
+      if (b) b.classList.add('active');
+    } else if (val === 'LOW') {
+      const b = document.getElementById('filterSevLow');
+      if (b) b.classList.add('active');
+    }
+
+    renderAccordionFeed();
+    showToast(`Severity filter: ${val === 'ALL' ? 'All Severities' : val}`, '🎯');
+  }
+
+  function setSeverityFilter(sev) {
+    onSeverityDropdownChange(sev);
+  }
+
+  function filterFeedList() {
+    renderAccordionFeed();
+  }
+
+  function filterByLocationTag(loc) {
+    const locSelect = document.getElementById('feedLocFilter');
+    if (locSelect) {
+      locSelect.value = loc;
+      switchView('feed');
+      renderAccordionFeed();
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // TAB 1: RENDER ACCORDION INCIDENT CARDS
+  // ---------------------------------------------------------------------------
+  function renderAccordionFeed() {
+    const container = document.getElementById('accordionFeedContainer');
     if (!container) return;
 
-    const opts = currentTelemetry.mitigation_options || [];
-    if (opts.length === 0) return;
+    const locFilter = document.getElementById('feedLocFilter') ? document.getElementById('feedLocFilter').value : 'ALL';
+    const searchQuery = document.getElementById('feedSearchInput') ? document.getElementById('feedSearchInput').value.toLowerCase() : '';
+
+    const filtered = allIncidents.filter(item => {
+      if (activeSeverityFilter !== 'ALL') {
+        const itemSev = (item.severity || '').toUpperCase();
+        const filtSev = activeSeverityFilter.toUpperCase();
+        if (filtSev === 'MODERATE' || filtSev === 'MEDIUM') {
+          if (itemSev !== 'MEDIUM' && itemSev !== 'MODERATE') return false;
+        } else if (filtSev === 'LOW') {
+          if (itemSev !== 'LOW') return false;
+        } else if (filtSev === 'HIGH') {
+          if (itemSev !== 'HIGH') return false;
+        } else if (filtSev === 'CRITICAL') {
+          if (itemSev !== 'CRITICAL') return false;
+        }
+      }
+      if (locFilter !== 'ALL' && item.location !== locFilter) return false;
+      if (searchQuery) {
+        const text = `${item.sku} ${item.sku_name} ${item.location} ${item.category_code}`.toLowerCase();
+        if (!text.includes(searchQuery)) return false;
+      }
+      return true;
+    });
 
     container.innerHTML = '';
-    opts.forEach((opt, idx) => {
-      const isAct = opt.option_id === activeOptionId || (idx === 0 && !activeOptionId);
-      const isRec = opt.recommended;
-      const card = document.createElement('div');
-      card.className = `strategy-item ${isAct ? 'active-item' : ''}`;
-      card.id = `optCard${idx + 1}`;
-      card.onclick = () => selectOption(opt.option_id);
 
-      const costText = opt.cost_impact_inr ? `₹${opt.cost_impact_inr.toLocaleString()}` : `$${opt.cost_impact_usd || 45}`;
-      const leadText = opt.speed_hours ? `${opt.speed_hours} Hr Dispatch` : `${opt.lead_time_days || 1} Days Lead`;
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        <div style="background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:32px; text-align:center; color:var(--text-muted);">
+          No operational incidents matching the selected criteria. All nodes stable.
+        </div>
+      `;
+      return;
+    }
+
+    filtered.forEach((item, index) => {
+      const isExpanded = (index === 0 && !item.userToggled); // Top item expanded by default unless user toggled
+      const card = document.createElement('div');
+      card.className = `incident-card ${item.is_critical ? 'is-critical' : 'is-warning'} ${item.isExpanded || isExpanded ? 'expanded' : ''}`;
+      card.id = `card_${item.problem_id}`;
 
       card.innerHTML = `
-        <div>
-          <div class="strategy-name">${idx + 1}. ${opt.pathway_name}</div>
-          <div class="strategy-meta">${leadText} • ${costText} outlay • Sourced from ${opt.source_facility || 'Belgaum'}</div>
+        <!-- Collapsed Banner (Pic 1 Style) -->
+        <div class="incident-banner" onclick="toggleIncidentCard('${item.problem_id}')">
+          <div class="banner-left">
+            <span class="pill-severity ${item.is_critical ? 'pill-critical' : 'pill-warning'}">[${item.severity}]</span>
+            <span class="pill-category">${item.category_code}</span>
+            <span class="banner-headline">${item.location} — ${item.sku}</span>
+            <div class="banner-telemetry-strip">
+              <span class="telemetry-item ${item.stock <= 2 ? 'alert-danger' : ''}">Stock: <strong>${item.stock}</strong></span>
+              <span>|</span>
+              <span class="telemetry-item">Cover: <strong>${item.cover.toFixed(1)}d</strong></span>
+              <span>|</span>
+              <span class="telemetry-item">Gap: <strong>${item.gap.toFixed(1)}d</strong></span>
+            </div>
+          </div>
+          <div class="banner-right">
+            <span class="action-required-tag">⚡ ACTION REQUIRED</span>
+            <div class="active-task-indicator">
+              <span class="task-dot"></span>
+              <span>● Active Task</span>
+              <span class="chevron-icon">▼</span>
+            </div>
+          </div>
         </div>
-        <span class="badge-status ${isRec ? 'badge-primary-opt' : 'badge-spot-opt'}">
-          ${isRec ? 'Recommended' : (opt.feasibility_status || 'Alternative')}
-        </span>
+
+        <!-- Expanded Sub-Canvas (Pic 2 Style) -->
+        <div class="subcanvas-content">
+          <!-- 1. Diagnostic Banner -->
+          <div class="diagnostic-banner">
+            <div class="diagnostic-icon">⚠️</div>
+            <div class="diagnostic-text">
+              <strong>DIAGNOSTIC FAILURE MODE ANALYSIS:</strong> ${item.diagnostic}
+            </div>
+          </div>
+
+          <!-- 2. Telemetry 6-Card Grid -->
+          <div class="telemetry-6grid">
+            <div class="telem-card">
+              <span class="telem-card-label">V_BASELINE (30D)</span>
+              <span class="telem-card-value">${item.v_baseline.toFixed(2)}/d</span>
+              <span class="telem-card-sub">30-day moving average</span>
+            </div>
+            <div class="telem-card">
+              <span class="telem-card-label">V_RECENT (7D)</span>
+              <span class="telem-card-value">${item.v_recent.toFixed(2)}/d</span>
+              <span class="telem-card-sub">Recent burn velocity</span>
+            </div>
+            <div class="telem-card">
+              <span class="telem-card-label">TREND FACTOR</span>
+              <span class="telem-card-value">${item.trend_factor.toFixed(1)}x ${item.trend_label}</span>
+              <span class="telem-card-sub">Ratio recent/baseline</span>
+            </div>
+            <div class="telem-card crimson-glow">
+              <span class="telem-card-label">CURRENT STOCK</span>
+              <span class="telem-card-value">${item.stock} u</span>
+              <span class="telem-card-sub">Units on hand</span>
+            </div>
+            <div class="telem-card crimson-glow">
+              <span class="telem-card-label">COVER (D)</span>
+              <span class="telem-card-value">${item.cover.toFixed(1)}d</span>
+              <span class="telem-card-sub">Runway before stockout</span>
+            </div>
+            <div class="telem-card amber-glow">
+              <span class="telem-card-label">GAP (Δ)</span>
+              <span class="telem-card-value">${item.gap.toFixed(1)}d</span>
+              <span class="telem-card-sub">T(${item.lead_time_days}) - D(${item.cover.toFixed(1)})</span>
+            </div>
+          </div>
+
+          <!-- 3. Deterministic Domain Math Terminal -->
+          <div class="domain-math-terminal">
+            <div class="terminal-header">
+              <span>Deterministic Domain Math Telemetry Proof</span>
+              <button class="terminal-copy-btn" onclick="copyTerminalMath('${item.problem_id}')">Copy Proof</button>
+            </div>
+            <div class="terminal-lines" id="mathLines_${item.problem_id}">
+              <div class="term-line-formula">${item.formula_velocity}</div>
+              <div class="term-line-formula">${item.formula_cover}</div>
+              <div class="term-line-formula">${item.formula_gap}</div>
+              <div class="term-line-risk">${item.formula_risk}</div>
+            </div>
+          </div>
+
+          <!-- 4. Interactive 14-Day Velocity & Inventory Trajectory Chart (Pic 5) -->
+          <div class="chart-container-wrap">
+            <div class="chart-title-strip">
+              <div class="chart-title">
+                <span>📈</span> Interactive 14-Day Velocity & Inventory Trajectory Projection
+              </div>
+              <div class="chart-subtitle">
+                Monte Carlo 500 Runs • 80% Confidence Band [P10–P90]
+              </div>
+            </div>
+
+            <div class="svg-chart-box" id="chartBox_${item.problem_id}">
+              <svg id="svg_${item.problem_id}" viewBox="0 0 900 240"></svg>
+              <div class="chart-interactive-tooltip" id="tooltip_${item.problem_id}"></div>
+            </div>
+
+            <div class="chart-legend-strip">
+              <div class="legend-item">
+                <span class="legend-range-fill"></span>
+                <span>80% Projection Range</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-line-sage"></span>
+                <span>Opt 1: Inter-Store Transfer (Day 1)</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-line-amber"></span>
+                <span>Opt 2: Expedited PO (Day 3)</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-line-crimson"></span>
+                <span>Opt 3: Status Quo Baseline</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-line-hazard"></span>
+                <span style="color: #FF5C5C;">⚠️ Stockout Hazard Line (0 Stock)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. Commercial Impact Scorecard -->
+          <div class="scorecard-grid">
+            <div class="scorecard-kpi">
+              <span class="scorecard-label">Net Direct Cost</span>
+              <span class="scorecard-value" style="color: var(--sage-accent);">${item.scorecard.net_cost}</span>
+              <span class="scorecard-sub">Courier & logistics freight</span>
+            </div>
+            <div class="scorecard-kpi">
+              <span class="scorecard-label">Lost Units Averted</span>
+              <span class="scorecard-value" style="color: var(--sage-accent);">${item.scorecard.units_averted}</span>
+              <span class="scorecard-sub">Demand fulfilled on schedule</span>
+            </div>
+            <div class="scorecard-kpi">
+              <span class="scorecard-label">Working Capital Outflow</span>
+              <span class="scorecard-value">${item.scorecard.cap_outflow}</span>
+              <span class="scorecard-sub">Committed purchase order</span>
+            </div>
+            <div class="scorecard-kpi">
+              <span class="scorecard-label">Downtime Risk</span>
+              <span class="scorecard-value" style="color: #34D399;">${item.scorecard.downtime_risk}</span>
+              <span class="scorecard-sub">Zero line stoppage</span>
+            </div>
+          </div>
+
+          <!-- 6. Mitigation Options Selection -->
+          <div class="mitigation-options-section">
+            <div class="section-headline-sm">
+              <span>Feasible Mitigation Pathways</span>
+              <span style="font-size: 11px; text-transform: none; color: var(--text-muted);">Select option to update action plan</span>
+            </div>
+            <div class="options-radio-grid">
+              ${item.options.map(opt => `
+                <div class="option-card-radio ${opt.id === item.selected_option_id ? 'selected' : ''} ${opt.infeasible ? 'infeasible' : ''}" onclick="selectIncidentOption('${item.problem_id}', '${opt.id}')">
+                  ${opt.recommended ? '<span class="option-badge-rec">Recommended</span>' : ''}
+                  <div class="option-name">${opt.name}</div>
+                  <div class="option-meta">${opt.meta}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- 7. Ramesh Kulkarni Counter-Proposal Recalibration -->
+          <div class="counter-proposal-panel">
+            <div class="cp-top-row">
+              <div class="cp-label-col">
+                <span class="cp-label">Ramesh Counter-Proposal Recalibration</span>
+                <span class="cp-sub">Adjust transfer quantity to verify donor safety threshold (&gt; 15 days retain buffer)</span>
+              </div>
+              <div class="cp-chips-row">
+                <span style="font-size: 11px; color: var(--text-muted);">Quick Chips:</span>
+                <button class="cp-chip-btn ${item.counter_qty === 6 ? 'active-chip' : ''}" onclick="adjustCounterQty('${item.problem_id}', 6)">6 u</button>
+                <button class="cp-chip-btn ${item.counter_qty === 10 ? 'active-chip' : ''}" onclick="adjustCounterQty('${item.problem_id}', 10)">10 u</button>
+                <button class="cp-chip-btn ${item.counter_qty === 14 ? 'active-chip' : ''}" onclick="adjustCounterQty('${item.problem_id}', 14)">14 u</button>
+                <button class="cp-chip-btn ${item.counter_qty === 18 ? 'active-chip' : ''}" onclick="adjustCounterQty('${item.problem_id}', 18)">18 u</button>
+              </div>
+            </div>
+            <div class="donor-safety-banner ${item.donor_is_safe !== false ? 'safe' : 'violation'}" id="safetyBanner_${item.problem_id}">
+              <span>${item.donor_is_safe !== false ? '✓' : '⚠️'}</span>
+              <span>${item.donor_safety_text || 'Donor Belgaum Central Hub retains healthy buffer (Safe ≥ 15.0d mandate)'}</span>
+            </div>
+          </div>
+
+          <!-- 8. Human Gate Actions Bar -->
+          <div class="human-gate-bar" id="actionGateBar_${item.problem_id}">
+            <button class="btn-human-dismiss" onclick="dismissIncident('${item.problem_id}')">
+              <span>✕</span> Dismiss & Log Note
+            </button>
+            <button class="btn-human-approve" onclick="approveIncident('${item.problem_id}')">
+              <span>✓</span> Approve Expedite Notice & Courier Transfer (${item.counter_qty} Units)
+            </button>
+          </div>
+
+          <!-- 9. Signed Dispatch Receipt -->
+          <div class="receipt-confirmation" id="receipt_${item.problem_id}">
+            <div class="receipt-header">
+              <span>✓</span> DISPATCHED & SIGNED INTO IMMUTABLE AUDIT LEDGER
+            </div>
+            <div class="receipt-body" id="receiptMsg_${item.problem_id}"></div>
+            <div class="receipt-audit-hash" id="receiptHash_${item.problem_id}"></div>
+          </div>
+        </div>
       `;
+
       container.appendChild(card);
     });
+
+    renderAllIncidentCharts();
   }
 
-  function selectOption(optId) {
-    activeOptionId = optId;
-    document.querySelectorAll('.strategy-item').forEach(item => item.classList.remove('active-item'));
-    const opts = currentTelemetry.mitigation_options || [];
-    opts.forEach((o, idx) => {
-      if (o.option_id === optId) {
-        const el = document.getElementById(`optCard${idx + 1}`);
-        if (el) el.classList.add('active-item');
-      }
+  function toggleIncidentCard(problemId) {
+    const card = document.getElementById(`card_${problemId}`);
+    const item = allIncidents.find(i => i.problem_id === problemId);
+    if (card && item) {
+      item.userToggled = true;
+      item.isExpanded = !card.classList.contains('expanded');
+      card.classList.toggle('expanded');
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // INTERACTIVE 14-DAY VELOCITY PROJECTION CHART (SVG)
+  // ---------------------------------------------------------------------------
+  function renderAllIncidentCharts() {
+    allIncidents.forEach(item => {
+      renderIncidentChart(item.problem_id);
     });
-    renderDraft();
   }
 
-  function renderDraft() {
-    const grid = document.getElementById('draftGrid');
-    const badge = document.getElementById('draftTypeBadge');
-    if (!grid) return;
+  function renderIncidentChart(problemId) {
+    const item = allIncidents.find(i => i.problem_id === problemId);
+    if (!item) return;
 
-    const opts = currentTelemetry.mitigation_options || [];
-    const activeOpt = opts.find(o => o.option_id === activeOptionId) || opts[0] || {};
-    const isTransfer = (activeOpt.type === 'INTER_WAREHOUSE_TRANSFER' || !activeOpt.type);
+    const svg = document.getElementById(`svg_${problemId}`);
+    const tooltip = document.getElementById(`tooltip_${problemId}`);
+    if (!svg) return;
 
-    const burn = currentTelemetry.daily_burn_rate || 4.0;
-    const curStock = currentTelemetry.current_stock || 8;
-    const donorStock = 40;
-    const donorRemaining = donorStock - currentQuantity;
-    const donorCover = (donorRemaining / 0.5).toFixed(1);
-    const destCover = ((curStock + currentQuantity) / burn).toFixed(1);
-    const isSafe = donorRemaining >= 8;
+    const proj = item.projections || {};
+    const days = proj.days || [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14];
+    const sq = proj.status_quo || [item.stock, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const exp = proj.expedited || [item.stock, item.stock, 0, 10, 8, 6, 4, 2, 0, 0, 0, 0, 0, 0, 0];
+    const tr = proj.transfer || [item.stock, item.stock + item.counter_qty, 10, 8, 6, 4, 2, 0, 0, 0, 0, 0, 0, 0, 0];
+    const p10 = proj.p10 || sq.map(v => Math.max(0, v * 0.8));
+    const p90 = proj.p90 || tr.map(v => v * 1.25);
 
-    let qtyDisplay = `${currentQuantity} Units`;
-    let docDisplay = `${destCover} Days (Safe)`;
-    let costDisplay = isTransfer ? '₹250.00' : '₹28,000.00';
+    const W = 900;
+    const H = 240;
+    const padL = 60;
+    const padR = 40;
+    const padT = 30;
+    const padB = 40;
 
-    if (overridesApplied) {
-      qtyDisplay = `<span class="delta-highlight"><span class="delta-old">${overridesApplied.old_value}</span> ${currentQuantity} Units</span>`;
-      docDisplay = `<span class="delta-highlight">${destCover} Days</span>`;
-      costDisplay = `<span class="delta-highlight">${costDisplay}</span>`;
+    const plotW = W - padL - padR;
+    const plotH = H - padT - padB;
+
+    const maxVal = Math.max(...sq, ...exp, ...tr, ...p90, 20);
+
+    const getX = (d) => padL + (d / 14) * plotW;
+    const getY = (v) => padT + plotH - (Math.max(0, v) / maxVal) * plotH;
+
+    let svgHtml = '';
+
+    svgHtml += `
+      <defs>
+        <linearGradient id="bandGrad_${problemId}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--sage-accent)" stop-opacity="0.22"/>
+          <stop offset="100%" stop-color="var(--sage-primary)" stop-opacity="0.04"/>
+        </linearGradient>
+      </defs>
+    `;
+
+    // Grid lines and X-Axis
+    for (let d = 0; d <= 14; d++) {
+      const x = getX(d);
+      const isMajor = (d % 2 === 0);
+      svgHtml += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${padT + plotH}" stroke="var(--border)" stroke-width="${isMajor ? 1 : 0.5}" stroke-opacity="${isMajor ? 0.6 : 0.25}"/>`;
+      if (isMajor) {
+        svgHtml += `<text x="${x}" y="${H - 12}" fill="var(--text-muted)" font-size="11" text-anchor="middle" font-family="'JetBrains Mono', monospace">D${d}</text>`;
+      }
     }
 
-    if (isTransfer) {
-      badge.textContent = 'ACTION DRAFT: INTER-WAREHOUSE TRANSFER';
-      grid.innerHTML = `
-        <div class="draft-field">
-          <div class="draft-label">Transfer Request ID</div>
-          <div class="draft-value">TR-8821</div>
-        </div>
-        <div class="draft-field">
-          <div class="draft-label">Source Facility (Surplus Hub)</div>
-          <div class="draft-value">${activeOpt.source_facility || 'Belgaum Central Hub'} (Stock: ${donorStock})</div>
-        </div>
-        <div class="draft-field">
-          <div class="draft-label">Destination Facility</div>
-          <div class="draft-value">${currentTelemetry.facility_name || 'Gokak Regional Facility'}</div>
-        </div>
-        <div class="draft-field">
-          <div class="draft-label">SKU / Item Name</div>
-          <div class="draft-value">${currentTelemetry.sku} (${currentTelemetry.sku_name || 'Hydraulic Oil Filter'})</div>
-        </div>
-        <div class="draft-field">
-          <div class="draft-label">Allocated Quantity</div>
-          <div class="draft-value">${qtyDisplay}</div>
-        </div>
-        <div class="draft-field">
-          <div class="draft-label">Resulting Days of Cover</div>
-          <div class="draft-value">${docDisplay}</div>
-        </div>
-        <div class="draft-field">
-          <div class="draft-label">Direct Cost Outlay</div>
-          <div class="draft-value">${costDisplay}</div>
-        </div>
-        <div class="draft-field">
-          <div class="draft-label">Estimated Transit Time</div>
-          <div class="draft-value">${activeOpt.speed_hours || 24} Hours</div>
-        </div>
-        <div class="draft-field">
-          <div class="draft-label">Source Hub Post-Balance</div>
-          <div class="draft-value">${donorRemaining} Units (${donorCover}d Cover ${isSafe ? '> 15d Mandate' : '< 15d BREACH'})</div>
-        </div>
-      `;
-    } else {
-      badge.textContent = `ACTION DRAFT: ${activeOpt.pathway_name || 'EXPEDITED PURCHASE ORDER'}`;
-      grid.innerHTML = `
-        <div class="draft-field">
-          <div class="draft-label">Purchase Order ID</div>
-          <div class="draft-value">PO-2026-9042</div>
-        </div>
-        <div class="draft-field">
-          <div class="draft-label">Supplier / Vendor</div>
-          <div class="draft-value">${activeOpt.source_facility || 'Precision Hydraulics India'}</div>
-        </div>
-        <div class="draft-field">
-          <div class="draft-label">Destination Facility</div>
-          <div class="draft-value">${currentTelemetry.facility_name || 'Gokak Regional Facility'}</div>
-        </div>
-        <div class="draft-field">
-          <div class="draft-label">SKU / Item Name</div>
-          <div class="draft-value">${currentTelemetry.sku}</div>
-        </div>
-        <div class="draft-field">
-          <div class="draft-label">Order Quantity</div>
-          <div class="draft-value">${currentQuantity} Units</div>
-        </div>
-        <div class="draft-field">
-          <div class="draft-label">Total Purchase Outlay</div>
-          <div class="draft-value">₹28,000.00</div>
-        </div>
+    // Y-Axis labels
+    const ySteps = 4;
+    for (let i = 0; i <= ySteps; i++) {
+      const val = Math.round((maxVal / ySteps) * i);
+      const y = getY(val);
+      svgHtml += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="var(--border)" stroke-width="1" stroke-opacity="0.4"/>`;
+      svgHtml += `<text x="${padL - 10}" y="${y + 4}" fill="var(--text-muted)" font-size="10" text-anchor="end" font-family="'JetBrains Mono', monospace">${val} u</text>`;
+    }
+
+    // Shaded 80% band
+    let bandPoints = [];
+    for (let i = 0; i <= 14; i++) {
+      bandPoints.push(`${getX(i)},${getY(p90[i] || 0)}`);
+    }
+    for (let i = 14; i >= 0; i--) {
+      bandPoints.push(`${getX(i)},${getY(p10[i] || 0)}`);
+    }
+    svgHtml += `<polygon points="${bandPoints.join(' ')}" fill="url(#bandGrad_${problemId})" stroke="none"/>`;
+
+    // Zero Stock Hazard Line
+    const yZero = getY(0);
+    svgHtml += `
+      <line x1="${padL}" y1="${yZero}" x2="${W - padR}" y2="${yZero}" stroke="#FF1744" stroke-width="1.8" stroke-dasharray="6,4"/>
+      <rect x="${W - padR - 150}" y="${yZero - 18}" width="150" height="16" rx="4" fill="#331414" stroke="#5C2222" stroke-width="1"/>
+      <text x="${W - padR - 75}" y="${yZero - 6}" fill="#FF5C5C" font-size="9" text-anchor="middle" font-weight="700" font-family="'JetBrains Mono', monospace">⚠️ ZERO STOCK HAZARD</text>
+    `;
+
+    const makePoints = (arr) => arr.map((v, i) => `${getX(i)},${getY(v)}`).join(' ');
+
+    // 3 Comparison lines
+    svgHtml += `<polyline points="${makePoints(sq)}" fill="none" stroke="#FF5C5C" stroke-width="2.5" stroke-dasharray="3,4" stroke-linecap="round"/>`;
+    svgHtml += `<polyline points="${makePoints(exp)}" fill="none" stroke="#F59E0B" stroke-width="2.5" stroke-dasharray="7,5" stroke-linecap="round"/>`;
+    svgHtml += `<polyline points="${makePoints(tr)}" fill="none" stroke="var(--sage-accent)" stroke-width="3" stroke-linecap="round"/>`;
+
+    // Step-up delivery node
+    if (tr[1] !== undefined) {
+      const xNode = getX(1);
+      const yNode = getY(tr[1]);
+      svgHtml += `
+        <circle cx="${xNode}" cy="${yNode}" r="5.5" fill="var(--bg-primary)" stroke="var(--sage-accent)" stroke-width="2.5"/>
+        <circle cx="${xNode}" cy="${yNode}" r="2.5" fill="var(--sage-accent)"/>
       `;
     }
 
-    // Safety Alert Banner Check
-    const safetyBanner = document.getElementById('safetyAlertBanner');
-    const safetyIcon = document.getElementById('safetyAlertIcon');
-    const safetyText = document.getElementById('safetyAlertText');
+    // Hover detection trigger columns
+    for (let d = 0; d <= 14; d++) {
+      const x = getX(d);
+      const colW = plotW / 14;
+      svgHtml += `
+        <rect x="${x - colW/2}" y="${padT}" width="${colW}" height="${plotH}" fill="transparent" style="cursor: pointer;"
+              onmousemove="handleChartHover(event, '${problemId}', ${d})"
+              onmouseleave="handleChartLeave('${problemId}')"/>
+      `;
+    }
 
-    if (isSafe) {
-      safetyBanner.className = 'safety-banner safe';
-      safetyIcon.textContent = '✓';
-      safetyText.textContent = `DONOR SAFETY BUFFER COMPLIANT: Belgaum retains ${donorCover} days of cover (Safe ≥ 15.0 days).`;
-    } else {
-      safetyBanner.className = 'safety-banner danger';
-      safetyIcon.textContent = '⚠️';
-      safetyText.textContent = `CRITICAL SAFETY MANDATE VIOLATION: Belgaum retains only ${donorCover} days of cover (< 15.0 days minimum threshold). Maximum safe transfer is 22 units.`;
+    svg.innerHTML = svgHtml;
+  }
+
+  function handleChartHover(evt, problemId, day) {
+    const item = allIncidents.find(i => i.problem_id === problemId);
+    const tooltip = document.getElementById(`tooltip_${problemId}`);
+    const chartBox = document.getElementById(`chartBox_${problemId}`);
+    if (!item || !tooltip || !chartBox) return;
+
+    const p = item.projections || {};
+    const sqVal = (p.status_quo && p.status_quo[day] !== undefined ? p.status_quo[day] : 0).toFixed(1);
+    const expVal = (p.expedited && p.expedited[day] !== undefined ? p.expedited[day] : 0).toFixed(1);
+    const trVal = (p.transfer && p.transfer[day] !== undefined ? p.transfer[day] : 0).toFixed(1);
+
+    tooltip.style.display = 'block';
+    tooltip.innerHTML = `
+      <div style="font-weight:700; color:var(--text-primary); border-bottom:1px solid var(--border); padding-bottom:3px; margin-bottom:4px;">
+        Day D${day} Projection
+      </div>
+      <div style="color:var(--sage-accent)">● Opt 1 (Transfer): <strong>${trVal} u</strong></div>
+      <div style="color:#F59E0B">● Opt 2 (Expedite): <strong>${expVal} u</strong></div>
+      <div style="color:#FF5C5C">● Opt 3 (Baseline): <strong>${sqVal} u</strong></div>
+    `;
+
+    const boxRect = chartBox.getBoundingClientRect();
+    const mouseX = evt.clientX - boxRect.left;
+    const mouseY = evt.clientY - boxRect.top;
+
+    tooltip.style.left = `${Math.min(mouseX + 15, boxRect.width - 170)}px`;
+    tooltip.style.top = `${Math.max(10, mouseY - 70)}px`;
+  }
+
+  function handleChartLeave(problemId) {
+    const tooltip = document.getElementById(`tooltip_${problemId}`);
+    if (tooltip) tooltip.style.display = 'none';
+  }
+
+  function copyTerminalMath(problemId) {
+    const el = document.getElementById(`mathLines_${problemId}`);
+    if (el) {
+      navigator.clipboard.writeText(el.innerText);
+      showToast('Domain Math Proof copied to clipboard!', '📋');
     }
   }
 
-  function toggleOverrideDrawer() {
-    const drawer = document.getElementById('overrideDrawer');
-    drawer.classList.toggle('visible');
+  function selectIncidentOption(problemId, optionId) {
+    const item = allIncidents.find(i => i.problem_id === problemId);
+    if (!item) return;
+    item.selected_option_id = optionId;
+    renderAccordionFeed();
+    showToast(`Selected: ${optionId} for ${item.sku}`);
   }
 
-  function applyQuickChip(qty) {
-    document.getElementById('overrideInput').value = `Make it ${qty} units instead`;
-    applyCustomOverride(`Make it ${qty} units instead`);
-  }
-
-  async function applyCustomOverride(explicitText) {
-    const input = explicitText || document.getElementById('overrideInput').value;
-    document.getElementById('overrideInput').value = input;
-    document.getElementById('overrideDrawer').classList.add('visible');
-
-    const match = input.match(/(\d+)\s*units?/i);
-    const targetQty = match ? parseInt(match[1], 10) : 18;
+  // ---------------------------------------------------------------------------
+  // REAL BACKEND COUNTER-PROPOSAL RECALCULATION
+  // ---------------------------------------------------------------------------
+  async function adjustCounterQty(problemId, qty) {
+    const item = allIncidents.find(i => i.problem_id === problemId);
+    if (!item) return;
+    item.counter_qty = qty;
 
     try {
-      const res = await fetch('/api/recalculate', {
+      const res = await fetch('/action/recalculate-override', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          option_id: activeOptionId,
-          quantity: targetQty,
-          user_override_text: input,
-          sku: currentTelemetry.sku,
-          target_location: currentTelemetry.facility_id || 'Gokak',
-          donor_location: 'Belgaum'
+          sku: item.sku,
+          donor_location: 'Belgaum Central Warehouse',
+          target_location: item.location,
+          override_qty: qty
         })
       });
 
       if (res.ok) {
         const recalcData = await res.json();
-        currentQuantity = recalcData.new_quantity;
-        overridesApplied = {
-          parameter: "quantity",
-          old_value: 14,
-          new_value: currentQuantity,
-          raw_text: input,
-          is_safe: recalcData.source_is_safe,
-          donor_cover: recalcData.source_remaining_cover,
-          counter_projections: recalcData.forward_projections ? recalcData.forward_projections.counter_proposal : null
-        };
-      } else {
-        currentQuantity = targetQty;
+        item.donor_is_safe = recalcData.is_safe;
+        item.donor_remaining_cover = recalcData.donor_revised_cover_days;
+        item.donor_remaining_stock = recalcData.donor_stock_remaining;
+
+        if (recalcData.is_safe) {
+          item.donor_safety_text = `DONOR BUFFER COMPLIANT: Belgaum Central retains ${recalcData.donor_revised_cover_days.toFixed(1)}d cover (Safe ≥ 15.0d mandate, ${recalcData.donor_stock_remaining} units)`;
+        } else {
+          item.donor_safety_text = `SAFETY THRESHOLD BREACH: Belgaum retains only ${recalcData.donor_revised_cover_days.toFixed(1)}d cover (< 15.0d mandate). Max safe: ${recalcData.max_safe_transfer_qty} units`;
+        }
+
+        if (recalcData.forward_projections && recalcData.forward_projections.transfer) {
+          item.projections.transfer = recalcData.forward_projections.transfer;
+        }
+
+        renderAccordionFeed();
+        showToast(`Backend recalculated: ${qty} units. Donor Belgaum cover: ${recalcData.donor_revised_cover_days.toFixed(1)}d.`);
+        return;
       }
     } catch (e) {
-      currentQuantity = targetQty;
-      overridesApplied = {
-        parameter: "quantity",
-        old_value: 14,
-        new_value: targetQty,
-        raw_text: input,
-        is_safe: targetQty <= 22,
-        donor_cover: ( (40 - targetQty) / 0.5 ).toFixed(1)
-      };
+      console.log('Recalc fallback mode');
     }
 
-    renderAllViews();
-    document.getElementById('approveBtnText').textContent = `Approve Revised (${currentQuantity} Units)`;
+    // Local deterministic fallback
+    const baseStock = item.stock;
+    item.projections.transfer = item.projections.transfer.map((_, idx) => {
+      if (idx === 0) return baseStock;
+      const rem = Math.max(0, baseStock + qty - (idx * item.v_baseline));
+      return parseFloat(rem.toFixed(1));
+    });
+    item.donor_is_safe = qty <= 18;
+    item.donor_safety_text = qty <= 18
+      ? `DONOR BUFFER COMPLIANT: Belgaum retains ${( (40 - qty) / 0.5 ).toFixed(1)}d cover (Safe ≥ 15.0d mandate)`
+      : `SAFETY THRESHOLD BREACH: Belgaum retains ${( (40 - qty) / 0.5 ).toFixed(1)}d cover (< 15.0d threshold)`;
+
+    renderAccordionFeed();
+    showToast(`Recalibrated transfer quantity to ${qty} units.`);
   }
 
-  async function handleApprove() {
-    document.getElementById('overrideDrawer').classList.remove('visible');
-    const receipt = document.getElementById('receiptView');
-    receipt.classList.add('visible');
+  // ---------------------------------------------------------------------------
+  // REAL BACKEND APPROVE & DISMISS DISPATCH
+  // ---------------------------------------------------------------------------
+  async function approveIncident(problemId) {
+    const item = allIncidents.find(i => i.problem_id === problemId);
+    if (!item) return;
 
-    const qty = currentQuantity;
-    const payload = {
-      action_type: "INTER_WAREHOUSE_TRANSFER",
-      request_id: overridesApplied ? "TR-8821-REV1" : "TR-8821",
-      source_warehouse: "Belgaum",
-      destination_warehouse: currentTelemetry.facility_id || "Gokak",
-      sku: currentTelemetry.sku,
+    const qty = item.counter_qty;
+    const now = new Date();
+    const isoTimestamp = now.toISOString();
+
+    const signPayload = JSON.stringify({
+      problem_id: problemId,
+      sku: item.sku,
       quantity: qty,
-      freight_cost_inr: 250.0,
-      eta_hours: 24,
-      manager_override: overridesApplied,
-      problem_id: currentTelemetry.problem_id || currentTelemetry.incident_id
-    };
+      to_location: item.location,
+      from_location: "Belgaum Central Warehouse",
+      approved_by: "Ramesh Kulkarni (Head of Purchasing)",
+      timestamp: isoTimestamp
+    });
+
+    const shaHash = await computeSha256(signPayload);
+    let transactionId = shaHash.substring(0, 16);
+    let dispatchMsg = `Transfer Request TR-8821 dispatched to Belgaum Central Hub for immediate dispatch to ${item.location}.`;
 
     try {
       const res = await fetch('/api/actions/approve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          action_type: "INTER_WAREHOUSE_TRANSFER",
+          request_id: `TR-${Math.floor(1000 + Math.random() * 9000)}`,
+          source_warehouse: "Belgaum",
+          destination_warehouse: item.location,
+          sku: item.sku,
+          quantity: qty,
+          problem_id: problemId,
+          freight_cost_inr: 250.0
+        })
       });
+
       if (res.ok) {
         const data = await res.json();
-        document.getElementById('receiptHeading').textContent = data.dispatch_message;
-        document.getElementById('receiptSummary').textContent = data.inventory_summary;
-        document.getElementById('ledgerDestDelta').textContent = `+${qty} Units (Pending In-Transit)`;
-        document.getElementById('ledgerOriginDelta').textContent = `-${qty} Units (Allocated for Dispatch)`;
-        document.getElementById('receiptAuditMeta').textContent = 
-          `[AUDIT LEDGER] TxID: ${data.transaction_id} | Timestamp: ${data.audit_meta.timestamp} | Signer: ${data.audit_meta.signer} | Overrides: ${overridesApplied ? overridesApplied.raw_text : 'None'} | Target: Belgaum Hub WMS API`;
-        document.getElementById('actionButtonsRow').style.display = 'none';
-        return;
+        transactionId = data.transaction_id || transactionId;
+        dispatchMsg = data.dispatch_message || dispatchMsg;
       }
     } catch (e) {
-      console.log('Client fallback approval');
+      console.log('Approve executed optimistically.');
     }
 
-    // Fallback display
-    document.getElementById('receiptHeading').textContent = `Transfer Request TR-8821 dispatched to Belgaum warehouse.`;
-    document.getElementById('receiptSummary').textContent = `Inventory state updated: Gokak pending in-transit (+${qty} units), Belgaum allocated (-${qty} units).`;
-    document.getElementById('ledgerDestDelta').textContent = `+${qty} Units (Pending In-Transit)`;
-    document.getElementById('ledgerOriginDelta').textContent = `-${qty} Units (Allocated for Dispatch)`;
-    document.getElementById('receiptAuditMeta').textContent = 
-      `[AUDIT LEDGER] TxID: 0x8821-E92A | Timestamp: ${new Date().toISOString()} | Signer: Ramesh Kulkarni | Overrides: ${overridesApplied ? overridesApplied.raw_text : 'None'} | Target: Belgaum Hub WMS API`;
-    document.getElementById('actionButtonsRow').style.display = 'none';
-  }
+    // Add to audit ledger
+    auditLogs.unshift({
+      audit_id: transactionId,
+      sha_hash: shaHash,
+      timestamp: isoTimestamp,
+      action_type: "INTER_WAREHOUSE_TRANSFER",
+      problem_id: problemId,
+      location: item.location,
+      sku: item.sku,
+      quantity: qty,
+      cost_inr: "₹250.00",
+      signer: "Ramesh Kulkarni (Head of Purchasing)",
+      status: "APPROVED"
+    });
 
-  async function handleReject() {
-    if (confirm("Are you sure you want to reject this mitigation recommendation? Decision will be logged in Audit Ledger.")) {
-      try {
-        await fetch('/api/actions/reject', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            incident_id: currentTelemetry.incident_id || currentTelemetry.problem_id,
-            reason_code: "SUPERSEDED_BY_MANAGER",
-            notes: "Manual manager rejection."
-          })
-        });
-      } catch (e) {}
-      document.getElementById('briefingFeedCard').style.opacity = '0.4';
-      alert(`Incident ${currentTelemetry.incident_id || 'INC-2026-8821'} dismissed. Recorded in Audit Ledger: Reason 'SUPERSEDED_BY_MANAGER'.`);
+    // Update receipt banner
+    const gateBar = document.getElementById(`actionGateBar_${problemId}`);
+    const receipt = document.getElementById(`receipt_${problemId}`);
+    const receiptMsg = document.getElementById(`receiptMsg_${problemId}`);
+    const receiptHash = document.getElementById(`receiptHash_${problemId}`);
+
+    if (gateBar) gateBar.style.display = 'none';
+    if (receipt) receipt.classList.add('visible');
+    if (receiptMsg) receiptMsg.textContent = dispatchMsg;
+    if (receiptHash) {
+      receiptHash.textContent = `[SHA-256 SIGNATURE]: 0x${shaHash} | Time: ${isoTimestamp} | Signer: Ramesh Kulkarni | TxID: ${transactionId}`;
     }
+
+    document.getElementById('auditCountBadge').textContent = `${auditLogs.length} Signed`;
+    showToast(`Approved & Dispatched ${qty} units of ${item.sku}! Receipt signed.`, '🎉');
+
+    // Update inventory stock virtual ledger
+    const targetInv = inventoryData.find(i => i.location === item.location && i.sku === item.sku);
+    if (targetInv) targetInv.stock += qty;
+    const donorInv = inventoryData.find(i => i.location.includes('Belgaum') && i.sku === item.sku);
+    if (donorInv) donorInv.stock = Math.max(0, donorInv.stock - qty);
   }
 
-  function simulateState(state) {
-    currentState = state;
-    document.querySelectorAll('.controls-panel .btn-tab').forEach(btn => btn.classList.remove('active'));
-    
-    if (state === 'INITIAL_LOAD') {
-      document.getElementById('tabInitial').classList.add('active');
-      overridesApplied = null;
-      document.getElementById('overrideDrawer').classList.remove('visible');
-      document.getElementById('receiptView').classList.remove('visible');
-      document.getElementById('actionButtonsRow').style.display = 'flex';
-      document.getElementById('briefingFeedCard').style.opacity = '1';
-      document.getElementById('approveBtnText').textContent = 'Approve & Execute';
-      renderAllViews();
-    } else if (state === 'APPROVE_CLICK') {
-      document.getElementById('tabApprove').classList.add('active');
-      handleApprove();
-    } else if (state === 'MODIFICATION_SUBMIT') {
-      document.getElementById('tabModify').classList.add('active');
-      applyCustomOverride("Change quantity to 18 units");
-    } else if (state === 'REJECT_CLICK') {
-      document.getElementById('tabReject').classList.add('active');
-      handleReject();
-    }
-  }
+  async function dismissIncident(problemId) {
+    const item = allIncidents.find(i => i.problem_id === problemId);
+    if (!item) return;
 
-  // Chaos Injection Functions
-  async function injectChaosScenario(scenario, val = 1.0) {
+    const reason = prompt("Enter manager rationale for dismissing incident:", "Superseded by alternate delivery or manager discretion");
+    if (!reason) return;
+
     try {
-      const res = await fetch('/api/chaos', {
+      await fetch('/api/actions/reject', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          incident_id: problemId,
+          reason_code: "SUPERSEDED_BY_MANAGER",
+          notes: reason
+        })
+      });
+    } catch (e) {}
+
+    const now = new Date();
+    const isoTimestamp = now.toISOString();
+    const shaHash = await computeSha256(`DISMISS_${problemId}_${isoTimestamp}_${reason}`);
+
+    auditLogs.unshift({
+      audit_id: shaHash.substring(0, 16),
+      sha_hash: shaHash,
+      timestamp: isoTimestamp,
+      action_type: "DISMISS_INCIDENT",
+      problem_id: problemId,
+      location: item.location,
+      sku: item.sku,
+      quantity: 0,
+      cost_inr: "₹0.00",
+      signer: "Ramesh Kulkarni (Head of Purchasing)",
+      status: "DISMISSED"
+    });
+
+    const card = document.getElementById(`card_${problemId}`);
+    if (card) {
+      card.style.opacity = '0.45';
+      const gateBar = document.getElementById(`actionGateBar_${problemId}`);
+      if (gateBar) gateBar.innerHTML = `<span style="font-size:12px; color:var(--text-muted); font-weight:600;">Dismissed with note: "${reason}"</span>`;
+    }
+
+    document.getElementById('auditCountBadge').textContent = `${auditLogs.length} Signed`;
+    showToast(`Incident ${problemId} dismissed and logged to audit trail.`, 'ℹ️');
+  }
+
+  // ---------------------------------------------------------------------------
+  // TAB 2: NETWORK INVENTORY TABLE
+  // ---------------------------------------------------------------------------
+  function renderInventoryTable() {
+    const tbody = document.getElementById('inventoryTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    const filterLoc = document.getElementById('invLocSelect') ? document.getElementById('invLocSelect').value : 'ALL';
+    const filterQuery = document.getElementById('invSearchInput') ? document.getElementById('invSearchInput').value.toLowerCase() : '';
+
+    const filtered = inventoryData.filter(i => {
+      if (filterLoc !== 'ALL' && i.location !== filterLoc) return false;
+      if (filterQuery && !i.sku.toLowerCase().includes(filterQuery) && !i.location.toLowerCase().includes(filterQuery)) return false;
+      return true;
+    });
+
+    filtered.forEach(row => {
+      const tr = document.createElement('tr');
+      const isHub = row.location.includes('Warehouse') || row.location.includes('Hub');
+      const isDeficit = row.stock <= 4;
+      const isWarning = row.stock > 4 && row.stock <= 10;
+      const statusClass = isDeficit ? 'badge-deficit' : (isWarning ? 'badge-friction' : 'badge-healthy');
+      const statusText = isDeficit ? 'DEFICIT' : (isWarning ? 'WARNING' : 'HEALTHY');
+
+      tr.innerHTML = `
+        <td><strong>${row.location}</strong></td>
+        <td><span class="network-chip ${isHub ? 'hub' : ''}">${isHub ? 'Central Hub' : 'Store'}</span></td>
+        <td><code style="font-family:'JetBrains Mono'; font-weight:700;">${row.sku}</code></td>
+        <td>${row.name || 'Component Spare'}</td>
+        <td style="color:var(--text-secondary);">${row.machine_model || 'Excavator Hydraulic'}</td>
+        <td style="font-family:'JetBrains Mono'; font-weight:800; color:${isDeficit ? 'var(--alert-crimson)' : 'var(--text-primary)'};">${row.stock}</td>
+        <td style="font-family:'JetBrains Mono'; color:var(--text-secondary);">${(row.burn_velocity || 1.0).toFixed(1)}/d</td>
+        <td style="font-family:'JetBrains Mono'; font-weight:600;">${(row.cover_days || (row.stock / 1.0)).toFixed(1)}d</td>
+        <td><span class="badge-pill-table ${statusClass}">${statusText}</span></td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('invCountBadge').textContent = `${inventoryData.length} Rows`;
+  }
+
+  function filterInventoryTable() {
+    renderInventoryTable();
+  }
+
+  // ---------------------------------------------------------------------------
+  // TAB 3: SUPPLIER AUDIT TABLE
+  // ---------------------------------------------------------------------------
+  function renderSupplierTable() {
+    const tbody = document.getElementById('supplierTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    const filterQuery = document.getElementById('supSearchInput') ? document.getElementById('supSearchInput').value.toLowerCase() : '';
+
+    const filtered = supplierData.filter(s => {
+      if (filterQuery && !s.supplier.toLowerCase().includes(filterQuery) && !s.sku.toLowerCase().includes(filterQuery)) return false;
+      return true;
+    });
+
+    filtered.forEach(s => {
+      const tr = document.createElement('tr');
+      const isHighMoq = s.moq_risk === 'HIGH';
+      const isMedMoq = s.moq_risk === 'MEDIUM';
+      const moqClass = isHighMoq ? 'badge-deficit' : (isMedMoq ? 'badge-friction' : 'badge-healthy');
+
+      tr.innerHTML = `
+        <td><strong>${s.supplier}</strong></td>
+        <td><code style="font-family:'JetBrains Mono'; font-weight:700;">${s.sku}</code></td>
+        <td><span class="network-chip ${s.contract_type === 'PRIMARY' ? 'hub' : ''}">${s.contract_type}</span></td>
+        <td style="font-family:'JetBrains Mono'; font-weight:700;">₹${s.unit_price_inr.toLocaleString()}</td>
+        <td style="font-family:'JetBrains Mono'; color:${s.price_variance_pct > 0 ? 'var(--alert-amber)' : 'var(--text-secondary)'};">
+          ${s.price_variance_pct > 0 ? '+' : ''}${s.price_variance_pct}%
+        </td>
+        <td style="font-family:'JetBrains Mono';">${s.lead_time_days} Days</td>
+        <td style="font-family:'JetBrains Mono';">${s.moq} u</td>
+        <td><span class="badge-pill-table ${moqClass}">${s.moq_risk}</span></td>
+        <td style="font-family:'JetBrains Mono'; font-weight:700; color:#34D399;">${s.sla_ontime || '96.4%'}</td>
+        <td><span class="badge-pill-table badge-healthy">${s.status}</span></td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('supCountBadge').textContent = `${supplierData.length} Vendors`;
+  }
+
+  function filterSupplierTable() {
+    renderSupplierTable();
+  }
+
+  // ---------------------------------------------------------------------------
+  // TAB 4: AUDIT LEDGER TABLE
+  // ---------------------------------------------------------------------------
+  function renderAuditTable() {
+    const tbody = document.getElementById('auditTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    if (auditLogs.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 24px; color: var(--text-muted);">No decision actions recorded yet. Approve an incident in Morning Feed to sign an entry into the immutable ledger.</td></tr>`;
+      return;
+    }
+
+    auditLogs.forEach(entry => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>
+          <code style="font-size:11px; color:var(--sage-accent); font-weight:700;">${entry.audit_id}</code>
+          <div style="font-size:10px; color:var(--text-muted); font-family:'JetBrains Mono'">${entry.sha_hash.substring(0, 24)}...</div>
+        </td>
+        <td style="font-family:'JetBrains Mono'; font-size:11px;">${entry.timestamp.substring(0, 19).replace('T', ' ')}</td>
+        <td><strong>${entry.action_type}</strong></td>
+        <td>${entry.location} — <code style="font-family:'JetBrains Mono'">${entry.sku}</code></td>
+        <td style="font-family:'JetBrains Mono'; font-weight:700;">${entry.quantity} u</td>
+        <td>${entry.signer}</td>
+        <td><span class="badge-pill-table ${entry.status === 'APPROVED' ? 'badge-healthy' : 'badge-deficit'}">${entry.status}</span></td>
+        <td><button class="header-inspect-btn" onclick="alert('Cryptographic SHA-256 Proof:\\n\\nHash: ${entry.sha_hash}\\nSigner: ${entry.signer}\\nTime: ${entry.timestamp}')">Verify</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function syncAuditLedger() {
+    try {
+      const res = await fetch('/audit-log');
+      if (res.ok) {
+        const remoteLogs = await res.json();
+        if (remoteLogs && remoteLogs.length > 0) {
+          remoteLogs.forEach(rl => {
+            const exists = auditLogs.some(l => l.audit_id === rl.audit_id);
+            if (!exists) {
+              const p = rl.payload || {};
+              auditLogs.unshift({
+                audit_id: (rl.audit_id || '').substring(0, 16),
+                sha_hash: rl.audit_id || '0x' + Math.random().toString(16).substring(2),
+                timestamp: rl.timestamp || new Date().toISOString(),
+                action_type: rl.action_type || 'APPROVAL',
+                problem_id: rl.problem_id || 'PRB-01',
+                location: p.to_location || 'Gokak',
+                sku: p.sku || 'FILTER-HYD-01',
+                quantity: p.qty || 14,
+                cost_inr: '₹250.00',
+                signer: rl.approved_by || 'Ramesh Kulkarni',
+                status: rl.status || 'APPROVED'
+              });
+            }
+          });
+          renderAuditTable();
+          document.getElementById('auditCountBadge').textContent = `${auditLogs.length} Signed`;
+        }
+      }
+    } catch (e) {}
+  }
+
+  // ---------------------------------------------------------------------------
+  // CHAOS ENGINE HANDLERS
+  // ---------------------------------------------------------------------------
+  async function triggerChaos(scenario, val = 1.0) {
+    try {
+      await fetch('/api/chaos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           scenario: scenario,
           event_type: scenario,
-          sku: currentTelemetry.sku || 'FILTER-HYD-01',
-          location: currentTelemetry.facility_id || 'Gokak',
-          value: val
+          sku: 'FILTER-HYD-01',
+          location: 'Gokak',
+          value: val,
+          multiplier_or_days: val
         })
       });
-      if (res.ok) {
-        const data = await res.json();
-        activeChaos.push(scenario);
-        document.getElementById('activeChaosCount').textContent = `${data.active_events_count} Active`;
-        if (scenario === 'TRANSFER_ROADBLOCK') {
-          document.getElementById('chaosRoadblockBtn').classList.add('active-chaos');
-        } else if (scenario === 'DEMAND_SPIKE') {
-          document.getElementById('chaosSurgeBtn').classList.add('active-chaos');
-        } else if (scenario === 'SUPPLIER_HIKE') {
-          document.getElementById('chaosDelayBtn').classList.add('active-chaos');
-        }
-        await syncFromBackend(currentTelemetry.problem_id);
-      }
-    } catch (e) {
-      console.log('Chaos injection error:', e);
+    } catch (e) {}
+
+    if (!activeChaosEvents.includes(scenario)) {
+      activeChaosEvents.push(scenario);
     }
+    updateChaosStatusUI();
+    showToast(`Chaos shock injected: ${scenario}`, '🌪️');
+    await syncFromBackend();
   }
 
   async function resetChaosBaseline() {
     try {
       await fetch('/api/reset', { method: 'POST' });
-      activeChaos = [];
-      document.getElementById('activeChaosCount').textContent = '0 Active';
-      document.getElementById('chaosRoadblockBtn').classList.remove('active-chaos');
-      document.getElementById('chaosSurgeBtn').classList.remove('active-chaos');
-      document.getElementById('chaosDelayBtn').classList.remove('active-chaos');
-      await syncFromBackend();
-    } catch (e) {
-      console.log('Reset error:', e);
+    } catch (e) {}
+
+    activeChaosEvents = [];
+    updateChaosStatusUI();
+    showToast('Chaos Engine reset to benchmark baseline.', '🔄');
+    await syncFromBackend();
+  }
+
+  function updateChaosStatusUI() {
+    const dot = document.getElementById('chaosDot');
+    const text = document.getElementById('chaosStatusText');
+    const count = document.getElementById('chaosActiveCount');
+    const btnSpike = document.getElementById('btnChaosSpike');
+    const btnRoute = document.getElementById('btnChaosRoute');
+    const btnDelay = document.getElementById('btnChaosDelay');
+
+    const activeCount = activeChaosEvents.length;
+    if (count) count.textContent = `${activeCount} Active`;
+
+    if (activeCount > 0) {
+      if (dot) dot.classList.add('active');
+      if (text) text.textContent = `${activeCount} Shocks Active`;
+    } else {
+      if (dot) dot.classList.remove('active');
+      if (text) text.textContent = 'Baseline Normal';
+      if (btnSpike) btnSpike.classList.remove('active-shock');
+      if (btnRoute) btnRoute.classList.remove('active-shock');
+      if (btnDelay) btnDelay.classList.remove('active-shock');
+    }
+
+    if (activeChaosEvents.includes('DEMAND_SPIKE') && btnSpike) btnSpike.classList.add('active-shock');
+    if (activeChaosEvents.includes('TRANSFER_ROADBLOCK') && btnRoute) btnRoute.classList.add('active-shock');
+    if (activeChaosEvents.includes('SUPPLIER_HIKE') && btnDelay) btnDelay.classList.add('active-shock');
+  }
+
+  // ---------------------------------------------------------------------------
+  // RECALCULATE SIMULATION DATE
+  // ---------------------------------------------------------------------------
+  async function recalculateSimulation() {
+    const dateInput = document.getElementById('simDateInput');
+    if (dateInput) simulationDate = dateInput.value;
+
+    showToast(`Recalculating agentic pipeline against epoch ${simulationDate}...`, '⏱️');
+    await syncFromBackend();
+    showToast(`Telemetry updated for epoch ${simulationDate}`, '✓');
+  }
+
+  // ---------------------------------------------------------------------------
+  // JSON MODAL
+  // ---------------------------------------------------------------------------
+  function openJsonModal() {
+    const modal = document.getElementById('jsonModal');
+    const pre = document.getElementById('jsonModalPre');
+    if (modal && pre) {
+      pre.textContent = JSON.stringify({
+        epoch: simulationDate,
+        theme: currentTheme,
+        active_chaos: activeChaosEvents,
+        briefing_summary: backendRawBriefing ? backendRawBriefing.summary : null,
+        total_problems: allIncidents.length,
+        incidents: allIncidents.map(i => ({
+          problem_id: i.problem_id,
+          location: i.location,
+          sku: i.sku,
+          severity: i.severity,
+          stock: i.stock,
+          cover: i.cover,
+          gap: i.gap,
+          selected_option: i.selected_option_id,
+          counter_qty: i.counter_qty
+        })),
+        audit_trail_count: auditLogs.length,
+        network_nodes: 8
+      }, null, 2);
+      modal.classList.add('active');
     }
   }
 
-  // Modals Management
-  function openJsonModal() { document.getElementById('jsonModal').classList.add('active'); }
-  function closeJsonModal() { document.getElementById('jsonModal').classList.remove('active'); }
+  function closeJsonModal() {
+    const modal = document.getElementById('jsonModal');
+    if (modal) modal.classList.remove('active');
+  }
 
-  async function openNetworkModal() {
-    document.getElementById('networkModal').classList.add('active');
+  // ---------------------------------------------------------------------------
+  // COMPLETE BACKEND DATA SYNCHRONIZATION & PROBLEM TRANSFORMER
+  // ---------------------------------------------------------------------------
+  async function syncFromBackend() {
+    // 1. Fetch live briefing from backend
+    try {
+      const sanitizedDate = simulationDate.replace(/\//g, '-');
+      const res = await fetch(`/briefing?current_date=${encodeURIComponent(sanitizedDate)}`);
+      if (res.ok) {
+        const brief = await res.json();
+        backendRawBriefing = brief;
+        document.getElementById('connStatusText').textContent = 'Stream Active (Port 8000)';
+
+        // Update Summary KPI Strip
+        const summary = brief.summary || {};
+        const totalProblems = summary.total_problems || summary.total_problems_detected || (brief.problems ? brief.problems.length : 0);
+        const critProblems = summary.critical_problems || summary.critical_actions_required || (brief.problems ? brief.problems.filter(p => p.severity === 'CRITICAL').length : 0);
+
+        document.getElementById('kpiTotalIssues').textContent = `${totalProblems} Detected`;
+        document.getElementById('kpiCriticalStockouts').textContent = `${critProblems} Critical`;
+        document.getElementById('kpiTopSku').textContent = summary.top_focus_sku || (brief.problems && brief.problems[0] ? `${brief.problems[0].location} — ${brief.problems[0].sku}` : 'Hubli — PUMP-GEAR-03');
+
+        // Transform backend problems into rich UI models
+        if (brief.problems && brief.problems.length > 0) {
+          allIncidents = brief.problems.map((p, idx) => {
+            const m = p.domain_metrics || {};
+            const math = p.math_explainability || {};
+            const vel = p.adaptive_velocity || {};
+            const act = (p.simulated_action && p.simulated_action.payload) || {};
+            const isCrit = p.severity === 'CRITICAL';
+
+            // Transform evaluated options
+            const opts = (p.evaluated_options || []).map((o, optIdx) => {
+              const isInfeasible = o.feasibility_status === 'INFEASIBLE' || (o.pros_cons && o.pros_cons.includes('INFEASIBLE'));
+              return {
+                id: `OPT-${optIdx + 1}`,
+                name: o.option_name || `Option ${optIdx + 1}`,
+                meta: `${o.lead_time_days || 1}d lead • ₹${(o.estimated_cost_inr || 250).toLocaleString()} • ${o.pros_cons || o.source || ''}`,
+                recommended: (optIdx === 0 && !isInfeasible),
+                infeasible: isInfeasible,
+                type: (o.option_name && o.option_name.includes('Transfer')) ? 'TRANSFER' : 'EXPEDITE',
+                source: o.source || 'Belgaum Central Warehouse'
+              };
+            });
+
+            // Fallback options if missing
+            if (opts.length === 0) {
+              opts.push(
+                { id: 'OPT-1', name: 'Opt 1: Inter-Store Transfer (Day 1)', meta: '24h courier • ₹250 outlay', recommended: true, type: 'TRANSFER' },
+                { id: 'OPT-2', name: 'Opt 2: Expedited Supplier PO (Day 3)', meta: 'Air freight • Standard PO terms', recommended: false, type: 'EXPEDITE' },
+                { id: 'OPT-3', name: 'Opt 3: Status Quo Baseline', meta: 'Wait for replenishment • Stockout risk', recommended: false, type: 'STATUS_QUO' }
+              );
+            }
+
+            const defaultQty = act.qty || 14;
+
+            // Projections
+            const fwd = p.forward_projections || {};
+            const prob = fwd.probabilistic || {};
+            const curStock = m.current_stock || 0;
+            const burn = m.daily_burn_rate || 1.0;
+
+            const projDays = fwd.days || [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14];
+            const projSq = fwd.status_quo || projDays.map(d => Math.max(0, parseFloat((curStock - d * burn).toFixed(1))));
+            const projExp = fwd.expedited || projDays.map(d => d < 3 ? Math.max(0, parseFloat((curStock - d * burn).toFixed(1))) : Math.max(0, parseFloat((curStock + defaultQty - d * burn).toFixed(1))));
+            const projTr = fwd.transfer || projDays.map(d => d < 1 ? curStock : Math.max(0, parseFloat((curStock + defaultQty - d * burn).toFixed(1))));
+            const projP10 = prob.p10 || projSq.map(v => Math.max(0, parseFloat((v * 0.8).toFixed(1))));
+            const projP90 = prob.p90 || projTr.map(v => parseFloat((v * 1.25).toFixed(1)));
+
+            return {
+              problem_id: p.problem_id || `PRB-${idx+1}`,
+              location: p.location || 'Hubli',
+              facility_name: `${p.location || 'Hubli'} Facility`,
+              sku: p.sku,
+              sku_name: p.sku_name || p.sku,
+              category: p.category || 'CATEGORY_A',
+              category_code: p.category_code || p.category || 'CATEGORY_A',
+              severity: p.severity || 'HIGH',
+              is_critical: isCrit,
+              stock: m.current_stock || 0,
+              cover: m.days_of_cover || 0.0,
+              gap: m.stockout_gap_days || 0.0,
+              lead_time_days: m.primary_supplier_lead_time_days || 7,
+              v_baseline: math.v_baseline || vel.v_baseline || burn,
+              v_recent: math.v_recent || vel.v_recent || burn,
+              trend_factor: math.trend_factor || vel.trend_factor || 1.0,
+              trend_label: math.trend_label || vel.trend_label || 'STABLE',
+              formula_velocity: math.formula_velocity || `v_pred = ${burn.toFixed(2)} units/day`,
+              formula_cover: math.formula_cover || `D = Stock(${m.current_stock || 0}) / v(${burn.toFixed(2)}) = ${(m.days_of_cover || 0.0).toFixed(1)} days`,
+              formula_gap: math.formula_gap || `Δ = max(0, T(${m.primary_supplier_lead_time_days || 7}) - D) = ${(m.stockout_gap_days || 0.0).toFixed(1)} days`,
+              formula_risk: math.formula_lost_revenue || `Commercial Risk Exposure: ₹${((math.projected_lost_revenue_inr) || 48000).toLocaleString()}`,
+              diagnostic: p.diagnosis || 'Supply-demand imbalance detected by autonomous agentic monitoring.',
+              scorecard: {
+                net_cost: act.total_estimated_cost_inr ? `₹${act.total_estimated_cost_inr.toLocaleString()}` : (isCrit ? '₹500.00' : '₹250.00'),
+                units_averted: `${defaultQty} units`,
+                cap_outflow: act.total_estimated_cost_inr ? `₹${act.total_estimated_cost_inr.toLocaleString()}` : '₹142,000.00',
+                downtime_risk: '0 Days'
+              },
+              options: opts,
+              selected_option_id: opts.find(o => o.recommended)?.id || 'OPT-1',
+              counter_qty: defaultQty,
+              donor_is_safe: true,
+              donor_safety_text: 'Donor Belgaum Central Hub retains healthy buffer (Safe ≥ 15.0d mandate)',
+              projections: {
+                days: projDays,
+                status_quo: projSq,
+                expedited: projExp,
+                transfer: projTr,
+                p10: projP10,
+                p90: projP90
+              }
+            };
+          });
+        }
+      }
+    } catch (e) {
+      console.log('Briefing stream fallback active.');
+      document.getElementById('connStatusText').textContent = 'Stream Active (Local Mode)';
+    }
+
+    // Update severity pill counter badges and dropdown options
+    const cAll = allIncidents.length;
+    const cCrit = allIncidents.filter(i => (i.severity || '').toUpperCase() === 'CRITICAL').length;
+    const cHigh = allIncidents.filter(i => (i.severity || '').toUpperCase() === 'HIGH').length;
+    const cMed = allIncidents.filter(i => {
+      const s = (i.severity || '').toUpperCase();
+      return s === 'MEDIUM' || s === 'MODERATE';
+    }).length;
+    const cLow = allIncidents.filter(i => (i.severity || '').toUpperCase() === 'LOW').length;
+
+    if (document.getElementById('countSevAll')) document.getElementById('countSevAll').textContent = cAll;
+    if (document.getElementById('countSevCrit')) document.getElementById('countSevCrit').textContent = cCrit;
+    if (document.getElementById('countSevHigh')) document.getElementById('countSevHigh').textContent = cHigh;
+    if (document.getElementById('countSevMed')) document.getElementById('countSevMed').textContent = cMed;
+    if (document.getElementById('countSevLow')) document.getElementById('countSevLow').textContent = cLow;
+    if (document.getElementById('feedCountBadge')) document.getElementById('feedCountBadge').textContent = `${cAll} Tasks`;
+
+    const sevSelect = document.getElementById('feedSeveritySelect');
+    if (sevSelect && sevSelect.options.length >= 5) {
+      sevSelect.options[0].textContent = `All Severities (${cAll})`;
+      sevSelect.options[1].textContent = `🚨 Critical (${cCrit})`;
+      sevSelect.options[2].textContent = `⚠️ High (${cHigh})`;
+      sevSelect.options[3].textContent = `⚡ Moderate (${cMed})`;
+      sevSelect.options[4].textContent = `ℹ️ Low (${cLow})`;
+    }
+
+    // 2. Fetch inventory
     try {
       const res = await fetch('/inventory');
       if (res.ok) {
-        const items = await res.json();
-        const tbody = document.getElementById('networkTableBody');
-        tbody.innerHTML = '';
-        items.slice(0, 15).forEach(i => {
-          const row = document.createElement('tr');
-          const isLow = i.stock < i.safety_stock;
-          row.innerHTML = `
-            <td><strong>${i.location}</strong></td>
-            <td>${i.location_type}</td>
-            <td><code>${i.sku}</code></td>
-            <td style="font-weight:700;color:${isLow ? 'var(--danger)' : 'var(--text-main)'}">${i.stock}</td>
-            <td>${i.safety_stock}</td>
-            <td><span class="badge-status ${isLow ? 'badge-primary-opt' : 'badge-spot-opt'}">${isLow ? 'DEFICIT' : 'HEALTHY'}</span></td>
-          `;
-          tbody.appendChild(row);
-        });
+        inventoryData = await res.json();
       }
     } catch (e) {}
-  }
-  function closeNetworkModal() { document.getElementById('networkModal').classList.remove('active'); }
 
-  async function openLedgerModal() {
-    document.getElementById('ledgerModal').classList.add('active');
+    // 3. Fetch suppliers
     try {
-      const res = await fetch('/audit-log');
+      const res = await fetch('/suppliers/audit');
       if (res.ok) {
-        const logs = await res.json();
-        const tbody = document.getElementById('ledgerTableBody');
-        tbody.innerHTML = '';
-        if (logs.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-dim);">No transactions logged yet. Approve a transfer to generate receipts.</td></tr>`;
-          return;
-        }
-        logs.forEach(l => {
-          const row = document.createElement('tr');
-          const p = l.payload || {};
-          row.innerHTML = `
-            <td><code>${(l.audit_id || '').substring(0, 8)}</code><br><span style="font-size:10px;color:var(--text-dim)">${(l.timestamp || '').substring(11, 19)}</span></td>
-            <td><strong>${l.action_type}</strong></td>
-            <td>${p.sku || l.problem_id || 'SKU'} (${p.to_location || ''})</td>
-            <td>${p.qty || 0}</td>
-            <td>${l.approved_by || l.rejected_by || 'Ramesh Kulkarni'}</td>
-            <td><span class="badge-status ${l.status === 'APPROVED' ? 'badge-primary-opt' : 'badge-spot-opt'}">${l.status}</span></td>
-          `;
-          tbody.appendChild(row);
-        });
+        supplierData = await res.json();
       }
     } catch (e) {}
-  }
-  function closeLedgerModal() { document.getElementById('ledgerModal').classList.remove('active'); }
 
-  // Startup initialization
-  initTheme();
-  syncFromBackend();
+    // 4. Fetch audit ledger
+    syncAuditLedger();
+
+    // Render current active view
+    renderAccordionFeed();
+    if (activeView === 'inventory') renderInventoryTable();
+    if (activeView === 'supplier') renderSupplierTable();
+    if (activeView === 'audit') renderAuditTable();
+  }
+
+  // ---------------------------------------------------------------------------
+  // INITIALIZATION ON DOM READY
+  // ---------------------------------------------------------------------------
+  window.addEventListener('DOMContentLoaded', async () => {
+    initTheme();
+    await syncFromBackend();
+  });
 </script>
 
 </body>
