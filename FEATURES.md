@@ -3,7 +3,7 @@
 **Track:** Cypher 2026 - Hackathon Challenge 01 (Agentic AI for Supply Chain)  
 **Operating Persona:** Autonomous AI Purchasing Colleague for **Ramesh Kulkarni** (Head of Purchasing)  
 **Operating Network:** 6 Retail Stores (*Gokak, Belgaum, Dharwad, Hubli, Bagalkot, Nippani*) & 2 Central Distribution Warehouses (*Belgaum Central Warehouse, Hubli Regional Warehouse*) across North Karnataka.  
-**Tech Stack & Design:** Python 3.10+, FastAPI, Dark Cyber-Amber Design System (Streamlit), NAVORA Terracotta/Cream UI (HTML5/Vanilla CSS/JS), Pandas, Plotly, Pydantic, Pytest  
+**Tech Stack & Design:** Python 3.10+, FastAPI, Official Sage Green Design System (Light: Earthy Sage & Warm Cream ⟷ Dark: Obsidian Olive & Bioluminescent Sage), Streamlit Executive Cockpit, NAVORA Modern Operations SPA (HTML5/Vanilla CSS/JS), Plotly, Pandas, Pydantic, Pytest (64/64 Passing)  
 
 ---
 
@@ -14,11 +14,13 @@ The **Kaveri Supply Chain Copilot** is a deterministic, domain-specialized agent
 Rather than merely displaying static reports or relying on unreliable LLM arithmetic approximations, the Copilot runs an autonomous **Observe $\rightarrow$ Reason $\rightarrow$ Evaluate $\rightarrow$ Decide $\rightarrow$ Draft $\rightarrow$ Gate** pipeline that:
 - **Enforces the 12 Agent Rules Mandate** with 100% deterministic arithmetic grounded directly in the 5 core domain tables.
 - **Scans & Classifies 5 Distinct Problem Categories** (`IMMINENT_STOCKOUT`, `CAPITAL_TRAP`, `OVERDUE_PO`, `DEMAND_VOLATILITY`, `SUPPLIER_MISMATCH`).
+- **Adopts the Official Sage Green Design System** with universal Light Mode (Earthy Sage & Warm Cream) and Dark Mode (Obsidian Olive & Bioluminescent Sage) toggling across Streamlit and NAVORA HTML SPA interfaces.
 - **Formulates Mandated Alternatives ($N \ge 2$)** with quantified commercial trade-offs in days, direct INR expenditure, and stockout revenue risk.
-- **Renders 14-Day Forward Visual Trajectory Projections** via interactive Plotly curves with a zero-stock hazard line.
+- **Renders 14-Day Forward Visual Trajectory Projections** via interactive Plotly curves with probabilistic Monte Carlo fan charts ($P_{10}$ to $P_{90}$) and a zero-stock hazard line.
 - **Provides a Commercial Impact Scorecard** summarizing Net Cost, Lost Units, Working Capital Outflow, and Downtime Risk.
 - **Empowers Ramesh's Human Gate & Counter-Proposals** with real-time dynamic recalculation of donor safety buffers ($\ge 15.0$ days) and trajectory adjustments.
-- **Demonstrates Chaos Resilience** by dynamically adapting to judge-injected runtime shocks (demand surges, route roadblocks, supplier delays).
+- **Demonstrates Chaos Resilience** by dynamically adapting to runtime shocks (demand surges, route roadblocks, supplier delays) with automated before/after plan diff explanations.
+- **Features a 60-Day Historical Backtest Replay Engine** validating stockouts prevented, lost units averted, capital saved, and positive net ROI.
 
 ---
 
@@ -145,49 +147,68 @@ Served directly at `http://127.0.0.1:8000/` as an executive-grade, standalone si
 #### 3.2. Interactive Streamlit Executive Cockpit (`app/dashboard.py`)
 Served at `http://127.0.0.1:8501/` as an industrial, high-velocity analytical workstation custom-engineered for Ramesh Kulkarni:
 
-##### 🎨 Dark Cyber-Amber Design System
-Built with a sleek, high-contrast industrial aesthetic engineered for intense supply chain operations:
-- **Base Surfaces:** Deep Obsidian (`#110E0E` / `#141010`) background with elevated dark charcoal card containers (`#181212` / `#1E1717`, border: `1px solid #332626`).
-- **Primary Accent & Glow:** Vibrant coral/amber (`#FF5733` / `#FF6B4A` / `#F97316`) for primary alerts, buttons, and active focus outlines.
-- **Secondary Accents:** Electric Emerald (`#10B981`) for safety/buffer stability; Critical Crimson (`#EF4444`, background: `#3D1212`, border: `#7F1D1D`) for stockout emergencies; Muted Slate (`#9CA3AF`) for secondary metrics; Mono Orange (`#FF8566`) for mathematical terms.
-- **Zero-Padding Viewport Flush:** Overrides Streamlit default top margins via `.block-container { padding-top: 0.6rem !important; }`, ensuring the title and executive command bar sit immediately at the top of the viewport with zero wasted blank space.
-- **Native Theme Configuration:** Standardized `.streamlit/config.toml` enforcing dark background, card surfaces, and coral accents across all environments.
-- **Custom Pixel-Perfect Dark Cyber Table System (`render_cyber_table`):** Completely eliminates Streamlit's white-canvas dataframe rendering glitch. Features sticky obsidian headers (`#181212`), high-contrast monospace numeric values, smooth row-hover illumination (`#221A1A`), and automatic status pill badges (`CRITICAL`, `FEASIBLE`, `HIGH`, `MEDIUM`).
-- **Unified Plotly Dark Theming (`format_cyber_plotly_figure`):** Custom figure transformer applying obsidian plot backgrounds (`#141010`), muted grid lines (`#2A2020`), crisp white labels (`#F3F4F6`), and high-contrast projection curves.
+##### 🌿 Official Sage Green Design System & Universal Light/Dark Theme Engine
+The user interface features an earthy, ergonomic industrial palette engineered for calm, confident executive decision-making under high-stress supply chain conditions.
 
-##### 🖥️ Master-Detail Layout & Workflow (Pic 1 Architecture + Pic 2 Cyber-Amber Styling)
+###### Dual-Mode Design Tokens Matrix:
+| Design Token | Light Mode (Earthy Sage & Warm Cream) | Dark Mode (Obsidian Olive & Bioluminescent Sage) | Role / Usage |
+| :--- | :--- | :--- | :--- |
+| **`--bg-primary`** | `#F4F6F0` (Warm Cream) | `#0E120E` (Obsidian Olive) | Global app canvas background |
+| **`--surface`** | `#FFFFFF` (Pure Crisp White) | `#171D16` (Deep Olive Surface) | Elevated cards, KPI boxes, dialogs |
+| **`--surface-alt`** | `#E8EDE0` (Soft Sage Cream) | `#20291F` (Muted Olive Layer) | Metric cards, active items, table headers |
+| **`--border`** | `#CBD5C0` (Muted Sage Border) | `#2C3A2A` (Olive Separator) | Structure outlines, card borders |
+| **`--sage-primary`**| `#5B7053` (Earthy Sage Primary) | `#8FA87B` (Soft Sage Green) | Brand badges, primary buttons, headers |
+| **`--sage-accent`** | `#7D9D71` (Vibrant Leaf Accent) | `#B2CF9C` (Bioluminescent Glow) | Active focus halos, trajectory curves |
+| **`--alert-crimson`**| `#C84B31` (Terracotta Alert) | `#FF5C5C` (Bioluminescent Red) | Critical stockouts, zero hazard line |
+| **`--alert-amber`**  | `#D9822B` (Warm Ochre Warning) | `#F59E0B` (Luminous Amber) | Friction warnings, expedited PO curves |
+| **`--text-primary`** | `#1E241B` (Deep Obsidian Ink) | `#F1F5EE` (Off-White Luminescence) | High-contrast readable body typography |
+| **`--text-secondary`**| `#5D6656` (Muted Slate Sage) | `#9DAE97` (Subtle Sage Secondary) | Subtitles, formulas, timestamps |
+| **`--card-shadow`** | `0 4px 16px rgba(91,112,83,0.08)` | `0 8px 32px rgba(0,0,0,0.45)` | Depth elevation without harsh edges |
+
+- **Universal Dynamic Theme Switcher:**
+  - **Streamlit Cockpit:** Managed via `st.session_state.theme_mode` with a persistent sidebar radio control (`Dark` ⟷ `Light`), dynamically regenerating all CSS rules on the fly with zero white-on-white text glitches.
+  - **NAVORA Modern SPA:** Injected CSS variables on `:root` and `[data-theme="dark"]` / `[data-theme="light"]`, toggled via `toggleTheme()` and preserved across sessions via browser `localStorage`.
+- **Adaptive Plotly 14-Day Trajectory Curve Engine (`render_sage_trajectory_chart`):**
+  - Dynamically flips chart plot background (`#121711` dark vs `#F4F6F0` light), paper background, axes, and legend box.
+  - Plots Option 1 (Network Transfer) in Bioluminescent/Earthy Sage with an 80% probabilistic confidence fan chart ($P_{10}$ to $P_{90}$).
+  - Plots Option 2 (Expedited Vendor PO) in amber dashed strokes and Option 3 (Status Quo Inaction) in crimson dotted line.
+  - Renders a prominent zero-stock hazard line with a shaded warning zone.
+- **Pixel-Perfect Adaptive Table System (`render_cyber_table`):**
+  - Sticky headers styled with `--surface-alt` and `--sage-primary`.
+  - Alternating rows bordered with `--border`, with automatic theme-aware badge chips for status codes (`CRITICAL`, `FEASIBLE`, `INFEASIBLE`, `HIGH`, `MEDIUM`, `LOW`, `APPROVED`).
+
+##### 🖥️ Master-Detail Layout & Workflow
 - **Top Executive Command Header:** Displays system mode (`LIVE OPERATIONAL SIMULATION`), active persona (`Ramesh Kulkarni - Head of Purchasing`), and simulation anchor date (`2026/10/09`).
+- **60-Day Historical Backtest Replay Banner:** Replays 60 operational days across North Karnataka showing stockouts prevented, lost units averted, capital saved, and positive net ROI.
 - **4-Column High-Impact KPI Overview Strip:**
-  1. *Active Incidents:* Real-time count with breakdown pills (`CRITICAL`, `HIGH`, `MEDIUM`).
-  2. *Capital at Risk:* Total network INR margin exposure across active stockout threats.
-  3. *Network Inventory Cover:* Network-wide weighted inventory runway in days.
-  4. *Autonomous Resolutions Ready:* Zero-working-capital rebalancing actions pre-drafted for execution.
-- **In-Pane Severity Filter Dropdown Menu:**
-  - Located directly above the task feed (`Filter Severity: [All, CRITICAL, HIGH, MEDIUM]`).
-  - Allows Ramesh to instantly filter the feed by operational urgency without jarring page jumps.
+  1. *Total Operational Issues:* Real-time count of active incidents across network.
+  2. *Critical Stockouts:* Imminent zero-stockout emergencies requiring immediate resolution.
+  3. *Top Attention SKU:* SKU with maximum stockout deficit gap $\Delta$.
+  4. *Pending Human Gate:* Proposed interventions awaiting Ramesh's authorization.
 - **Master Incident Feed (Left Column — 38% Width):**
   - Vertically stacked clickable Incident Cards (`.incident-card` vs `.incident-card-active`).
-  - Active card illumination: Glowing coral border (`border: 1px solid #FF5733`) and amber box shadow (`0 0 12px rgba(255, 87, 51, 0.4)`).
-  - High-density card telemetry: Severity pill badge, SKU Name & ID, Category Code, Facility Location, Inventory Cover ($D$), and Deficit Stockout Gap ($\Delta$).
-  - Instant selection: Clicking any card updates `st.session_state.selected_problem_id` and populates the right-hand cockpit without resetting scroll position.
+  - Active card illumination: Glowing sage border (`1.5px solid var(--sage-accent)`) and halo glow.
+  - Telemetry badges: Severity pill badge, SKU Name & ID, Category Code, Facility Location, Stock, Cover ($D$), and Gap ($\Delta$).
+  - Instant selection: Clicking any card updates `st.session_state.selected_problem_id` and populates the cockpit.
 - **Detailed Incident Resolution Cockpit (Right Column — 62% Width):**
   - **Primary Action Recommendation Banner:** Clear operational headline (e.g. `RECOMMENDED ACTION: 24-Hour Inter-Store Stock Transfer`).
-  - **Closed-Form Telemetry Terminal (`.math-terminal`):** 4-cell telemetry grid covering Stock vs Adaptive Velocity ($v_{30}, v_7$), Days of Cover vs Stockout Gap ($D, \Delta$), Primary Lead Time vs In-Transit PO Status, and Deterministic Classification Proof.
+  - **Closed-Form Telemetry Terminal (`.math-terminal`):** Monospace mathematical breakdown of velocity ($v_{30}, v_7$), cover ($D$), lead time ($T_{\text{lead}}$), and stockout gap ($\Delta$).
   - **Commercial Impact Scorecard (Rule 5):** 4-metric executive summary: Net Cost (₹250 Handling vs ₹28,000+ External Purchase), Lost Units Averted, Capital Outlay Saved, and Stockout Risk Averted.
-  - **Comparative Resolution Alternatives Table (Rule 4):** Evaluates Feasible Internal Transfer, Expedited Vendor PO, and Status Quo Inaction with cost, lead time, and stockout risk rendered in the custom cyber table.
-  - **Interactive 14-Day Forward Trajectory Plotly Chart:** Day-by-day projected inventory curves comparing Status Quo (cliff drop), Expedited Vendor PO, and Inter-Store Transfer with a dashed red Zero-Stock Hazard Line.
-  - **1-Click Human Approval & Dispatch:** One-click `Approve & Dispatch` (mutates multi-echelon stock, generates transfer request, logs transaction into audit ledger) and `Dismiss / Reject` with operator feedback.
-  - **Ramesh's Counter-Proposal Tool (Rule 6, Rule 9, Rule 10):** Numeric quantity override slider/input with instant live recalculation of recipient cover days and dynamic **Donor Safety Buffer Alert** ($\ge 15.0$ days compliance vs $< 15.0$ days violation warnings with maximum safe transfer calculation).
+  - **Comparative Resolution Alternatives Table (Rule 4):** Evaluates Feasible Internal Transfer, Expedited Vendor PO, and Status Quo Inaction with cost, lead time, and stockout risk.
+  - **Interactive 14-Day Forward Trajectory Plotly Chart:** Day-by-day projected inventory curves comparing Status Quo (cliff drop), Expedited Vendor PO, and Inter-Store Transfer with a zero-stock hazard line.
+  - **1-Click Human Approval & Dispatch:** One-click `Approve & Dispatch` (mutates multi-echelon stock, logs transaction into audit ledger) and `Dismiss / Reject`.
+  - **Ramesh's Counter-Proposal Tool (Rule 6, Rule 9, Rule 10):** Numeric quantity override slider with live recalculation of recipient cover days and dynamic **Donor Safety Buffer Alert** ($\ge 15.0$ days compliance vs $< 15.0$ days violation warnings).
 
 ##### 📑 Multi-Tab Governance Control Plane
-1. **`🚨 Morning Action Feed`:** The master-detail operational triage cockpit described above.
-2. **`🏭 Multi-Echelon Network Inventory`:** Comprehensive stock explorer across all 8 facilities (6 retail stores + 2 central warehouses), rendered using `render_cyber_table` with SKU, Category, On-Hand Units, Reserved, In-Transit, and Unit Value.
-3. **`🔍 Supplier Friction & Reliability Audit`:** Supplier audit tracking purchase order lead times, contract markup variances, MOQ feasibility constraints, and reliability ratings.
+1. **`🚨 Morning Action Feed & Approval Gate`:** The master-detail operational triage cockpit described above.
+2. **`🏭 Multi-Echelon Network Inventory`:** Comprehensive stock explorer across all 8 facilities (6 retail stores + 2 central warehouses), rendered using `render_cyber_table` with SKU, Category, Model, Location, and Current Stock.
+3. **`🔍 Supplier Friction & Reliability Audit`:** Evaluates contracted suppliers on price markup variance, MOQ lock-up friction, delivery slippage, on-time rates, and learned adjusted lead times.
 4. **`📜 Immutable Audit Trail`:** Chronological ledger of all approved and rejected human decisions with timestamps, operator identity, and mutated balances.
 
 ##### ⚡ Dedicated Sidebar Operating Controls & Chaos Engine
-- Operating Persona & Network config (6 retail stores + 2 central distribution hubs).
-- **Chaos Engine Controls (Rule 12):** Isolated in the sidebar to prevent UI overlap collisions, featuring runtime triggers for `🌪️ Demand Surge 3x`, `🚧 Block Route Gokak-Belgaum`, `📈 Supplier Delay +5d`, and `🔄 Reset Baseline`.
+- **Visual Theme Toggle:** Light / Dark mode selector.
+- **Operating Persona & Network:** Ramesh Kulkarni (Head of Purchasing) and 8 network facilities (6 stores + 2 hubs).
+- **Chaos Engine Controls (Rule 12):** Runtime shocks (`🌪️ 3x Demand Spike`, `🚧 Block Route Belgaum-Gokak`, `📈 Vendor Delay +5d`, and `🔄 Reset Baseline`) with an automated **Chaos Plan Diff** banner displaying before/after adaptations and rationale.
 
 ---
 
@@ -223,15 +244,16 @@ Built with a sleek, high-contrast industrial aesthetic engineered for intense su
 
 ### 5. Automated Verification Suite (`tests/test_decisions.py`)
 
-All **35 automated test assertions** pass cleanly:
+All **64 automated test assertions** pass cleanly with 100% success rate:
 
 ```bash
 python -m pytest tests/test_decisions.py -v
+============================= 64 passed in 17.39s =============================
 ```
 
-#### Core Mandate Verification Highlights (35/35 Passing):
+#### Core Mandate & Extended Capabilities Highlights (64/64 Passing):
 1. `test_adaptive_velocity_surge`: A 2x jump in 7-day sales triggers `ACCELERATING` and adjusts days of cover.
-2. `test_donor_safety_margin`: Transfer proposals that leave a donor store with $<15$ days of cover are rejected (`is_safe: False`).
+2. `test_donor_safety_margin`: Transfer proposals leaving a donor with $<15$ days of cover are rejected (`is_safe: False`).
 3. `test_benchmark_gokak_belgaum`: Gokak hydraulic filter stockout selects a Belgaum transfer of 12–16 units over expedited vendor procurement.
 4. `test_forward_projection_math`: Day-by-day trajectory curves correctly reflect daily burn rates and planned delivery arrivals.
 5. `test_human_override_flow`: Overriding a transfer quantity updates destination cover while maintaining donor constraints.
@@ -253,6 +275,35 @@ python -m pytest tests/test_decisions.py -v
 21. `test_shared_donor_reservation_deduction`: Rejects candidates with gross surplus if active draft reservations leave $<15.0$ days cover.
 22. `test_approval_idempotency_duplicate_conflict`: Verifies duplicate `/action/approve` calls return `HTTP 409 Conflict`.
 23. `test_approval_safety_buffer_violation_400`: Verifies approval endpoint blocks transfers leaving donor with $<15.0$ days cover (`HTTP 400 Bad Request`).
+24. `test_objective_function_scoring_and_ranking`: Multi-factor objective function correctly scores options balancing direct cost, lead time, and downtime risk.
+25. `test_objective_function_vendor_wins_when_transfer_expensive`: Verifies vendor order wins when transfer cost exceeds purchase price.
+26. `test_objective_function_vendor_wins_when_no_safe_donor`: Verifies vendor order wins when donor stock buffer is insufficient.
+27. `test_scorecard_differentiates_across_incidents`: Commercial scorecards dynamically compute incident-specific savings and margins.
+28. `test_real_alternatives_and_baseline_status_quo`: Status quo baseline quantifies exact stockout day and lost unit impact.
+29. `test_grounded_projections_data_driven_and_category_a_no_arrival`: Forward projections ground strictly in real inventory and historical burn.
+30. `test_llm_layer_parsing_number_guard_and_multilingual`: LLM explanation layer preserves numerical facts with Kannada/Hindi localization support.
+31. `test_sqlite_persistence_idempotency_restart_409`: Durable SQLite state persistence preserves reservations across application restarts.
+32. `test_sqlite_reservation_lifecycle_and_rejection_frees_hold`: Rejection frees active reservation hold for other facilities.
+33. `test_sqlite_reservation_ttl_expiry`: Stale unapproved reservations automatically expire after TTL window.
+34. `test_surge_definition_and_category_d_resolution_matching`: Category D demand surge matches appropriate safety buffer interventions.
+35. `test_comparison_operators_15day_and_3x_moq`: Exact boundary checks for 15.0 days donor threshold and 3x MOQ friction.
+36. `test_dynamic_donor_buffer_and_incoming_pos`: Dynamic donor buffers factor in confirmed in-transit inbound purchase orders.
+37. `test_per_sku_target_cover_capital_trap`: Target cover days adjust dynamically based on SKU category and cost tier.
+38. `test_overdue_po_cancellation_partial_delivery_and_softer_draft`: Overdue PO handling drafts supplier follow-ups with partial delivery support.
+39. `test_generic_route_block_and_supplier_delay_vs_price_hike`: Distinguishes between logistics route blocks and supplier price hikes.
+40. `test_moq_excess_carrying_cost_scoring`: Evaluates carrying cost of excess inventory resulting from restrictive MOQs.
+41. `test_severity_explicit_formula_and_margin_at_risk`: Explicit mathematical formula for severity classification based on margin at risk.
+42. `test_velocity_robustness_minimum_volume_and_ewma`: Robust EWMA velocity smoothing avoids noise on sparse transaction data.
+43. `test_edge_case_zero_stock_and_zero_velocity_no_stockout`: Zero stock with zero sales velocity is classified as dead inventory without false stockout alarms.
+44. `test_backtest_simulation_metrics`: Validates 60-day historical backtest replay metrics and positive ROI calculation.
+45. `test_global_transfer_optimizer_joint_solution_and_capital_trap`: Global optimizer finds joint multi-facility transfer plan resolving capital traps.
+46. `test_probabilistic_projections_monte_carlo_fan_chart_and_day_14_stockout_risk`: Monte Carlo simulation generates $P_{10}$ to $P_{90}$ trajectory bands.
+47. `test_supplier_reliability_learning_slippage_and_adjusted_lead_time`: Computes historical supplier slippage and adjusts expected lead time.
+48. `test_chaos_plan_diff_before_and_after_adaptation_with_reason`: Generates structured diff of operational plan shifts under chaos shocks.
+49. `test_rejection_memory_soft_constraint_application`: Remembers user rejection feedback and penalizes rejected suppliers in future recommendations.
+50. `test_data_quality_flags_low_volume_and_gaps`: Emits warnings for low transaction volume or unverified telemetry gaps.
+51. `test_ingestion_schemas_case_insensitivity_and_csv_support`: Defensive ingestion handles case variations and CSV formats seamlessly.
+52. `test_consolidated_api_unified_aliases`: API routing aliases maintain complete backwards compatibility.
 
 #### Live End-to-End Backend Audit Script:
 ```bash
@@ -265,7 +316,7 @@ Validates all 5 operational pillars against real running HTTP endpoints with pas
 ## ⚡ Quick-Start Execution Commands
 
 ```bash
-# 1. Run Automated Test Suite (35/35 tests passing)
+# 1. Run Automated Test Suite (64/64 tests passing)
 pytest tests/test_decisions.py -v
 
 # 2. Run Live Backend Contract Audit
